@@ -65,6 +65,6 @@
       </nav>
     {% endif %}
   {% else %}
-    <p class="muted">The Trash is empty.</p>
+    {% include "cues/includes/empty.html" with icon="trash" title="Trash Is Empty" %}
   {% endif %}
 {% endblock %}

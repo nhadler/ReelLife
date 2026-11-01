@@ -943,6 +943,37 @@ input[type='checkbox'] {
   color: var(--slate);
 }
 
+/* An empty page or list (includes/empty.html): icon, title, action. */
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: var(--space);
+  padding: calc(var(--space) * 6) calc(var(--space) * 2);
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  color: var(--slate);
+  text-align: center;
+}
+
+.empty-state__icon .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.empty-state__title {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.empty-state__note {
+  margin: 0;
+}
+
+.empty-state .button {
+  margin-top: var(--space);
+}
+
 /* Settings tabs */
 
 .tabs {
@@ -1100,8 +1131,12 @@ details.form-section summary {
 
 /* Dialogs */
 
+/* Two sizes (Nick's design review): --dialog-md for short forms and the
+   cue tools, --dialog-lg for everything else. */
 .dialog {
-  width: min(52rem, calc(100vw - 2rem));
+  --dialog-md: 40rem;
+  --dialog-lg: 56rem;
+  width: min(var(--dialog-lg), calc(100vw - 2rem));
   max-height: calc(100vh - 3rem);
   padding: calc(var(--space) * 3);
   border: 1px solid var(--rule);
@@ -2632,10 +2667,6 @@ input[type='search'].grid-search {
   overflow: auto;
 }
 
-.dialog:has(.import) {
-  width: min(66rem, calc(100vw - 2rem));
-}
-
 /* The cue list matters only when something will happen to them. */
 .import__missing:has([value='leave']:checked) .import__missing-list {
   display: none;
@@ -2984,6 +3015,18 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   background: var(--accent);
   color: var(--panel);
   font-weight: 600;
+}
+
+/* A day off reads as it does on the Schedule: hatched, not a green
+   button (green is for actions and today). */
+.days-off-picker .calendar__day[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--ink) 35%, var(--rule));
+  background: repeating-linear-gradient(
+    135deg,
+    var(--bay) 0 5px,
+    color-mix(in srgb, var(--ink) 30%, var(--bay)) 5px 6px
+  );
+  color: var(--ink);
 }
 
 .calendar__day:focus-visible {
@@ -3639,8 +3682,17 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   opacity: 0.45;
 }
 
+/* No picture for the cue or the project: its initials, as the project's
+   own thumbnail shows them. */
 .cue-thumb--empty {
-  border: 1px dashed var(--rule);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--rule);
+  background: var(--panel-raised);
+  color: var(--slate);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 .cue-thumbnail {
@@ -3794,7 +3846,7 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 
 /* Cue tools: fields, then a live preview of the change. */
 .dialog:has(.tool-form) {
-  width: min(38rem, calc(100vw - 2rem));
+  width: min(var(--dialog-md), calc(100vw - 2rem));
 }
 
 .tool-form__problem {
@@ -4316,7 +4368,7 @@ button.stats__name:hover,
 
 /* Batch edit's question (overview/batch.js). */
 .dialog:has(.batch-edit) {
-  width: min(28rem, calc(100vw - 2rem));
+  width: min(var(--dialog-md), calc(100vw - 2rem));
 }
 
 .batch-edit p {
@@ -5587,7 +5639,9 @@ td.party-table__ipi {
 
 .project {
   display: grid;
-  grid-template-columns: 6rem minmax(0, 1fr) repeat(3, 7.5rem) 2.25rem;
+  /* The deadline figure is wider: its label names the deadline and its
+     date ("Orchestration Dec 18"). */
+  grid-template-columns: 6rem minmax(0, 1fr) repeat(2, 7.5rem) 10rem 2.25rem;
   column-gap: calc(var(--space) * 3);
   align-items: center;
   padding: calc(var(--space) * 1.5) calc(var(--space) * 2) 0;

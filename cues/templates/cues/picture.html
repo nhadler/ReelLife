@@ -47,7 +47,7 @@
       </tbody>
     </table>
   {% else %}
-    <p class="empty">No turnovers yet. Log the cut you're spotting from to place cues on the timeline.</p>
+    {% include "cues/includes/empty.html" with icon="picture" title="No Turnovers Yet" %}
   {% endif %}
   {% if unplaced %}
     <section class="form-section" aria-labelledby="unplaced-title">

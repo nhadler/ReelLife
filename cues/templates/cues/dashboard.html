@@ -63,10 +63,14 @@
         {% include "cues/includes/project_card.html" with listed=True %}
       {% endfor %}
     </ul>
-    <p class="empty" data-no-match{% if shown %} hidden{% endif %}>No projects match.</p>
+    <div data-no-match{% if shown %} hidden{% endif %}>{% include "cues/includes/empty.html" with icon="search" title="No Projects Match" %}</div>
   {% elif query %}
-    <p class="empty">No projects match “{{ query }}”.</p>
+    {% url 'cues:dashboard' as all_projects %}
+    {% include "cues/includes/empty.html" with icon="search" title="No Projects Match" note=query url=all_projects action="Clear Search" %}
+  {% elif request.user.role != "viewer" %}
+    {% url 'cues:project_create' as new_project %}
+    {% include "cues/includes/empty.html" with icon="picture" title="No Projects Yet" url=new_project action="New Project" %}
   {% else %}
-    <p class="empty">No projects yet. Create one to start spotting.</p>
+    {% include "cues/includes/empty.html" with icon="picture" title="No Projects Yet" %}
   {% endif %}
 {% endblock %}

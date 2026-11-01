@@ -453,8 +453,11 @@ function gradingRenderer(meta) {
  */
 function thumbnailRenderer(params) {
   if (!params.value) {
+    // The project's initials, as its own thumbnail shows them.
     const frame = document.createElement('span');
     frame.className = 'cue-thumb cue-thumb--empty';
+    frame.textContent = gridElement?.dataset.initials ?? '';
+    frame.setAttribute('aria-hidden', 'true');
     return frame;
   }
   const image = document.createElement('img');

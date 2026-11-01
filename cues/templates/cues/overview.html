@@ -38,7 +38,8 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p class="empty">No active projects. Create one to start spotting.</p>
+      {% url 'cues:dashboard' as all_projects %}
+      {% include "cues/includes/empty.html" with icon="picture" title="No Active Projects" url=all_projects action="All Projects" %}
     {% endif %}
   </section>
 {% endblock %}

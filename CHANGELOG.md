@@ -15,6 +15,17 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Runs on Django 6.1.
+- Empty pages (Projects, Overview, Picture, Activity, Trash) show an
+  icon, a short title and, where there's something to do, the button
+  for it.
+- Dialogs come in two widths; the Cue Sheet dialog's button says Export
+  Cue Sheet, and Edit View has a × like the others.
+- Import and Restore Backup drop zones show a file, not a picture.
+- Days off on Your Days Off are hatched, as on the Schedule.
+- A page that doesn't exist shows Page Not Found inside the app, with a
+  way back to the Overview.
+- Cues without a thumbnail show the project's initials in the grid.
 - App Settings is one sheet: each section a row, its controls lined up
   on shared columns, so the page fits a laptop screen without
   scrolling. Viewers see it read-only.
@@ -22,6 +33,9 @@ this project follows [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 - A project card's ⋯ menu was cut off at the card's edge.
+- A project card's deadline label ("Composition Nov 22") was cut off.
+- A fresh install no longer takes a needless snapshot before its first
+  migration.
 
 ## [0.4.0] - 2026-11-01
 

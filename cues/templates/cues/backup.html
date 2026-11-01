@@ -19,7 +19,7 @@
     <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="fields">
-        {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a backup ZIP" %}
+        {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a backup ZIP" file=True %}
         {% include "cues/includes/field.html" with field=form.confirm %}
       </div>
       <div class="form-actions"><button class="button button--quiet backup__restore" type="submit">Restore</button></div>

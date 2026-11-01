@@ -1,5 +1,5 @@
 {% extends "app.html" %}
-{% load static %}
+{% load static text %}
 
 {% block title %}{{ project.title }} · ReelLife{% endblock %}
 {% block page_class %}page--overview{% endblock %}
@@ -119,7 +119,8 @@
   </div>
 
   <div class="grid-area">
-    <div class="cue-grid" id="cue-grid" aria-label="Cues"></div>
+    {# data-initials: what an empty thumbnail shows, as the project's does. #}
+    <div class="cue-grid" id="cue-grid" aria-label="Cues" data-initials="{{ project.title|initials }}"></div>
     {# Project notes and Stats open here, beside the grid. #}
     <aside class="side-panel" id="side-panel" aria-label="Side panel" hidden></aside>
   </div>

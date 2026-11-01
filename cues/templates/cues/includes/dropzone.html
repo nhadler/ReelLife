@@ -1,7 +1,7 @@
-{# A file field as a drop zone: drag a file onto it, or click to choose. Pass field, and optionally prompt. #}
+{# A file field as a drop zone: drag a file onto it, or click to choose. Pass field, and optionally prompt; file=True draws a file rather than a picture. #}
 <div class="field field--wide">
   <label class="dropzone" for="{{ field.id_for_label }}" data-dropzone>
-    <svg class="dropzone__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16l4.5-4.5 3 3L15 11l5 5M4 5h16v14H4zM15.5 8.5h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg class="dropzone__icon" viewBox="0 0 24 24" aria-hidden="true">{% if file %}<path d="M6 3h8.5L18 6.5V21H6z M14.5 3v3.5H18 M12 17.5v-7M9 13.5l3-3 3 3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>{% else %}<path d="M4 16l4.5-4.5 3 3L15 11l5 5M4 5h16v14H4zM15.5 8.5h.01" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>{% endif %}</svg>
     <span class="dropzone__text"><strong>{{ prompt|default:"Drop a file here" }}</strong> or click to choose one</span>
     {% if field.help_text %}<span class="dropzone__hint">{{ field.help_text }}</span>{% endif %}
     <span class="dropzone__name" aria-live="polite"></span>

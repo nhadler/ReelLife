@@ -1,11 +1,21 @@
-{% extends "base.html" %}
+{% extends request.user.is_authenticated|yesno:"app.html,base.html" %}
+{# Signed in, inside the app with its top bar; otherwise on its own. #}
 
-{% block title %}Error 404 · ReelLife{% endblock %}
+{% block title %}Page Not Found · ReelLife{% endblock %}
 
 {% block content %}
-  <section class="notice">
-    <h1>Error 404</h1>
-    <p>There's nothing at this address.</p>
-    <p><a href="/">Back to ReelLife</a></p>
-  </section>
+  {% if request.user.is_authenticated %}
+    <div class="page-head"><h1>Page Not Found</h1></div>
+    <div class="empty-state">
+      <span class="empty-state__icon">{% include "cues/includes/icon.html" with name="search" %}</span>
+      <p class="empty-state__title">There's nothing at this address.</p>
+      <a class="button" href="{% url 'cues:overview' %}">Go to Overview</a>
+    </div>
+  {% else %}
+    <section class="notice">
+      <h1>Page Not Found</h1>
+      <p>There's nothing at this address.</p>
+      <p><a href="/">Back to ReelLife</a></p>
+    </section>
+  {% endif %}
 {% endblock %}

@@ -145,4 +145,4 @@ def test_the_page_is_paginated(editor: Client, project: models.Project) -> None:
 def test_an_empty_project_says_so(
     editor: Client, project: models.Project
 ) -> None:
-    assert "No changes yet." in _page(editor, project)
+    assert "No Changes Yet" in _page(editor, project)

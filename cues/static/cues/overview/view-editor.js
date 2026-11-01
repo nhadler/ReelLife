@@ -33,7 +33,14 @@ export function editView(input) {
   const title = document.createElement('h2');
   title.id = 'dialog-title';
   title.textContent = input.title;
-  head.append(title);
+  // The × every dialog has; closing resolves as Cancel does.
+  const close = document.createElement('button');
+  close.className = 'dialog__close';
+  close.type = 'button';
+  close.dataset.dialogClose = '';
+  close.setAttribute('aria-label', 'Close');
+  close.textContent = '×';
+  head.append(title, close);
 
   const form = document.createElement('form');
   form.className = 'view-editor';

@@ -371,7 +371,7 @@ def _cue_sheet(page: Any, axe: Check) -> None:
     axe("cue sheet dialog")
     dialog.get_by_label("CSV (one row per writer or publisher)").check()
     with page.expect_download() as info:
-        dialog.get_by_role("button", name="Download").click()
+        dialog.get_by_role("button", name="Export Cue Sheet").click()
     assert info.value.suggested_filename.endswith(".csv")
     page.keyboard.press("Escape")
     expect(dialog).to_be_hidden()

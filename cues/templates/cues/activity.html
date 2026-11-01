@@ -64,6 +64,6 @@
       </nav>
     {% endif %}
   {% else %}
-    <p class="muted">No changes yet.</p>
+    {% include "cues/includes/empty.html" with icon="clock" title="No Changes Yet" %}
   {% endif %}
 {% endblock %}
