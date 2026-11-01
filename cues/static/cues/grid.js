@@ -1456,6 +1456,10 @@ function onSelectionChanged() {
   const groups = [];
   api.forEachNode((node) => node.data._group && groups.push(node));
   api.redrawRows({rowNodes: groups});
+  const logButton = document.getElementById('grid-log-written');
+  if (logButton) {
+    logButton.disabled = api.getSelectedRows().length !== 1;
+  }
 }
 
 /** Columns the user resized in this view (their widths are kept). */
@@ -2786,6 +2790,11 @@ async function start() {
   document.addEventListener('click', (event) => {
     if (event.target.closest('#grid-details')) {
       openDetails();
+    } else if (event.target.closest('#grid-log-written')) {
+      const [cue] = api.getSelectedRows();
+      if (cue) {
+        openCueDialog(config.logWrittenUrl, cue.id);
+      }
     } else if (event.target.closest('#notes-toggle')) {
       toggleSidePanel('notes', event.target.closest('#notes-toggle'));
     } else if (event.target.closest('#stats-toggle')) {

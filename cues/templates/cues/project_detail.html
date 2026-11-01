@@ -99,6 +99,12 @@
     <button class="toolbar__button" type="button" id="grid-details"
             title="Open the cue's details (Ctrl+Enter, or double-click a row)">
       {% include "cues/includes/icon.html" with name="details" %}<span>Details</span></button>
+    {% if request.user.role != "viewer" %}
+      {# On when exactly one cue is ticked (grid.js). #}
+      <button class="toolbar__button" type="button" id="grid-log-written" disabled
+              title="Log how much of the selected cue you wrote">
+        {% include "cues/includes/icon.html" with name="pen" %}<span>Log Written</span></button>
+    {% endif %}
     </div>
     <p class="selection-summary" id="grid-selection" hidden></p>
     <span class="grid-status" id="grid-status" role="status" aria-live="polite"></span>

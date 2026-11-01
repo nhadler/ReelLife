@@ -14,8 +14,9 @@ this project follows [Semantic Versioning](https://semver.org/).
 - **Calendar Feed** (profile menu): a private link your calendar app
   subscribes to, one event a day listing its cues, the last 30 days and
   the next 90; revoke or replace it any time, or download an .ics once.
-- **Log Written…** (a day's list on the Schedule, the cue page's ⋯
-  menu, the grid's right-click menu): how much of a cue you wrote on a
+- **Log Written…** (a day's list on the Schedule, the grid's toolbar
+  with one cue ticked, the cue page's ⋯ menu, the grid's right-click
+  menu): how much of a cue you wrote on a
   day. The schedule counts only logged work as done and plans the rest;
   past days show what was planned beside what was written. Undoable.
 - The Schedule keeps each day's plan, so past days show what was

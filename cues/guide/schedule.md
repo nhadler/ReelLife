@@ -57,8 +57,9 @@ moves into the coming days with the rest. Nothing is ever marked late.
 ## Log Written
 
 To tell the schedule how far you got, use **Log Written…** beside a cue
-in today's or a past day's list (or in the cue page's ⋯ menu, or the
-grid's right-click menu): the day, and how much music you wrote, as
+in today's or a past day's list, **Log Written** in the grid's toolbar
+with one cue ticked, the cue page's ⋯ menu, or the grid's right-click
+menu: the day, and how much music you wrote, as
 m:ss or minutes. It starts filled in with what was planned. The days
 ahead then plan only what's left, though at least one Smallest Share
 stays until you mark the cue composed. Logging the same cue and day
