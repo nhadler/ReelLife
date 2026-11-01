@@ -1,0 +1,19 @@
+SESSION NAME:	EP101 Spotting
+SAMPLE RATE:	48000.000000
+BIT DEPTH:	24-bit
+SESSION START TIMECODE:	00:59:00;00
+TIMECODE FORMAT:	29.97 Drop Frame
+# OF AUDIO TRACKS:	0
+# OF AUDIO CLIPS:	0
+# OF AUDIO FILES:	0
+
+
+M A R K E R S  L I S T I N G
+#   	LOCATION     	TIME REFERENCE    	UNITS    	NAME                             	COMMENTS
+1   	01:00:15;10  	000000            	Samples  	101m01 Cold Open IN              	
+2   	01:01:02;04  	000000            	Samples  	101m01 OUT                       	
+3   	01:02:30;00  	000000            	Samples  	101m02 Title Card IN             	
+4   	01:02:41;12  	000000            	Samples  	101m02 Title Card OUT            	
+5   	01:05:00;00  	000000            	Samples  	FFOA                             	
+6   	01:09:59;28  	000000            	Samples  	101m03s Radio Song IN            	
+7   	01:10:20;02  	000000            	Samples  	101m03s OUT                      	

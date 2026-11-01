@@ -1,0 +1,60 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <table class="table settings-views">
+    <thead><tr><th scope="col">View</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          <th scope="row">
+            {% if row.standard %}
+              {{ row.view.name }}{% if row.changed %} <span class="muted">(changed)</span>{% endif %}
+            {% else %}
+              <form class="settings-views__rename" method="post" action="{% url 'cues:settings_view_action' project.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="view" value="{{ row.view.pk }}">
+                <input type="hidden" name="action" value="rename">
+                <input type="text" name="name" value="{{ row.view.name }}" maxlength="50" required aria-label="Name of {{ row.view.name }}">
+                <button class="button button--quiet button--small" type="submit">Rename</button>
+              </form>
+            {% endif %}
+          </th>
+          <td class="settings-views__actions">
+            <form method="post" action="{% url 'cues:settings_view_action' project.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="view" value="{{ row.view.pk }}">
+              {% if not row.standard %}
+                <button class="button button--quiet button--small" type="submit" name="action" value="up"{% if row.first %} disabled{% endif %} aria-label="Move {{ row.view.name }} up" title="Move Up">↑</button>
+                <button class="button button--quiet button--small" type="submit" name="action" value="down"{% if row.last %} disabled{% endif %} aria-label="Move {{ row.view.name }} down" title="Move Down">↓</button>
+              {% endif %}
+              <button class="button button--quiet button--small" type="submit" name="action" value="duplicate">Duplicate</button>
+              {% if row.changed %}
+                <button class="button button--quiet button--small" type="submit" name="action" value="reset" data-confirm="Reset {{ row.view.name }} to the standard columns? Your changes to it are lost.">Reset to Standard</button>
+              {% elif not row.standard %}
+                <button class="button button--quiet button--small button--danger-text" type="submit" name="action" value="delete" data-confirm="Delete the {{ row.view.name }} view?">Delete</button>
+              {% endif %}
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <section class="form-section">
+    <h2>Copy From Another Project</h2>
+    {% if copy_form.fields.source.queryset.exists %}
+      <form method="post" action="{% url 'cues:settings_copy_from' project.pk %}" novalidate>
+        {% csrf_token %}
+        {{ copy_form.non_field_errors }}
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=copy_form.source %}
+          {% include "cues/includes/field.html" with field=copy_form.views %}
+          {% include "cues/includes/field.html" with field=copy_form.lists %}
+        </div>
+        <div class="form-actions"><button class="button button--quiet" type="submit">Copy</button></div>
+      </form>
+    {% else %}
+      <p class="muted">There are no other projects yet.</p>
+    {% endif %}
+  </section>
+{% endblock %}

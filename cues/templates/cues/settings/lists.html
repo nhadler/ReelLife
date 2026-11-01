@@ -1,0 +1,18 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <section class="form-section">
+      <h2>Themes</h2>
+      {% include "cues/includes/inline_table.html" with fs=theme_set add="Add Theme" %}
+    </section>
+    <section class="form-section">
+      <h2>Instruments</h2>
+      {% include "cues/includes/inline_table.html" with fs=instrument_set add="Add Instrument" %}
+    </section>
+    <div class="form-actions">
+      <button class="button" type="submit">Save</button>
+    </div>
+  </form>
+{% endblock %}

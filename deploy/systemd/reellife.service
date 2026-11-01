@@ -1,0 +1,78 @@
+# ReelLife web service. Install steps: deploy/README.md.
+[Unit]
+Description=ReelLife cue tracking (gunicorn)
+Documentation=file:///opt/reellife/deploy/README.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=reellife
+DynamicUser=yes
+StateDirectory=reellife
+StateDirectoryMode=0700
+# Request bodies and uploads (up to 200 MB for a backup being restored)
+# are spooled to TMPDIR: on disk, not in a /tmp that may be a tmpfs
+# counted against MemoryMax.
+CacheDirectory=reellife
+CacheDirectoryMode=0700
+WorkingDirectory=/opt/reellife
+EnvironmentFile=/etc/reellife/reellife.env
+Environment=DJANGO_SETTINGS_MODULE=reellife.settings.prod
+Environment=REELLIFE_DATA_DIR=%S/reellife
+Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+Environment=TMPDIR=%C/reellife
+# Secrets arrive as files readable only by this service.
+LoadCredential=secret_key:/etc/reellife/secret_key
+LoadCredential=oidc_client_secret:/etc/reellife/oidc_client_secret
+Environment=REELLIFE_SECRET_KEY_FILE=%d/secret_key
+Environment=OIDC_CLIENT_SECRET_FILE=%d/oidc_client_secret
+
+# Snapshot before migrating so an upgrade can be rolled back (only when
+# migrations are pending; kept apart from the nightly snapshots).
+ExecStartPre=/opt/reellife/.venv/bin/reellife snapshot --before-migrate
+ExecStartPre=/opt/reellife/.venv/bin/reellife migrate --noinput
+ExecStartPre=/opt/reellife/.venv/bin/reellife createcachetable
+# The ASGI worker serves Django and the MCP server at /mcp.
+ExecStart=/opt/reellife/.venv/bin/gunicorn reellife.asgi:application \
+    --worker-class asgi \
+    --bind 127.0.0.1:8000 \
+    --workers 2 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --access-logfile - \
+    --error-logfile - \
+    --forwarded-allow-ips "" \
+    --no-control-socket
+Restart=on-failure
+RestartSec=5
+
+# Sandboxing.
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+MemoryMax=512M
+TasksMax=128
+
+[Install]
+WantedBy=multi-user.target

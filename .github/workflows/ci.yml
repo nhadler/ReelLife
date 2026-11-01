@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # The release workflow runs the whole suite before publishing.
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request supersedes this run.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --frozen
+      - name: ruff check
+        run: uv run ruff check .
+      - name: ruff format
+        run: uv run ruff format --check .
+      - name: pylint
+        run: uv run pylint accounts cues mcp_server reellife tests manage.py
+      - name: mypy
+        run: uv run mypy
+      - name: bandit
+        run: uv run bandit -q -r accounts cues mcp_server reellife -x tests
+      - name: makemigrations --check
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: check --deploy
+        env:
+          REELLIFE_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-padding-to-fifty-chars
+          REELLIFE_ALLOWED_HOSTS: reellife.example.com
+          REELLIFE_BASE_URL: https://reellife.example.com
+          REELLIFE_DATA_DIR: ${{ runner.temp }}
+          OIDC_ISSUER: https://id.example.com
+          OIDC_CLIENT_ID: reellife
+          OIDC_CLIENT_SECRET: ci-only-not-a-real-client-secret
+          DJANGO_SETTINGS_MODULE: reellife.settings.prod
+        run: uv run python manage.py check --deploy --fail-level WARNING
+      - name: pip-audit
+        run: >-
+          uv export --frozen --no-hashes --no-emit-project
+          --format requirements-txt > requirements.txt &&
+          uv run pip-audit --strict -r requirements.txt
+      - name: pytest (small + medium) with coverage
+        run: uv run pytest -m "not large" -n auto --cov --cov-report=term
+      - name: 100% branch coverage floors (the same list as `just cov`)
+        run: sh scripts/coverage_floors.sh
+
+  frontend:
+    # ESLint and Prettier.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: ESLint
+        run: npx eslint .
+      - name: Prettier
+        run: npx prettier --check .
+
+  container:
+    # Builds the image and runs the large container tests.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --frozen
+      - name: Image and Compose tests
+        run: uv run pytest -m large tests/large -p no:xdist -v --ignore=tests/large/e2e
+
+  e2e:
+    # A composer's day in Chromium, with axe-core on every page.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: |
+          uv sync --frozen
+          npm ci
+          uv run playwright install --with-deps chromium
+      - name: End-to-end tests
+        run: uv run pytest -m large tests/large/e2e -p no:xdist -v

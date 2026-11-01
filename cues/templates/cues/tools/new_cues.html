@@ -1,0 +1,20 @@
+{% extends "cues/tools/base.html" %}
+{% load text %}
+{% block fields %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.count %}
+    <div class="field">
+      <label for="{{ form.picture.id_for_label }}">{{ form.picture.label|title_case }}</label>
+      {# A new reel suggests its own next number. #}
+      <select name="{{ form.picture.html_name }}" id="{{ form.picture.id_for_label }}"
+              hx-get="{{ action }}" hx-target="#number-field" hx-select="#number-field" hx-swap="outerHTML">
+        {% for value, label in form.picture.field.choices %}
+          {% if value %}<option value="{{ value }}"{% if value|stringformat:"s" == form.picture.value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>{% endif %}
+        {% endfor %}
+      </select>
+      {{ form.picture.errors }}
+    </div>
+    <div id="number-field">{% include "cues/includes/field.html" with field=form.number %}</div>
+    {% include "cues/includes/field.html" with field=form.status %}
+  </div>
+{% endblock %}

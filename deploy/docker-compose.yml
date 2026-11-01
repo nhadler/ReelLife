@@ -1,0 +1,57 @@
+# ReelLife with Docker Compose (deploy/README.md).
+#   cp .env.example .env    # then fill it in
+#   docker compose up -d
+#
+# Runs the published image; pin a release with REELLIFE_IMAGE in .env.
+# To build from this checkout instead, add docker-compose.build.yml:
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+#
+# Serves on 127.0.0.1:8000 only; point Tailscale Serve or a reverse
+# proxy at it. Data lives in the reellife-data volume.
+
+name: reellife
+
+x-app: &app
+  image: ${REELLIFE_IMAGE:-ghcr.io/nhadler/reellife:latest}
+  env_file: ${REELLIFE_ENV_FILE:-.env}
+  volumes:
+    - reellife-data:/data
+  read_only: true
+  # Small on purpose: a tmpfs counts against mem_limit. Uploads spool to
+  # /data/tmp instead (TMPDIR, set in the image).
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  restart: unless-stopped
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: '5'
+
+services:
+  web:
+    <<: *app
+    command: ['web']
+    ports:
+      - '127.0.0.1:${REELLIFE_PORT:-8000}:8000'
+    mem_limit: 512m
+    pids_limit: 128
+
+  scheduler:
+    <<: *app
+    command: ['scheduler']
+    # Starts once web has migrated the database.
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      disable: true
+    mem_limit: 256m
+    pids_limit: 32
+    stop_grace_period: 30s
+
+volumes:
+  reellife-data:

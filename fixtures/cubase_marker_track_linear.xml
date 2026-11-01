@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  GUESSED STRUCTURE. Written from memory of Cubase/Nuendo "Export > Selected Tracks" XML (tracklist2 format).
+  Replace with a real export before trusting the parser. Things to confirm against a real file:
+  - element and class names (MMarkerTrackEvent, MRangeMarkerEvent, MMarkerEvent)
+  - Domain Type value for linear vs musical time
+  - units of Start/Length in linear mode (assumed seconds from project zero)
+  - whether the project start timecode is present anywhere in the file
+-->
+<tracklist2>
+  <list name="track" type="obj">
+    <obj class="MMarkerTrackEvent" ID="1001">
+      <float name="Start" value="0"/>
+      <float name="Length" value="0"/>
+      <obj class="MListNode" name="Node" ID="1002">
+        <string name="Name" value="Cues"/>
+        <member name="Domain">
+          <int name="Type" value="1"/>
+          <float name="Period" value="1"/>
+        </member>
+        <list name="Events" type="obj">
+          <obj class="MRangeMarkerEvent" ID="1003">
+            <float name="Start" value="3610"/>
+            <float name="Length" value="80.5"/>
+            <string name="Name" value="1m01 Main Title"/>
+            <int name="ID" value="1"/>
+          </obj>
+          <obj class="MRangeMarkerEvent" ID="1004">
+            <float name="Start" value="3780"/>
+            <float name="Length" value="132.333333"/>
+            <string name="Name" value="1m02 The Chase"/>
+            <int name="ID" value="2"/>
+          </obj>
+          <obj class="MMarkerEvent" ID="1005">
+            <float name="Start" value="3600"/>
+            <string name="Name" value="FFOA"/>
+            <int name="ID" value="3"/>
+          </obj>
+        </list>
+      </obj>
+    </obj>
+  </list>
+</tracklist2>

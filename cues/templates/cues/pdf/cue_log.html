@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ project.title }} Cue Log</title></head>
+<body>
+  {% include "cues/pdf/header.html" with what="Cue Log" %}
+  {% for note in notes %}<p class="meta">{{ note }}</p>{% endfor %}
+  {% for block in blocks %}
+    <table class="block">
+      {% for line in block %}<tr>{% for value in line %}{% if forloop.parentloop.first %}<th>{{ value }}</th>{% else %}<td>{{ value }}</td>{% endif %}{% endfor %}</tr>{% endfor %}
+    </table>
+  {% endfor %}
+  {% for reel in log.reels %}
+    <h2>{% if reel.name %}Reel {{ reel.name }}{% else %}No Reel{% endif %}</h2>
+    <table>
+      <thead><tr>{% for header in log.headers %}<th>{{ header }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in reel.rows %}<tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>{% endfor %}
+        <tr class="subtotal"><td colspan="{{ log.headers|length }}">{{ reel.cues }} cue{{ reel.cues|pluralize }}, {{ reel.duration }}</td></tr>
+      </tbody>
+    </table>
+  {% endfor %}
+</body>
+</html>

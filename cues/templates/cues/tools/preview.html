@@ -1,0 +1,18 @@
+{# What the tool would do; swapped into the dialog's preview area. #}
+{% if preview %}
+  {% if preview.summary %}<p class="tool-preview__summary" data-keys>{{ preview.summary }}</p>{% endif %}
+  <div class="tool-preview__scroll">
+    <table class="table tool-preview__table">
+      <thead><tr>{% for column in preview.columns %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in preview.rows %}
+          <tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% elif errors %}
+  <ul class="tool-preview__errors">
+    {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+  </ul>
+{% endif %}

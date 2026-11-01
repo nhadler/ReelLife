@@ -1,0 +1,25 @@
+{# The version list: pick one to see its fields. #}
+<div class="cue-versions__head">
+  <h2 class="cue-versions__title" id="versions-title">Versions</h2>
+  {% if can_edit %}
+    <button class="button button--quiet button--icon" id="new-version" type="button"
+            title="New version (Ctrl+Shift+V)" aria-label="New version"
+            hx-get="{% url 'cues:new_version' cue.pk %}"
+            hx-target="#app-dialog" hx-swap="innerHTML">+</button>
+  {% endif %}
+</div>
+<ol class="version-list" aria-labelledby="versions-title">
+  {% for version in versions %}
+    <li>
+      <a class="version-list__item{% if version == selected %} version-list__item--selected{% endif %}"
+         href="{% url 'cues:cue' cue.pk %}?version={{ version.pk }}"
+         {% if version == selected %}aria-current="page"{% endif %}>
+        <span class="version-list__label">{{ version.label }}</span>
+        {% if version.pk == cue.current_version_id %}<span class="version-list__current">current</span>{% endif %}
+        <span class="version-list__meta">{{ version.written_to.turnover.label|default:"no picture" }} · {{ version.created_at|date:short_format }}</span>
+      </a>
+    </li>
+  {% empty %}
+    <li class="version-list__empty muted">No versions yet.</li>
+  {% endfor %}
+</ol>

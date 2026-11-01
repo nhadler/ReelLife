@@ -1,0 +1,127 @@
+# Publishes a release when a version tag is pushed (v0.4.0): runs the
+# whole CI suite, builds the image for amd64 and arm64, pushes it to
+# ghcr.io/nhadler/reellife with an SBOM and signed build provenance, and
+# creates the GitHub release from CHANGELOG.md.
+#
+# To release: move CHANGELOG.md's Unreleased notes under
+# "## [X.Y.Z] - YYYY-MM-DD", set version = "X.Y.Z" in pyproject.toml
+# (uv lock), commit, then `git tag vX.Y.Z && git push origin vX.Y.Z`.
+name: Release
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
+  check:
+    # The tag, pyproject.toml and the changelog must agree.
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        name: Tag matches pyproject.toml
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          project="$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          if [ "$tag" != "$project" ]; then
+            echo "::error::Tag v$tag but pyproject.toml says $project"
+            exit 1
+          fi
+          echo "version=$tag" >> "$GITHUB_OUTPUT"
+      - name: Release notes from CHANGELOG.md
+        run: |
+          awk -v v="${{ steps.version.outputs.version }}" '
+            $0 ~ "^## \\[" v "\\]" { on = 1; next }
+            on && /^## \[/ { exit }
+            on { print }
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no section for ${{ steps.version.outputs.version }}"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: notes
+          path: notes.md
+
+  image:
+    needs: [ci, check]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          # 0.4.0 and 0.4 always; latest only for a release, not a
+          # pre-release such as 0.5.0-rc.1.
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+      - id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          sbom: true
+          provenance: mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+
+  release:
+    needs: [check, image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: notes
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          prerelease=""
+          case "$VERSION" in *-*) prerelease="--prerelease" ;; esac
+          {
+            cat notes.md
+            printf '\n## Image\n\n```\nghcr.io/%s:%s\n```\n' "$GITHUB_REPOSITORY" "$VERSION"
+          } > body.md
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
+            --title "ReelLife $VERSION" --notes-file body.md $prerelease

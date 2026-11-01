@@ -1,0 +1,91 @@
+{% extends "app.html" %}
+{% load static text %}
+
+{% block title %}Credits · ReelLife{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'cues/credits.js' %}" type="module"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head credits-head">
+    <h1>Credits</h1>
+    {% include "cues/includes/help_link.html" with slug="credits-and-cue-sheets" %}
+    <details class="menu credits-head__export">
+      <summary class="button button--quiet button--small">Export</summary>
+      <div class="menu__panel">
+        <a class="menu__item" href="{% url 'cues:credits_export' 'csv' %}" download>CSV</a>
+        <a class="menu__item" href="{% url 'cues:credits_export' 'xlsx' %}" download>Excel</a>
+      </div>
+    </details>
+  </div>
+
+  <datalist id="societies">{% for name in societies %}<option value="{{ name }}"></option>{% endfor %}</datalist>
+
+  <div class="credits">
+    <div class="credits__main">
+      {% if can_edit %}
+        <div class="search-field" data-credits-search-field hidden>
+          {% include "cues/includes/icon.html" with name="search" %}
+          <label class="visually-hidden" for="credits-search">Find a writer or publisher</label>
+          <input type="search" id="credits-search" data-credits-search placeholder="Find a writer or publisher" autocomplete="off">
+        </div>
+        <form method="post" novalidate data-credits-form>
+          {% csrf_token %}
+          {% include "cues/includes/credits_band.html" with fs=writers writers=True title="Writers" icon="person" count=writers.initial_form_count add="Add Writer" %}
+          {% include "cues/includes/credits_band.html" with fs=publishers writers=False title="Publishers" icon="building" count=publishers.initial_form_count add="Add Publisher" %}
+          <div class="save-bar">
+            <span class="save-bar__status" data-credits-status></span>
+            {% if undoable %}<button class="button button--quiet" type="submit" form="credits-undo" title="Take back your latest change to this list">Undo Last Change</button>{% endif %}
+            <button class="button" type="submit">Save Changes</button>
+          </div>
+        </form>
+        {% if undoable %}<form id="credits-undo" method="post" action="{% url 'cues:credits_undo' %}">{% csrf_token %}</form>{% endif %}
+      {% else %}
+        {% for title, icon, parties, people in readonly %}
+          <section class="credit-card" aria-labelledby="{{ icon }}-title">
+            <header class="credit-card__head">
+              <span class="credit-card__icon">{% include "cues/includes/icon.html" with name=icon %}</span>
+              <div class="credit-card__titles"><h2 id="{{ icon }}-title">{{ title }} <span class="count-pill">{{ parties|length }}</span></h2></div>
+            </header>
+            {% if parties %}
+              <div class="party-table">
+                <table>
+                  <thead><tr><th scope="col">{% if people %}Name{% else %}Company{% endif %}</th><th scope="col" class="party-table__pro">PRO</th><th scope="col" class="party-table__ipi">IPI/CAE #</th><th scope="col" class="party-table__own">Composer's Own</th></tr></thead>
+                  <tbody>
+                    {% for party in parties %}
+                      <tr>
+                        <td><div class="party-name"><span class="monogram{% if not people %} monogram--company{% endif %}" aria-hidden="true">{% if people %}{{ party.first_name|slice:":1"|upper }}{{ party.last_name|slice:":1"|upper }}{% else %}{{ party.name|slice:":1"|upper }}{% endif %}</span>{{ party.name }}</div></td>
+                        <td class="party-table__pro">{{ party.society }}</td>
+                        <td class="party-table__ipi">{{ party.ipi }}</td>
+                        <td class="party-table__own">{% if party.is_mine %}<span class="own-mark" aria-label="Yes">✓</span>{% endif %}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="party-table__empty">None yet.</p>
+            {% endif %}
+          </section>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <aside class="credits__side side-card" aria-labelledby="credits-history-title">
+      <h2 class="side-card__title" id="credits-history-title">Recent Changes</h2>
+      {% if recent %}
+        <ol class="timeline">
+          {% for entry in recent %}
+            <li class="timeline__entry{% if entry.undone %} timeline__entry--undone{% endif %}">
+              <p class="timeline__label">{{ entry.label }}{% if entry.undone %} <span class="chip">Undone</span>{% endif %}</p>
+              <p class="timeline__meta">{% if entry.user %}{{ entry.user }} · {% endif %}<time datetime="{{ entry.when|date:'c' }}">{{ entry.when|stamp:short_format }}</time></p>
+            </li>
+          {% endfor %}
+        </ol>
+      {% else %}
+        <p class="muted credits__quiet">No changes yet.</p>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock %}

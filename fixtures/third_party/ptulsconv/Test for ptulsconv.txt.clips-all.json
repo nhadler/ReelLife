@@ -1,0 +1,28 @@
+{
+  "source": "Pro Tools clips",
+  "frame_rate": "23.976",
+  "drop_frame": false,
+  "warnings": [],
+  "rows": [
+    {
+      "line": 17,
+      "label": "Test Line 1 $QN=T1001",
+      "number": "Test",
+      "title": "Line 1 $QN=T1001",
+      "in": "00:00:00:00",
+      "out": "00:00:02:00",
+      "in_frames": 0,
+      "out_frames": 48
+    },
+    {
+      "line": 18,
+      "label": "Test Line 2 $QN=T1002",
+      "number": "Test",
+      "title": "Line 2 $QN=T1002",
+      "in": "00:00:04:00",
+      "out": "00:00:06:00",
+      "in_frames": 96,
+      "out_frames": 144
+    }
+  ]
+}

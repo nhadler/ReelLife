@@ -1,0 +1,48 @@
+{
+  "source": "Pro Tools clips",
+  "frame_rate": "23.976",
+  "drop_frame": false,
+  "warnings": [],
+  "rows": [
+    {
+      "line": 18,
+      "label": "1m01 Main Title",
+      "number": "1m01",
+      "title": "Main Title",
+      "in": "01:00:10:00",
+      "out": "01:01:30:12",
+      "in_frames": 86640,
+      "out_frames": 88572
+    },
+    {
+      "line": 19,
+      "label": "1m02 The Chase",
+      "number": "1m02",
+      "title": "The Chase",
+      "in": "01:03:00:00",
+      "out": "01:05:12:08",
+      "in_frames": 90720,
+      "out_frames": 93896
+    },
+    {
+      "line": 20,
+      "label": "1m03 Aftermath",
+      "number": "1m03",
+      "title": "Aftermath",
+      "in": "01:06:01:15",
+      "out": "01:07:44:00",
+      "in_frames": 95079,
+      "out_frames": 97536
+    },
+    {
+      "line": 21,
+      "label": "1m03 Aftermath",
+      "number": "1m03",
+      "title": "Aftermath",
+      "in": "01:07:50:00",
+      "out": "01:08:20:00",
+      "in_frames": 97680,
+      "out_frames": 98400
+    }
+  ]
+}

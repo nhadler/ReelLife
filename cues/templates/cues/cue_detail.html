@@ -1,0 +1,238 @@
+{% extends "app.html" %}
+{% load static %}
+{# The cue details page: versions, fields, history. #}
+
+{% block title %}{{ cue.number }} {{ cue.title }} · {{ project.title }} · ReelLife{% endblock %}
+{% block page_class %}page--wide{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'cues/cue.js' %}" type="module"></script>
+{% endblock %}
+
+{% block content %}
+  {# Sent with every save, so a change made elsewhere isn't overwritten. #}
+  <input type="hidden" id="cue-updated-at" name="updated_at" value="{{ cue.updated_at.isoformat }}">
+
+  <header class="cue-head">
+    <div class="cue-head__title" id="cue-heading">{% include "cues/details/heading.html" %}</div>
+
+    <span class="cue-head__status" id="cue-status" role="status" aria-live="polite"></span>
+    <div class="cue-head__actions">
+      <details class="menu switcher">
+        <summary class="button button--quiet cue-head__switch" title="Switch to another cue">{{ cue.number }} ▾</summary>
+        <div class="menu__panel switcher__panel">
+          <div class="switcher__tools">
+            <span class="field--check">
+              <input type="checkbox" id="switcher-inactive">
+              <label for="switcher-inactive">Show Inactive</label>
+            </span>
+            {% if can_edit %}
+              <button class="button button--quiet button--small" id="new-cue" type="button" title="New cue (Control+N)"
+                      hx-get="{% url 'cues:new_cue' project.pk %}"
+                      hx-target="#app-dialog" hx-swap="innerHTML">New Cue</button>
+            {% endif %}
+          </div>
+          {% for picture, reel_cues in switcher %}
+            <p class="switcher__reel">Reel {{ picture.name }}</p>
+            <ul class="switcher__cues">
+              {% for other in reel_cues %}
+                <li class="{% if not other.active %}switcher__cue--inactive{% endif %}">
+                  <a class="switcher__cue" href="{% url 'cues:cue' other.pk %}"{% if other == cue %} aria-current="page"{% endif %}>
+                    {% if other.status %}<svg class="swatch" viewBox="0 0 1 1" aria-hidden="true"><rect width="1" height="1" fill="{{ other.status.color }}"/></svg>{% endif %}
+                    <span class="switcher__number">{{ other.number }}</span>
+                    <span>{{ other.title }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endfor %}
+        </div>
+      </details>
+
+      {% if previous %}
+        <a class="button button--quiet" id="cue-previous" href="{% url 'cues:cue' previous.0 %}" title="Previous cue (Alt+↑)" aria-label="Previous cue, {{ previous.1 }}">‹ {{ previous.1 }}</a>
+      {% endif %}
+      {% if following %}
+        <a class="button button--quiet" id="cue-next" href="{% url 'cues:cue' following.0 %}" title="Next cue (Alt+↓)" aria-label="Next cue, {{ following.1 }}">{{ following.1 }} ›</a>
+      {% endif %}
+
+      {% if can_edit %}
+        <details class="menu">
+          <summary class="button button--quiet button--icon" title="More" aria-label="More for {{ cue.number }}">⋯</summary>
+          <div class="menu__panel menu__panel--right">
+            {% if selected and selected.pk != cue.current_version_id %}
+              <button class="menu__item" type="button"
+                      hx-post="{% url 'cues:version_make_current' selected.pk %}">Make {{ selected.label }} Current</button>
+            {% endif %}
+            {% if selected %}
+              <button class="menu__item menu__item--danger" type="button"
+                      hx-post="{% url 'cues:version_delete' selected.pk %}"
+                      hx-confirm="Delete {{ cue.number }} {{ selected.label }}? You can revert this from History.">Delete Version {{ selected.label }}</button>
+            {% endif %}
+            <button class="menu__item menu__item--danger" type="button"
+                    hx-post="{% url 'cues:cue_delete' cue.pk %}"
+                    hx-confirm="Delete cue {{ cue.number }}{% if versions %} and its {{ versions|length }} version{{ versions|length|pluralize }}{% endif %}? Undo on the project page brings it back.">Delete Cue</button>
+          </div>
+        </details>
+      {% endif %}
+
+    </div>
+  </header>
+
+  <div class="cue-page">
+    <div class="cue-side">
+      <aside class="cue-versions" id="cue-versions">{% include "cues/details/versions.html" %}</aside>
+      <nav class="cue-index" aria-label="Sections">
+        <a href="#group-cue">Cue</a>
+        <a href="#group-version">Version</a>
+        <a href="#group-picture">Picture</a>
+        <a href="#group-spotting">Spotting</a>
+        <a href="#group-sheet">Cue Sheet</a>
+        <a href="#group-shares">Credits</a>
+        {% for group, fields, filled in department_groups %}<a href="#group-{{ group|slugify }}"{% if not filled %} class="cue-index__empty"{% endif %}>{{ group }}</a>{% endfor %}
+        <a href="#group-notes">Notes</a>
+      </nav>
+    </div>
+
+    <div class="details-fields">
+      <section class="details-group" aria-labelledby="group-cue">
+        <h2 class="details-group__title" id="group-cue">Cue</h2>
+        <div class="cue-thumbnail">
+          {% if can_edit %}
+            <form method="post" enctype="multipart/form-data" action="{% url 'cues:cue_thumbnail_upload' cue.pk %}">
+              {% csrf_token %}
+              <label class="cue-thumb-drop" data-dropzone data-dropzone-submit title="Drop an image or click to choose one (JPEG, PNG, WebP or GIF under 2 MB)">
+                {% if thumbnail_url %}
+                  <img class="cue-thumb{% if not cue.thumbnail %} cue-thumb--inherited{% endif %}" src="{{ thumbnail_url }}"
+                       alt="{% if cue.thumbnail %}Thumbnail of {{ cue.number }}{% else %}The project's thumbnail{% endif %}">
+                {% else %}
+                  <span class="cue-thumb cue-thumb--empty" aria-hidden="true"></span>
+                {% endif %}
+                <span class="cue-thumb-drop__hint">{% if cue.thumbnail %}Replace Still{% else %}Add Still{% endif %}</span>
+                <span class="dropzone__name visually-hidden" aria-live="polite"></span>
+                <input class="visually-hidden" type="file" name="thumbnail" accept="image/jpeg,image/png,image/webp,image/gif"
+                       aria-label="Thumbnail image (JPEG, PNG, WebP or GIF under 2 MB)">
+              </label>
+              {% if cue.thumbnail %}
+                <button class="button button--quiet button--small" type="submit" name="remove" value="1">Remove Still</button>
+              {% endif %}
+            </form>
+          {% elif thumbnail_url %}
+            <img class="cue-thumb{% if not cue.thumbnail %} cue-thumb--inherited{% endif %}" src="{{ thumbnail_url }}"
+                 alt="{% if cue.thumbnail %}Thumbnail of {{ cue.number }}{% else %}The project's thumbnail{% endif %}">
+          {% endif %}
+        </div>
+        <div class="fields">
+          {% include "cues/details/field.html" with field=cue_form.number %}
+          {% include "cues/details/field.html" with field=cue_form.title %}
+          {% include "cues/details/field.html" with field=cue_form.status %}
+          {% include "cues/details/field.html" with field=cue_form.cue_type %}
+          {% include "cues/details/field.html" with field=cue_form.priority %}
+          {% include "cues/details/field.html" with field=cue_form.difficulty %}
+          {% include "cues/details/field.html" with field=cue_form.active %}
+        </div>
+      </section>
+
+      <section class="details-group details-group--version" aria-labelledby="group-version">
+        <h2 class="details-group__title" id="group-version">
+          {% if selected %}Version {{ selected.label }}{% if selected.pk == cue.current_version_id %} <span class="chip">current</span>{% endif %}{% else %}Version{% endif %}
+        </h2>
+        {% if version_form %}
+          <div class="fields">
+            {% include "cues/details/field.html" with field=version_form.label %}
+            {% include "cues/details/field.html" with field=version_form.written_to %}
+            {% include "cues/details/field.html" with field=version_form.review_status %}
+            {% include "cues/details/field.html" with field=version_form.sub_status %}
+            {% include "cues/details/field.html" with field=version_form.tc_in %}
+            {% include "cues/details/field.html" with field=version_form.tc_out %}
+            {% include "cues/details/field.html" with field=version_form.seq_start %}
+            {% include "cues/details/field.html" with field=version_form.in_note %}
+            {% include "cues/details/field.html" with field=version_form.out_note %}
+            {% include "cues/details/field.html" with field=version_form.change_notes %}
+            {% include "cues/details/field.html" with field=version_form.file_link %}
+            {% include "cues/details/field.html" with field=version_form.delivered_at %}
+          </div>
+          {% if file_url %}
+            <p class="details-group__note"><a href="{{ file_url }}" rel="noopener noreferrer" target="_blank">Open the Bounce</a></p>
+          {% endif %}
+        {% else %}
+          <p class="muted">No versions yet. Add one when you deliver the cue.</p>
+        {% endif %}
+      </section>
+
+      <section class="details-group" aria-labelledby="group-picture">
+        <h2 class="details-group__title" id="group-picture">Current Picture</h2>
+        <div class="fields">
+          {% include "cues/details/field.html" with field=cue_form.picture %}
+          {% include "cues/details/field.html" with field=cue_form.seq_start %}
+          {% include "cues/details/field.html" with field=cue_form.tc_in %}
+          {% include "cues/details/field.html" with field=cue_form.tc_out %}
+          {% include "cues/details/field.html" with field=cue_form.duration %}
+        </div>
+        {% include "cues/details/compare.html" %}
+      </section>
+
+      <section class="details-group" aria-labelledby="group-spotting">
+        <h2 class="details-group__title" id="group-spotting">Spotting{% if selected %} <span class="chip">{{ selected.label }}</span>{% endif %}</h2>
+        <div class="fields">
+          {% if version_form %}
+            {% include "cues/details/field.html" with field=version_form.spotting_notes %}
+            {% include "cues/details/field.html" with field=version_form.temp %}
+          {% endif %}
+          {% include "cues/details/field.html" with field=cue_form.scene %}
+          {% if version_form %}
+            {% include "cues/details/field.html" with field=version_form.scene_description %}
+            {% include "cues/details/field.html" with field=version_form.key %}
+            {% include "cues/details/field.html" with field=version_form.bpm %}
+            {% include "cues/details/field.html" with field=version_form.meter %}
+          {% endif %}
+        </div>
+      </section>
+
+      <section class="details-group" aria-labelledby="group-sheet">
+        <h2 class="details-group__title" id="group-sheet">Cue Sheet</h2>
+        <div class="fields">
+          {% include "cues/details/field.html" with field=cue_form.usage %}
+          {% include "cues/details/field.html" with field=cue_form.usage_theme %}
+          {% include "cues/details/field.html" with field=cue_form.artist %}
+          {% include "cues/details/field.html" with field=cue_form.cue_sheet_title %}
+          {% include "cues/details/field.html" with field=cue_form.plays_as_source %}
+          {% include "cues/details/field.html" with field=cue_form.interrupted_use %}
+          {% include "cues/details/field.html" with field=cue_form.cue_sheet_notes %}
+        </div>
+      </section>
+
+      {% include "cues/details/shares.html" %}
+
+      {% for group, fields, filled in department_groups %}
+        <details class="details-group details-group--fold" id="group-{{ group|slugify }}"{% if filled %} open{% endif %}>
+          <summary class="details-group__title">{{ group }}</summary>
+          <div class="fields">
+            {% for field in fields %}
+              {% include "cues/details/field.html" %}
+            {% endfor %}
+          </div>
+        </details>
+      {% endfor %}
+
+      <section class="details-group" aria-labelledby="group-notes">
+        <h2 class="details-group__title" id="group-notes">Notes{% if selected %} <span class="chip">{{ selected.label }}</span>{% endif %}</h2>
+        {% if version_form %}
+          <div class="fields">
+            {% include "cues/details/field.html" with field=version_form.notes %}
+            {% include "cues/details/field.html" with field=version_form.revision_notes %}
+          </div>
+        {% endif %}
+      </section>
+    </div>
+
+    <aside class="cue-history" aria-labelledby="history-title"
+           hx-get="{% url 'cues:cue_history' cue.pk %}"
+           hx-trigger="load, cues:changed from:body" hx-swap="innerHTML">
+      <h2 class="cue-history__title" id="history-title">History</h2>
+      <p class="muted">Loading…</p>
+    </aside>
+  </div>
+
+  {{ page_config|json_script:"cue-config" }}
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "app.html" %}
+
+{% block title %}{% if turnover %}Edit {{ turnover.label }}{% else %}Log a turnover{% endif %} · {{ project.title }} · ReelLife{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+  <h1>{% if turnover %}Edit Turnover {{ turnover.label }}{% else %}Log a Turnover{% endif %}</h1>
+  <p class="muted">{{ project.title }}. Times are {{ project.rate.label }} timecode.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% include "cues/includes/form_errors.html" %}
+    <div class="fields form-section">
+      {% include "cues/includes/field.html" with field=form.label %}
+      {% include "cues/includes/field.html" with field=form.received_date %}
+      {% include "cues/includes/field.html" with field=form.notes wide=True %}
+    </div>
+
+    {% if rows %}
+      <fieldset class="form-section">
+        <legend>{{ project.reels_word }} in This Turnover</legend>
+        <p class="muted">{% if turnover %}Ticked reels are part of this turnover. Untick one to drop it; it then keeps its picture from the turnovers before.{% else %}Untick reels that didn't change; they keep their current picture.{% endif %}</p>
+        {{ existing.management_form }}
+        <table class="table table--edit">
+          <thead><tr><th scope="col">{% if turnover %}In Turnover{% else %}Changed{% endif %}</th><th scope="col">{{ project.reel_word }}</th><th scope="col">IN</th><th scope="col">OUT</th></tr></thead>
+          <tbody>
+            {% for reel, row in rows %}
+              <tr>
+                <td>{{ row.include }}</td>
+                <th scope="row"><label for="{{ row.include.id_for_label }}">{{ reel.title }}</label></th>
+                <td><label class="visually-hidden" for="{{ row.tc_in.id_for_label }}">Reel {{ reel.name }} IN</label>{{ row.tc_in }}{{ row.tc_in.errors }}</td>
+                <td><label class="visually-hidden" for="{{ row.tc_out.id_for_label }}">Reel {{ reel.name }} OUT</label>{{ row.tc_out }}{{ row.tc_out.errors }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </fieldset>
+    {% else %}
+      {{ existing.management_form }}
+    {% endif %}
+
+    {% if project.long_play and rows %}
+      {# Long play has one picture: its new IN and OUT go above. #}
+      {{ new.management_form }}
+    {% else %}
+      <fieldset class="form-section">
+        <legend>{% if project.long_play %}The Picture{% else %}New {{ project.reels_word }}{% endif %}</legend>
+        {{ new.management_form }}
+        <table class="table table--edit">
+          <thead><tr>{% if not project.long_play %}<th scope="col">{{ project.reel_word }}</th>{% endif %}<th scope="col">IN</th><th scope="col">OUT</th></tr></thead>
+          <tbody>
+            {% for row in new %}
+              {% if not project.long_play or forloop.first %}
+                <tr>
+                  {% if not project.long_play %}<td><label class="visually-hidden" for="{{ row.name.id_for_label }}">New {{ project.reel_word|lower }} {{ forloop.counter }} name</label>{{ row.name }}{{ row.name.errors }}</td>{% endif %}
+                  <td><label class="visually-hidden" for="{{ row.tc_in.id_for_label }}">{% if project.long_play %}Picture{% else %}New {{ project.reel_word|lower }} {{ forloop.counter }}{% endif %} IN</label>{{ row.tc_in }}{{ row.tc_in.errors }}</td>
+                  <td><label class="visually-hidden" for="{{ row.tc_out.id_for_label }}">{% if project.long_play %}Picture{% else %}New {{ project.reel_word|lower }} {{ forloop.counter }}{% endif %} OUT</label>{{ row.tc_out }}{{ row.tc_out.errors }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </fieldset>
+    {% endif %}
+
+    <div class="form-actions">
+      <button class="button" type="submit">{% if turnover %}Save Changes{% else %}Log Turnover{% endif %}</button>
+      <a class="button button--quiet" href="{% url 'cues:picture' project.pk %}">Cancel</a>
+    </div>
+  </form>
+  {% if turnover %}
+    {# Its own form: deleting isn't saving. Refused while cues are written to its picture. #}
+    <form class="form-section turnover-delete" method="post" action="{% url 'cues:turnover_delete' project.pk turnover.pk %}">
+      {% csrf_token %}
+      <h2>Delete This Turnover</h2>
+      <p class="muted">Only while no cue version is written to its picture. Undo brings it back.</p>
+      <button class="button button--danger" type="submit">Delete {{ turnover.label }}</button>
+    </form>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,14 @@
+# Only what the Dockerfile copies is needed; keep the context small and
+# free of local data and secrets.
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!manage.py
+!accounts/
+!cues/
+!reellife/
+!mcp_server/
+!templates/
+!deploy/docker-entrypoint.sh
+**/__pycache__

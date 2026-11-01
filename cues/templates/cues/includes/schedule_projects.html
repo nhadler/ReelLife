@@ -1,0 +1,18 @@
+{# Which projects the calendar shows, as a calendar app lists its calendars. #}
+<form class="side-card" method="get" data-autosubmit aria-labelledby="schedule-projects-title">
+  <h2 class="side-card__title" id="schedule-projects-title">Projects</h2>
+  {% for key, value in here %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+  <input type="hidden" name="f" value="1">
+  <ul class="cal-projects">
+    {% for info, checked in projects %}
+      <li>
+        <label class="cal-project tone-{{ info.tone }}">
+          <input type="checkbox" name="p" value="{{ info.id }}"{% if checked %} checked{% endif %}>
+          <span class="cal-project__name">{{ info.title }}</span>
+          {% if info.due %}<span class="cal-project__due">due {{ info.due|date:short_format }}</span>{% endif %}
+        </label>
+      </li>
+    {% endfor %}
+  </ul>
+  <button class="button button--small" type="submit" data-autosubmit-button>Show</button>
+</form>

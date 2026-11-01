@@ -1,0 +1,10 @@
+{% extends "cues/tools/base.html" %}
+{% block fields %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.mode wide=True %}
+    {% include "cues/includes/field.html" with field=form.start %}
+    {% include "cues/includes/field.html" with field=form.reel %}
+    {% include "cues/includes/field.html" with field=form.keep_suffix wide=True %}
+  </div>
+  {% include "cues/tools/renumber_list.html" %}
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "app.html" %}
+{% load static %}
+
+{% block title %}{{ project.title }} · ReelLife{% endblock %}
+{% block page_class %}page--overview{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'cues/vendor/ag-grid-community.min.js' %}" defer></script>
+  <script src="{% static 'cues/grid.js' %}" type="module"></script>
+{% endblock %}
+
+{% block content %}
+<div class="overview">
+  {# Kept current after changes: a cell save brings the header back with it (grid.js); anything else re-fetches it. #}
+  <div id="project-header"
+       hx-get="{% url 'cues:project_header' project.pk %}"
+       hx-trigger="cues:refresh-header from:body"
+       hx-swap="innerHTML">
+    {% include "cues/includes/project_header.html" %}
+  </div>
+
+  <div class="timeline" id="timeline" aria-label="Timeline" hidden></div>
+
+  <div class="toolbar" id="grid-tools">
+    <div class="toolbar__menus">
+    <details class="menu toolbar__menu" id="tools-menu">
+      <summary class="toolbar__button" title="Tools (Q)">
+        {% include "cues/includes/icon.html" with name="tools" %}<span>Tools</span></summary>
+      <div class="menu__panel menu__panel--left tools-panel" role="menu">
+        {% if request.user.role != "viewer" %}
+          {# data-needs: how many selected cues a tool wants (grid.js greys the rest). #}
+          <button class="menu__item" type="button" role="menuitem" data-tool="new" data-palette="New Cues"
+                  title="Several new cues in one {{ project.reel_word|lower }}">New Cues</button>
+          <button class="menu__item" type="button" role="menuitem" id="grid-import" data-palette="Import Cues" data-palette-keys="Ctrl+I"
+                  hx-get="{% url 'cues:import' project.pk %}"
+                  hx-target="#app-dialog" hx-swap="innerHTML">
+            Import Cues<kbd>Ctrl+I</kbd></button>
+        {% endif %}
+        <button class="menu__item" type="button" role="menuitem" id="grid-export" data-palette="Export Cues" data-palette-keys="Ctrl+E">
+          Export Cues<kbd>Ctrl+E</kbd></button>
+        <button class="menu__item" type="button" role="menuitem" id="grid-cue-sheet" data-palette="Export Cue Sheet"
+                hx-get="{% url 'cues:cue_sheet' project.pk %}"
+                hx-target="#app-dialog" hx-swap="innerHTML"
+                title="The PRO cue sheet: RapidCue Excel or CSV">Export Cue Sheet</button>
+        {% if request.user.role != "viewer" %}
+          <hr class="menu__rule">
+          <button class="menu__item" type="button" role="menuitem" data-tool="versions"
+                  title="A new version for each selected cue, or every cue shown">Add Versions</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="split" data-needs="one"
+                  title="Split one selected cue in two">Split Cue</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="merge" data-needs="two"
+                  title="Merge two or more selected cues into one">Merge Cues</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="renumber" data-needs="any"
+                  title="New numbers for the selected cues (one selected: it and every cue after it)">Renumber Cues</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="shift" data-needs="any"
+                  title="Move the selected cues earlier or later">Shift Cues</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="move" data-needs="any"
+                  title="Move the selected cues to another {{ project.reel_word|lower }}">Move Cues</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="copy" data-needs="any"
+                  title="Copy the selected cues into a {{ project.reel_word|lower }}">Copy Cues</button>
+          <button class="menu__item" type="button" role="menuitem" data-tool="delete" data-needs="any"
+                  title="Delete the selected cues">Delete Cues<kbd>Ctrl+Shift+⌫</kbd></button>
+          <hr class="menu__rule">
+          <button class="menu__item" type="button" role="menuitem" id="grid-undo">
+            Undo Last Change<kbd>Ctrl+Z</kbd></button>
+        {% endif %}
+      </div>
+    </details>
+    <details class="menu toolbar__menu" id="grid-filter">
+      <summary class="toolbar__button" id="grid-filter-button" title="Filter (F)">
+        {% include "cues/includes/icon.html" with name="filter" %}<span>Filter</span></summary>
+      <div class="menu__panel menu__panel--left filter-panel" id="grid-filter-panel"></div>
+    </details>
+    <details class="menu toolbar__menu" id="grid-view-menu">
+      <summary class="toolbar__button" title="View (V)">
+        {% include "cues/includes/icon.html" with name="view" %}<span>View</span></summary>
+      <div class="menu__panel menu__panel--left view-panel">
+        <fieldset class="segmented">
+          <legend title="Keys 1 to 5">Row Size</legend>
+          {% for value, label in row_sizes %}
+            <label><input type="radio" name="row-size" value="{{ value }}"{% if value == "medium" %} checked{% endif %}><span>{{ label }}</span></label>
+          {% endfor %}
+        </fieldset>
+        <fieldset class="segmented">
+          <legend title="Key L">Timeline</legend>
+          <label><input type="radio" name="timeline-lanes" value="all" checked><span>All Lanes</span></label>
+          <label><input type="radio" name="timeline-lanes" value="collapsed"><span>Collapsed</span></label>
+        </fieldset>
+      </div>
+    </details>
+    {% if request.user.role != "viewer" %}
+      {# The same dialog as Tools › Import Cues, where it can be seen. #}
+      <button class="toolbar__button" type="button" id="grid-import-open"
+              hx-get="{% url 'cues:import' project.pk %}"
+              hx-target="#app-dialog" hx-swap="innerHTML"
+              title="Import cues (Ctrl+I)">
+        {% include "cues/includes/icon.html" with name="import" %}<span>Import</span></button>
+    {% endif %}
+    <button class="toolbar__button" type="button" id="grid-details"
+            title="Open the cue's details (Ctrl+Enter, or double-click a row)">
+      {% include "cues/includes/icon.html" with name="details" %}<span>Details</span></button>
+    </div>
+    <p class="selection-summary" id="grid-selection" hidden></p>
+    <span class="grid-status" id="grid-status" role="status" aria-live="polite"></span>
+    {# A magnifier until it is used; the field stays open while it has text. #}
+    <div class="toolbar__find" id="grid-find">
+      <button class="toolbar__button" type="button" id="grid-search-open"
+              aria-controls="grid-search" title="Find a cue (Ctrl+F)">
+        {% include "cues/includes/icon.html" with name="search" %}<span class="visually-hidden">Find a Cue</span></button>
+      <input class="toolbar__search" type="search" id="grid-search"
+             placeholder="Find a cue" aria-label="Find a cue by number, title, scene or notes"
+             title="Number, title, scene or notes (Ctrl+F)">
+    </div>
+    <label class="switch" title="Show inactive cues (H)">
+      <input type="checkbox" role="switch" id="grid-show-inactive" checked>
+      <span class="switch__track" aria-hidden="true"><span class="switch__knob">{% include "cues/includes/icon.html" with name="eye" %}</span></span>
+      <span class="visually-hidden">Show Inactive Cues</span>
+    </label>
+  </div>
+
+  <div class="grid-area">
+    <div class="cue-grid" id="cue-grid" aria-label="Cues"></div>
+    {# Project notes and Stats open here, beside the grid. #}
+    <aside class="side-panel" id="side-panel" aria-label="Side panel" hidden></aside>
+  </div>
+
+  <div class="bottom-bar">
+    <nav class="view-tabs" id="view-tabs" aria-label="Views"></nav>
+    <button class="view-tab bottom-bar__stats" type="button" id="stats-toggle"
+            data-panel-url="{% url 'cues:stats_panel' project.pk %}"
+            title="Stats (Ctrl+Shift+S)" aria-expanded="false">
+      {% include "cues/includes/icon.html" with name="stats" %}<span>Stats</span></button>
+  </div>
+</div>
+
+{{ grid_config|json_script:"grid-config" }}
+<noscript><p class="empty">The cue grid needs JavaScript.</p></noscript>
+{% endblock %}

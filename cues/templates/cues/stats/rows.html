@@ -1,0 +1,31 @@
+{# One stats section's table. Needs rows, title; optional base (the % column's heading). #}
+<table class="stats__table">
+  <caption class="visually-hidden">{{ title }}</caption>
+  <thead>
+    <tr><th scope="col"><span class="visually-hidden">Name</span></th><th scope="col">Cues</th><th scope="col">Time</th><th scope="col">%</th></tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+      <tr>
+        <th scope="row">
+          {% if row.cues and row.group %}
+            {# The swatch selects these cues; the name filters to them (Shift adds). #}
+            <button class="stats__swatch-button" type="button" data-stat-select
+                    data-group="{{ row.group }}" data-values="{{ row.filter_values }}"
+                    title="Select these cues (Shift adds)" aria-label="Select {{ row.label }} cues">
+              {% include "cues/stats/swatch.html" %}</button>
+            <button class="stats__name" type="button" data-stat-filter
+                    data-group="{{ row.group }}" data-values="{{ row.filter_values }}"
+                    title="Show only these cues (Shift adds)">{{ row.label }}</button>
+          {% else %}
+            <span class="stats__swatch-button">{% include "cues/stats/swatch.html" %}</span>
+            <span class="stats__name">{{ row.label }}</span>
+          {% endif %}
+        </th>
+        <td>{{ row.cues }}</td>
+        <td>{{ row.duration }}</td>
+        <td>{{ row.percent }}%</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

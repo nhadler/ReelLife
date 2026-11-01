@@ -1,0 +1,69 @@
+{% extends "app.html" %}
+{% load text %}
+
+{% block title %}Activity · {{ project.title }} · ReelLife{% endblock %}
+
+{% block subheader %}
+  <div class="project-band">{% include "cues/includes/project_header.html" %}</div>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>Activity</h1>
+    {% include "cues/includes/help_link.html" with slug="undo-and-history" %}
+    <div class="page-head__actions">
+      <a class="button button--quiet button--small" href="{% url 'cues:trash' project.pk %}">Trash</a>
+    </div>
+  </div>
+
+  {% if entries %}
+    <div class="activity__body">
+      <table class="table activity">
+        <thead>
+          <tr>
+            <th scope="col">When</th>
+            <th scope="col">Who</th>
+            <th scope="col">Change</th>
+            <th scope="col" class="activity__cues">Cues</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr class="activity__row{% if entry.undone %} activity__row--undone{% endif %}">
+              <td class="activity__when"><time datetime="{{ entry.when|date:'c' }}">{{ entry.when|stamp:short_format }}</time></td>
+              <td>{{ entry.user|default:"—" }}</td>
+              <td>
+                <span class="activity__label">{{ entry.label }}</span>
+                {% if entry.undone %}<span class="chip">Undone</span>{% endif %}
+              </td>
+              <td class="activity__cues">{{ entry.cues|default:"—" }}</td>
+              <td class="activity__action">
+                {% if entry.action and can_edit %}
+                  <form method="post" action="{% url 'cues:activity_undo' project.pk entry.change_set.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="page" value="{{ page.number }}">
+                    <button class="button button--quiet button--small" type="submit">
+                      {% if entry.action == "redo" %}Redo{% else %}Undo{% endif %}<span class="visually-hidden">: {{ entry.label }}</span>
+                    </button>
+                  </form>
+                {% elif entry.blocked and not entry.undone %}
+                  <span class="muted activity__blocked" title="Something it changed was changed again afterwards; undo that first.">Changed Since</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page.has_other_pages %}
+      <nav class="activity__pages" aria-label="Activity pages">
+        {% if page.has_previous %}<a class="button button--quiet button--small" href="?page={{ page.previous_page_number }}">Newer</a>{% endif %}
+        <span class="muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a class="button button--quiet button--small" href="?page={{ page.next_page_number }}">Older</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p class="muted">No changes yet.</p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,918 @@
+{
+  "source": "Pro Tools clips",
+  "frame_rate": "29.97",
+  "drop_frame": false,
+  "warnings": [],
+  "rows": [
+    {
+      "line": 35,
+      "label": "@ {Sc=MT Main Titles}",
+      "number": "@",
+      "title": "{Sc=MT Main Titles}",
+      "in": "01:00:08:00",
+      "out": "01:01:35:25",
+      "in_frames": 108240,
+      "out_frames": 110875
+    },
+    {
+      "line": 36,
+      "label": "@ {Sc=1 Ext. Town Square - News of the King}",
+      "number": "@",
+      "title": "{Sc=1 Ext. Town Square - News of the King}",
+      "in": "01:01:35:25",
+      "out": "01:01:57:01",
+      "in_frames": 110875,
+      "out_frames": 111511
+    },
+    {
+      "line": 37,
+      "label": "@{Sc=2 Int. Castle - John and Guy}",
+      "number": "@{Sc=2",
+      "title": "Int. Castle - John and Guy}",
+      "in": "01:01:57:01",
+      "out": "01:02:49:07",
+      "in_frames": 111511,
+      "out_frames": 113077
+    },
+    {
+      "line": 38,
+      "label": "@{Sc=Int/Ext. Montage - John's Soldiers Terrorize the Countryside}",
+      "number": "@{Sc=Int/Ext.",
+      "title": "Montage - John's Soldiers Terrorize the Countryside}",
+      "in": "01:02:49:07",
+      "out": "01:03:21:18",
+      "in_frames": 113077,
+      "out_frames": 114048
+    },
+    {
+      "line": 39,
+      "label": "@{Sc=Ext. Edge of Sherwood Forest - Much Poaches a Deer}",
+      "number": "@{Sc=Ext.",
+      "title": "Edge of Sherwood Forest - Much Poaches a Deer}",
+      "in": "01:03:21:18",
+      "out": "01:06:24:11",
+      "in_frames": 114048,
+      "out_frames": 119531
+    },
+    {
+      "line": 40,
+      "label": "@{Sc=Int. Nottingham Castle - The Feast}",
+      "number": "@{Sc=Int.",
+      "title": "Nottingham Castle - The Feast}",
+      "in": "01:06:24:11",
+      "out": "01:09:15:24",
+      "in_frames": 119531,
+      "out_frames": 124674
+    },
+    {
+      "line": 49,
+      "label": "\"What now, Sir Guy? You would not kill a man for telling the truth, would you?\" $QN=R101",
+      "number": "\"What",
+      "title": "now, Sir Guy? You would not kill a man for telling the truth, would you?\" $QN=R101",
+      "in": "01:05:06:18",
+      "out": "01:05:09:22",
+      "in_frames": 117198,
+      "out_frames": 117292
+    },
+    {
+      "line": 50,
+      "label": "\"You can be thankful that my humor is of a different sort.\" $QN=R102",
+      "number": "\"You",
+      "title": "can be thankful that my humor is of a different sort.\" $QN=R102",
+      "in": "01:05:11:06",
+      "out": "01:05:13:12",
+      "in_frames": 117336,
+      "out_frames": 117402
+    },
+    {
+      "line": 51,
+      "label": "\"By a better right than you have, to misuse it...\" $QN=R103",
+      "number": "\"By",
+      "title": "a better right than you have, to misuse it...\" $QN=R103",
+      "in": "01:05:15:21",
+      "out": "01:05:18:06",
+      "in_frames": 117471,
+      "out_frames": 117546
+    },
+    {
+      "line": 52,
+      "label": "\"And that goes for your master, Prince John.\" $QN=R104",
+      "number": "\"And",
+      "title": "that goes for your master, Prince John.\" $QN=R104",
+      "in": "01:05:18:06",
+      "out": "01:05:20:01",
+      "in_frames": 117546,
+      "out_frames": 117601
+    },
+    {
+      "line": 53,
+      "label": "\"Thank you, he does need a bit of a talking to, hey Will?\"  $QN=R105",
+      "number": "\"Thank",
+      "title": "you, he does need a bit of a talking to, hey Will?\"  $QN=R105",
+      "in": "01:05:24:10",
+      "out": "01:05:27:01",
+      "in_frames": 117730,
+      "out_frames": 117811
+    },
+    {
+      "line": 54,
+      "label": "\"Hold there! What's his fault?\" $QN=R106",
+      "number": "\"Hold",
+      "title": "there! What's his fault?\" $QN=R106",
+      "in": "01:05:30:05",
+      "out": "01:05:31:21",
+      "in_frames": 117905,
+      "out_frames": 117951
+    },
+    {
+      "line": 55,
+      "label": "\"You're wrong! I killed that deer, this man's my servant.\" $QN=R107",
+      "number": "\"You're",
+      "title": "wrong! I killed that deer, this man's my servant.\" $QN=R107",
+      "in": "01:05:33:07",
+      "out": "01:05:35:28",
+      "in_frames": 117997,
+      "out_frames": 118078
+    },
+    {
+      "line": 56,
+      "label": "\"Really, are there no exceptions?\" $QN=R108",
+      "number": "\"Really,",
+      "title": "are there no exceptions?\" $QN=R108",
+      "in": "01:05:42:22",
+      "out": "01:05:46:08",
+      "in_frames": 118282,
+      "out_frames": 118388
+    },
+    {
+      "line": 57,
+      "label": "\"Better look before you shoot next time, little man!\" $QN=R109",
+      "number": "\"Better",
+      "title": "look before you shoot next time, little man!\" $QN=R109",
+      "in": "01:06:01:21",
+      "out": "01:06:03:21",
+      "in_frames": 118851,
+      "out_frames": 118911
+    },
+    {
+      "line": 58,
+      "label": "\"Fetch the deer, then.\" $QN=R110",
+      "number": "\"Fetch",
+      "title": "the deer, then.\" $QN=R110",
+      "in": "01:06:20:00",
+      "out": "01:06:21:01",
+      "in_frames": 119400,
+      "out_frames": 119431
+    },
+    {
+      "line": 67,
+      "label": "\"Yes, he has been getting rather out-of-hand.\" $QN=W101",
+      "number": "\"Yes,",
+      "title": "he has been getting rather out-of-hand.\" $QN=W101",
+      "in": "01:05:27:07",
+      "out": "01:05:28:26",
+      "in_frames": 117817,
+      "out_frames": 117866
+    },
+    {
+      "line": 68,
+      "label": "\"Ha hah ha ha ha ha ha ha.\" $QN=W102",
+      "number": "\"Ha",
+      "title": "hah ha ha ha ha ha ha.\" $QN=W102",
+      "in": "01:05:59:03",
+      "out": "01:06:01:13",
+      "in_frames": 118773,
+      "out_frames": 118843
+    },
+    {
+      "line": 77,
+      "label": "\"Must I take him, Your Highness?\" $QN=M101",
+      "number": "\"Must",
+      "title": "I take him, Your Highness?\" $QN=M101",
+      "in": "01:07:52:23",
+      "out": "01:07:54:17",
+      "in_frames": 122183,
+      "out_frames": 122237
+    },
+    {
+      "line": 78,
+      "label": "\"Well, he's a Norman, of course.\" $QN=M102",
+      "number": "\"Well,",
+      "title": "he's a Norman, of course.\" $QN=M102",
+      "in": "01:07:56:16",
+      "out": "01:07:58:14",
+      "in_frames": 122296,
+      "out_frames": 122354
+    },
+    {
+      "line": 79,
+      "label": "\"Isn't that reason enough for a Royal Ward who must obey her guardian?\" $QN=M103",
+      "number": "\"Isn't",
+      "title": "that reason enough for a Royal Ward who must obey her guardian?\" $QN=M103",
+      "in": "01:08:01:11",
+      "out": "01:08:04:24",
+      "in_frames": 122441,
+      "out_frames": 122544
+    },
+    {
+      "line": 80,
+      "label": "\"Perhaps when I know him better—\" $QN=M104",
+      "number": "\"Perhaps",
+      "title": "when I know him better—\" $QN=M104",
+      "in": "01:08:17:24",
+      "out": "01:08:19:14",
+      "in_frames": 122934,
+      "out_frames": 122984
+    },
+    {
+      "line": 89,
+      "label": "\"And how are the dear Saxons taking the news, Sir Guy?\" $QN=J101",
+      "number": "\"And",
+      "title": "how are the dear Saxons taking the news, Sir Guy?\" $QN=J101",
+      "in": "01:01:57:29",
+      "out": "01:02:01:20",
+      "in_frames": 111539,
+      "out_frames": 111650
+    },
+    {
+      "line": 90,
+      "label": "\"They'll be more than worried when I get through squeezing the fat out of their pampered hides!\" $QN=J102",
+      "number": "\"They'll",
+      "title": "be more than worried when I get through squeezing the fat out of their pampered hides!\" $QN=J102",
+      "in": "01:02:05:05",
+      "out": "01:02:09:04",
+      "in_frames": 111755,
+      "out_frames": 111874
+    },
+    {
+      "line": 91,
+      "label": "\"What better moment than this, Sir Guy? …\" $QN=J103",
+      "number": "\"What",
+      "title": "better moment than this, Sir Guy? …\" $QN=J103",
+      "in": "01:02:10:25",
+      "out": "01:02:12:25",
+      "in_frames": 111925,
+      "out_frames": 111985
+    },
+    {
+      "line": 92,
+      "label": "\"Who ever would have thought my dear brother would be so considerate…\" $QN=J104",
+      "number": "\"Who",
+      "title": "ever would have thought my dear brother would be so considerate…\" $QN=J104",
+      "in": "01:02:13:04",
+      "out": "01:02:15:29",
+      "in_frames": 111994,
+      "out_frames": 112079
+    },
+    {
+      "line": 93,
+      "label": "\"…as to get himself captured, and leave ALL of England to my tender care?\" $QN=J105",
+      "number": "\"…as",
+      "title": "to get himself captured, and leave ALL of England to my tender care?\" $QN=J105",
+      "in": "01:02:15:29",
+      "out": "01:02:21:27",
+      "in_frames": 112079,
+      "out_frames": 112257
+    },
+    {
+      "line": 94,
+      "label": "\"If he returns, and I'll see to it that he doesn't.\" $QN=J106",
+      "number": "\"If",
+      "title": "he returns, and I'll see to it that he doesn't.\" $QN=J106",
+      "in": "01:02:24:21",
+      "out": "01:02:28:06",
+      "in_frames": 112341,
+      "out_frames": 112446
+    },
+    {
+      "line": 95,
+      "label": "\"We must drink to this moment, Sir Guy...\" $QN=J107",
+      "number": "\"We",
+      "title": "must drink to this moment, Sir Guy...\" $QN=J107",
+      "in": "01:02:28:07",
+      "out": "01:02:30:19",
+      "in_frames": 112447,
+      "out_frames": 112519
+    },
+    {
+      "line": 96,
+      "label": "\"...Golden days are ahead!\" $QN=J108",
+      "number": "\"...Golden",
+      "title": "days are ahead!\" $QN=J108",
+      "in": "01:02:31:02",
+      "out": "01:02:32:21",
+      "in_frames": 112532,
+      "out_frames": 112581
+    },
+    {
+      "line": 97,
+      "label": "\"I'll assign tax districts to you tomorrow.\" $QN=J109",
+      "number": "\"I'll",
+      "title": "assign tax districts to you tomorrow.\" $QN=J109",
+      "in": "01:02:34:07",
+      "out": "01:02:36:28",
+      "in_frames": 112627,
+      "out_frames": 112708
+    },
+    {
+      "line": 98,
+      "label": "\"My Lords, I thank you.\" $QN=J110",
+      "number": "\"My",
+      "title": "Lords, I thank you.\" $QN=J110",
+      "in": "01:07:32:05",
+      "out": "01:07:34:19",
+      "in_frames": 121565,
+      "out_frames": 121639
+    },
+    {
+      "line": 99,
+      "label": "\"Well, this is what we Normans like: good food, good company, and a beautful woman to flatter me.\" $QN=J111",
+      "number": "\"Well,",
+      "title": "this is what we Normans like: good food, good company, and a beautful woman to flatter me.\" $QN=J111",
+      "in": "01:07:35:06",
+      "out": "01:07:41:01",
+      "in_frames": 121656,
+      "out_frames": 121831
+    },
+    {
+      "line": 100,
+      "label": "\"Eh, Lady Marian? Was it worthwhile coming with me from London to see what stout fellows our Nottingham friends are?\" $QN=J112",
+      "number": "\"Eh,",
+      "title": "Lady Marian? Was it worthwhile coming with me from London to see what stout fellows our Nottingham friends are?\" $QN=J112",
+      "in": "01:07:41:21",
+      "out": "01:07:47:11",
+      "in_frames": 121851,
+      "out_frames": 122021
+    },
+    {
+      "line": 101,
+      "label": "\"Take Sir Guy of Gisbourne now, one of our most renowned defenders of the realm.\" $QN=J113",
+      "number": "\"Take",
+      "title": "Sir Guy of Gisbourne now, one of our most renowned defenders of the realm.\" $QN=J113",
+      "in": "01:07:48:00",
+      "out": "01:07:52:21",
+      "in_frames": 122040,
+      "out_frames": 122181
+    },
+    {
+      "line": 102,
+      "label": "\"Why, you like him, don't you?\" $QN=J114",
+      "number": "\"Why,",
+      "title": "you like him, don't you?\" $QN=J114",
+      "in": "01:07:54:19",
+      "out": "01:07:56:06",
+      "in_frames": 122239,
+      "out_frames": 122286
+    },
+    {
+      "line": 103,
+      "label": "\"Is that the ONLY reason for liking him?\" $QN=J115",
+      "number": "\"Is",
+      "title": "that the ONLY reason for liking him?\" $QN=J115",
+      "in": "01:07:58:29",
+      "out": "01:08:01:05",
+      "in_frames": 122369,
+      "out_frames": 122435
+    },
+    {
+      "line": 104,
+      "label": "\"Nay, I'd not force you, my Lady.\" $QN=J116",
+      "number": "\"Nay,",
+      "title": "I'd not force you, my Lady.\" $QN=J116",
+      "in": "01:08:04:23",
+      "out": "01:08:07:09",
+      "in_frames": 122543,
+      "out_frames": 122619
+    },
+    {
+      "line": 105,
+      "label": "\"But he's our most powerful friend in these shires, and he's already in love with you.\" $QN=J117",
+      "number": "\"But",
+      "title": "he's our most powerful friend in these shires, and he's already in love with you.\" $QN=J117",
+      "in": "01:08:07:09",
+      "out": "01:08:11:26",
+      "in_frames": 122619,
+      "out_frames": 122756
+    },
+    {
+      "line": 106,
+      "label": "\"If I could promise him marriage to a royal ward, it might help my plans.\" $QN=J118",
+      "number": "\"If",
+      "title": "I could promise him marriage to a royal ward, it might help my plans.\" $QN=J118",
+      "in": "01:08:12:10",
+      "out": "01:08:17:09",
+      "in_frames": 122770,
+      "out_frames": 122919
+    },
+    {
+      "line": 107,
+      "label": "\"Of course…\" $QN=J119",
+      "number": "\"Of",
+      "title": "course…\" $QN=J119",
+      "in": "01:08:19:08",
+      "out": "01:08:20:02",
+      "in_frames": 122978,
+      "out_frames": 123002
+    },
+    {
+      "line": 108,
+      "label": "\"You're a very wise young woman.\" $QN=J120",
+      "number": "\"You're",
+      "title": "a very wise young woman.\" $QN=J120",
+      "in": "01:08:20:15",
+      "out": "01:08:22:13",
+      "in_frames": 123015,
+      "out_frames": 123073
+    },
+    {
+      "line": 109,
+      "label": "John.grp-02 $QN=J121",
+      "number": "John.grp-02",
+      "title": "$QN=J121",
+      "in": "01:08:23:12",
+      "out": "01:08:27:13",
+      "in_frames": 123102,
+      "out_frames": 123223
+    },
+    {
+      "line": 118,
+      "label": "\"They're even more worried than (usual) your highness.\" {R=Unintelligible} $QN=GY101",
+      "number": "\"They're",
+      "title": "even more worried than (usual) your highness.\" {R=Unintelligible} $QN=GY101",
+      "in": "01:02:03:02",
+      "out": "01:02:05:04",
+      "in_frames": 111692,
+      "out_frames": 111754
+    },
+    {
+      "line": 119,
+      "label": "\"And you intend to act on your plans?\" $QN=GY102",
+      "number": "\"And",
+      "title": "you intend to act on your plans?\" $QN=GY102",
+      "in": "01:02:08:28",
+      "out": "01:02:10:25",
+      "in_frames": 111868,
+      "out_frames": 111925
+    },
+    {
+      "line": 120,
+      "label": "\"He may disapprove if he returns, Your Highness.\" $QN=GY103",
+      "number": "\"He",
+      "title": "may disapprove if he returns, Your Highness.\" $QN=GY103",
+      "in": "01:02:22:14",
+      "out": "01:02:24:09",
+      "in_frames": 112274,
+      "out_frames": 112329
+    },
+    {
+      "line": 121,
+      "label": "\"Tomorrow, Your Highness!\" {R=Set Noise} $QN=GY104",
+      "number": "\"Tomorrow,",
+      "title": "Your Highness!\" {R=Set Noise} $QN=GY104",
+      "in": "01:02:38:19",
+      "out": "01:02:40:12",
+      "in_frames": 112759,
+      "out_frames": 112812
+    },
+    {
+      "line": 122,
+      "label": "\"Get him! Follow me the rest remain here!\" {R=Intelligibility} $QN=GY105",
+      "number": "\"Get",
+      "title": "him! Follow me the rest remain here!\" {R=Intelligibility} $QN=GY105",
+      "in": "01:03:51:00",
+      "out": "01:03:53:06",
+      "in_frames": 114930,
+      "out_frames": 114996
+    },
+    {
+      "line": 123,
+      "label": "\"What's your name? You Saxon dog!\" $QN=GY106",
+      "number": "\"What's",
+      "title": "your name? You Saxon dog!\" $QN=GY106",
+      "in": "01:04:19:15",
+      "out": "01:04:21:28",
+      "in_frames": 115785,
+      "out_frames": 115858
+    },
+    {
+      "line": 124,
+      "label": "\"What's your name?\" $QN=GY107",
+      "number": "\"What's",
+      "title": "your name?\" $QN=GY107",
+      "in": "01:04:29:08",
+      "out": "01:04:29:26",
+      "in_frames": 116078,
+      "out_frames": 116096
+    },
+    {
+      "line": 125,
+      "label": "\"Don't you know it's death to kill the King's deer?\" $QN=GY108",
+      "number": "\"Don't",
+      "title": "you know it's death to kill the King's deer?\" $QN=GY108",
+      "in": "01:04:32:14",
+      "out": "01:04:34:01",
+      "in_frames": 116174,
+      "out_frames": 116221
+    },
+    {
+      "line": 126,
+      "label": "\"What the devil!\" $QN=GY109",
+      "number": "\"What",
+      "title": "the devil!\" $QN=GY109",
+      "in": "01:05:05:22",
+      "out": "01:05:06:22",
+      "in_frames": 117172,
+      "out_frames": 117202
+    },
+    {
+      "line": 127,
+      "label": "\"If it amuse me, yes!\" $QN=GY110",
+      "number": "\"If",
+      "title": "it amuse me, yes!\" $QN=GY110",
+      "in": "01:05:09:21",
+      "out": "01:05:11:03",
+      "in_frames": 117291,
+      "out_frames": 117333
+    },
+    {
+      "line": 128,
+      "label": "\"By what right do you interfere with the King's justice?\" $QN=GY111",
+      "number": "\"By",
+      "title": "what right do you interfere with the King's justice?\" $QN=GY111",
+      "in": "01:05:13:14",
+      "out": "01:05:15:18",
+      "in_frames": 117404,
+      "out_frames": 117468
+    },
+    {
+      "line": 129,
+      "label": "\"I'll give him that message, at the baron's meeting in Nottingham tonight.\" $QN=GY112",
+      "number": "\"I'll",
+      "title": "give him that message, at the baron's meeting in Nottingham tonight.\" $QN=GY112",
+      "in": "01:05:20:23",
+      "out": "01:05:23:25",
+      "in_frames": 117623,
+      "out_frames": 117715
+    },
+    {
+      "line": 130,
+      "label": "\"Fetch him along!\" $QN=GY113",
+      "number": "\"Fetch",
+      "title": "him along!\" $QN=GY113",
+      "in": "01:05:29:17",
+      "out": "01:05:30:04",
+      "in_frames": 117887,
+      "out_frames": 117904
+    },
+    {
+      "line": 131,
+      "label": "\"He killed a royal deer!\" $QN=GY114",
+      "number": "\"He",
+      "title": "killed a royal deer!\" $QN=GY114",
+      "in": "01:05:31:24",
+      "out": "01:05:32:25",
+      "in_frames": 117954,
+      "out_frames": 117985
+    },
+    {
+      "line": 132,
+      "label": "\"Oh, I suppose you realize the penalty for killing the King's deer is death, wether for serf or noble.\" $QN=GY115",
+      "number": "\"Oh,",
+      "title": "I suppose you realize the penalty for killing the King's deer is death, wether for serf or noble.\" $QN=GY115",
+      "in": "01:05:36:08",
+      "out": "01:05:42:03",
+      "in_frames": 118088,
+      "out_frames": 118263
+    },
+    {
+      "line": 133,
+      "label": "(react to ARROW pointed at head! Then goad horse.) [EFF] $QN=GY116",
+      "number": "(react",
+      "title": "to ARROW pointed at head! Then goad horse.) [EFF] $QN=GY116",
+      "in": "01:05:46:15",
+      "out": "01:05:49:03",
+      "in_frames": 118395,
+      "out_frames": 118473
+    },
+    {
+      "line": 142,
+      "label": "(effort TRIPPING and FALLING) {R=Added} [EFF] $QN=MH101",
+      "number": "(effort",
+      "title": "TRIPPING and FALLING) {R=Added} [EFF] $QN=MH101",
+      "in": "01:04:12:05",
+      "out": "01:04:13:16",
+      "in_frames": 115565,
+      "out_frames": 115606
+    },
+    {
+      "line": 143,
+      "label": "\"A better one than yours!\" $QN=MH102",
+      "number": "\"A",
+      "title": "better one than yours!\" $QN=MH102",
+      "in": "01:04:22:01",
+      "out": "01:04:23:05",
+      "in_frames": 115861,
+      "out_frames": 115895
+    },
+    {
+      "line": 144,
+      "label": "(effort STRUCK WITH HAND) [EFF] {R=Added} $QN=MH103",
+      "number": "(effort",
+      "title": "STRUCK WITH HAND) [EFF] {R=Added} $QN=MH103",
+      "in": "01:04:23:20",
+      "out": "01:04:25:12",
+      "in_frames": 115910,
+      "out_frames": 115962
+    },
+    {
+      "line": 145,
+      "label": "\"Sir Guy of the Devil! There's little to choose between them!\" $QN=MH104",
+      "number": "\"Sir",
+      "title": "Guy of the Devil! There's little to choose between them!\" $QN=MH104",
+      "in": "01:04:26:03",
+      "out": "01:04:28:20",
+      "in_frames": 115983,
+      "out_frames": 116060
+    },
+    {
+      "line": 146,
+      "label": "\"Much, the Miller's son.\" $QN=MH105",
+      "number": "\"Much,",
+      "title": "the Miller's son.\" $QN=MH105",
+      "in": "01:04:30:27",
+      "out": "01:04:32:00",
+      "in_frames": 116127,
+      "out_frames": 116160
+    },
+    {
+      "line": 147,
+      "label": "\"Yes, and death from hunger if I don't!\" $QN=MH106",
+      "number": "\"Yes,",
+      "title": "and death from hunger if I don't!\" $QN=MH106",
+      "in": "01:04:34:08",
+      "out": "01:04:36:02",
+      "in_frames": 116228,
+      "out_frames": 116282
+    },
+    {
+      "line": 148,
+      "label": "\"Thanks to you and the rest of you Norman cut-throats at Nottingham castle!\" $QN=MH107",
+      "number": "\"Thanks",
+      "title": "to you and the rest of you Norman cut-throats at Nottingham castle!\" $QN=MH107",
+      "in": "01:04:36:02",
+      "out": "01:04:39:10",
+      "in_frames": 116282,
+      "out_frames": 116380
+    },
+    {
+      "line": 149,
+      "label": "(effort STRUCK) [EFF] $QN=MH108",
+      "number": "(effort",
+      "title": "STRUCK) [EFF] $QN=MH108",
+      "in": "01:04:39:12",
+      "out": "01:04:39:26",
+      "in_frames": 116382,
+      "out_frames": 116396
+    },
+    {
+      "line": 150,
+      "label": "\"I WON'T be quiet!...\" $QN=MH109",
+      "number": "\"I",
+      "title": "WON'T be quiet!...\" $QN=MH109",
+      "in": "01:04:40:20",
+      "out": "01:04:41:29",
+      "in_frames": 116420,
+      "out_frames": 116459
+    },
+    {
+      "line": 151,
+      "label": "\"You can KILL me if you like! But not until I've had my say!\" $QN=MH110",
+      "number": "\"You",
+      "title": "can KILL me if you like! But not until I've had my say!\" $QN=MH110",
+      "in": "01:04:42:00",
+      "out": "01:04:44:25",
+      "in_frames": 116460,
+      "out_frames": 116545
+    },
+    {
+      "line": 152,
+      "label": "\"You can beat and starve us Saxons now! But when King Richard escapes, he'll take you by the scruff of the neck and (throw) into the sea!\" {R=Intelligibility} $QN=MH111",
+      "number": "\"You",
+      "title": "can beat and starve us Saxons now! But when King Richard escapes, he'll take you by the scruff of the neck and (throw) into the sea!\" {R=Intelligibility} $QN=MH111",
+      "in": "01:04:45:07",
+      "out": "01:04:52:16",
+      "in_frames": 116557,
+      "out_frames": 116776
+    },
+    {
+      "line": 153,
+      "label": "\"Thanks, good master.\" $QN=MH112",
+      "number": "\"Thanks,",
+      "title": "good master.\" $QN=MH112",
+      "in": "01:06:00:04",
+      "out": "01:06:01:15",
+      "in_frames": 118804,
+      "out_frames": 118845
+    },
+    {
+      "line": 154,
+      "label": "\"From this day on, I follow only you…\" $QN=MH113",
+      "number": "\"From",
+      "title": "this day on, I follow only you…\" $QN=MH113",
+      "in": "01:06:03:24",
+      "out": "01:06:05:26",
+      "in_frames": 118914,
+      "out_frames": 118976
+    },
+    {
+      "line": 155,
+      "label": "\"Why there isn't a poor Saxon in all of Nottinghamshire that doesn't know and bless Sir Robin of Locksley!\" $QN=MH114",
+      "number": "\"Why",
+      "title": "there isn't a poor Saxon in all of Nottinghamshire that doesn't know and bless Sir Robin of Locksley!\" $QN=MH114",
+      "in": "01:06:06:11",
+      "out": "01:06:11:02",
+      "in_frames": 118991,
+      "out_frames": 119132
+    },
+    {
+      "line": 156,
+      "label": "\"Take me as your servant!\" $QN=MH115",
+      "number": "\"Take",
+      "title": "me as your servant!\" $QN=MH115",
+      "in": "01:06:11:12",
+      "out": "01:06:12:17",
+      "in_frames": 119142,
+      "out_frames": 119177
+    },
+    {
+      "line": 157,
+      "label": "\"Why in all the forest there isn't a hunter as good as me,\" $QN=MH116",
+      "number": "\"Why",
+      "title": "in all the forest there isn't a hunter as good as me,\" $QN=MH116",
+      "in": "01:06:13:10",
+      "out": "01:06:16:20",
+      "in_frames": 119200,
+      "out_frames": 119300
+    },
+    {
+      "line": 158,
+      "label": "\"I ask no pay, just to follow you.\" $QN=MH117",
+      "number": "\"I",
+      "title": "ask no pay, just to follow you.\" $QN=MH117",
+      "in": "01:06:16:21",
+      "out": "01:06:19:29",
+      "in_frames": 119301,
+      "out_frames": 119399
+    },
+    {
+      "line": 167,
+      "label": "\"But who's gonna pay me?\" $QN=BT101",
+      "number": "\"But",
+      "title": "who's gonna pay me?\" $QN=BT101",
+      "in": "01:02:51:00",
+      "out": "01:02:52:19",
+      "in_frames": 113130,
+      "out_frames": 113179
+    },
+    {
+      "line": 176,
+      "label": "\"News has come from Vienna…\" $QN=TC101",
+      "number": "\"News",
+      "title": "has come from Vienna…\" $QN=TC101",
+      "in": "01:01:38:26",
+      "out": "01:01:40:20",
+      "in_frames": 110966,
+      "out_frames": 111020
+    },
+    {
+      "line": 177,
+      "label": "\"Leopold of Austria has seized King Richard, on his return from the crusades…\" $QN=TC102",
+      "number": "\"Leopold",
+      "title": "of Austria has seized King Richard, on his return from the crusades…\" $QN=TC102",
+      "in": "01:01:40:29",
+      "out": "01:01:45:27",
+      "in_frames": 111029,
+      "out_frames": 111177
+    },
+    {
+      "line": 178,
+      "label": "\"Our King is being held prisoner, nothing futher is known...\" $QN=TC103",
+      "number": "\"Our",
+      "title": "King is being held prisoner, nothing futher is known...\" $QN=TC103",
+      "in": "01:01:45:27",
+      "out": "01:01:50:14",
+      "in_frames": 111177,
+      "out_frames": 111314
+    },
+    {
+      "line": 179,
+      "label": "\"His Highness Prince John, will make further public pronouncement tomorrow.\" $QN=TC104",
+      "number": "\"His",
+      "title": "Highness Prince John, will make further public pronouncement tomorrow.\" $QN=TC104",
+      "in": "01:01:50:27",
+      "out": "01:01:55:10",
+      "in_frames": 111327,
+      "out_frames": 111460
+    },
+    {
+      "line": 188,
+      "label": "\"Pay, pay, that's all you Saxon's think about!\" $QN=SA101",
+      "number": "\"Pay,",
+      "title": "pay, that's all you Saxon's think about!\" $QN=SA101",
+      "in": "01:02:52:17",
+      "out": "01:02:55:25",
+      "in_frames": 113177,
+      "out_frames": 113275
+    },
+    {
+      "line": 189,
+      "label": "\"Didn't I tell you it was for Prince John, who has just come up from London?\" {R=Rhotic R} $QN=SA102",
+      "number": "\"Didn't",
+      "title": "I tell you it was for Prince John, who has just come up from London?\" {R=Rhotic R} $QN=SA102",
+      "in": "01:02:56:04",
+      "out": "01:02:59:19",
+      "in_frames": 113284,
+      "out_frames": 113389
+    },
+    {
+      "line": 198,
+      "label": "\"He refused to send his men to work in Guy of Gisbourne's fields.\" {R=Mis-pronounced} $QN=SB101",
+      "number": "\"He",
+      "title": "refused to send his men to work in Guy of Gisbourne's fields.\" {R=Mis-pronounced} $QN=SB101",
+      "in": "01:03:14:11",
+      "out": "01:03:17:29",
+      "in_frames": 113831,
+      "out_frames": 113939
+    },
+    {
+      "line": 207,
+      "label": "\"Look to your manners! This is Sir Guy of Gisbourne!\" $QN=SC101",
+      "number": "\"Look",
+      "title": "to your manners! This is Sir Guy of Gisbourne!\" $QN=SC101",
+      "in": "01:04:23:26",
+      "out": "01:04:26:02",
+      "in_frames": 115916,
+      "out_frames": 115982
+    },
+    {
+      "line": 208,
+      "label": "\"Be quiet, you!\" {R=Performance} $QN=SC102",
+      "number": "\"Be",
+      "title": "quiet, you!\" {R=Performance} $QN=SC102",
+      "in": "01:04:39:24",
+      "out": "01:04:40:21",
+      "in_frames": 116394,
+      "out_frames": 116421
+    },
+    {
+      "line": 217,
+      "label": "\"No, stop! Stop!\" (effort SHOVED AWAY) {R=Off mic} [EFF] $QN=PR101",
+      "number": "\"No,",
+      "title": "stop! Stop!\" (effort SHOVED AWAY) {R=Off mic} [EFF] $QN=PR101",
+      "in": "01:03:07:01",
+      "out": "01:03:09:08",
+      "in_frames": 113611,
+      "out_frames": 113678
+    },
+    {
+      "line": 218,
+      "label": "\"This man is free-born! He's a landowner, you can't make a slave of him!\" $QN=PR102",
+      "number": "\"This",
+      "title": "man is free-born! He's a landowner, you can't make a slave of him!\" $QN=PR102",
+      "in": "01:03:09:20",
+      "out": "01:03:13:25",
+      "in_frames": 113690,
+      "out_frames": 113815
+    },
+    {
+      "line": 219,
+      "label": "\"But I protest! Argh…\" (effort PUSHED OUT OF ROOM) $QN=PR103",
+      "number": "\"But",
+      "title": "I protest! Argh…\" (effort PUSHED OUT OF ROOM) $QN=PR103",
+      "in": "01:03:17:14",
+      "out": "01:03:21:22",
+      "in_frames": 113924,
+      "out_frames": 114052
+    },
+    {
+      "line": 228,
+      "label": "\"While Richard is bent on adventure in foreign lands, it is our duty as Normans to preserrve the realm, by giving loyal support to Prince John\" $QN=GC101",
+      "number": "\"While",
+      "title": "Richard is bent on adventure in foreign lands, it is our duty as Normans to preserrve the realm, by giving loyal support to Prince John\" $QN=GC101",
+      "in": "01:07:08:07",
+      "out": "01:07:17:20",
+      "in_frames": 120847,
+      "out_frames": 121130
+    },
+    {
+      "line": 229,
+      "label": "\"the only true defender of the Norman spirit. Hail to Prince John.\" [AP] $QN=GC102",
+      "number": "\"the",
+      "title": "only true defender of the Norman spirit. Hail to Prince John.\" [AP] $QN=GC102",
+      "in": "01:07:17:20",
+      "out": "01:07:20:21",
+      "in_frames": 121130,
+      "out_frames": 121221
+    }
+  ]
+}

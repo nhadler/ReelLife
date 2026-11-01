@@ -1,0 +1,28 @@
+{
+  "source": "Cubase/Nuendo track archive",
+  "frame_rate": null,
+  "drop_frame": null,
+  "warnings": [],
+  "rows": [
+    {
+      "line": 1,
+      "label": "1m01 Main Title",
+      "number": "1m01",
+      "title": "Main Title",
+      "in": "01:00:10:00",
+      "out": "01:01:30:12",
+      "in_frames": 86640,
+      "out_frames": 88572
+    },
+    {
+      "line": 2,
+      "label": "1m02 The Chase",
+      "number": "1m02",
+      "title": "The Chase",
+      "in": "01:03:00:00",
+      "out": "01:05:12:08",
+      "in_frames": 90720,
+      "out_frames": 93896
+    }
+  ]
+}

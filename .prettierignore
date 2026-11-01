@@ -1,0 +1,13 @@
+# Prettier formats JS, CSS, YAML and JSON here. Python is ruff's job;
+# Django templates and Markdown docs are left as written.
+.venv/
+node_modules/
+staticfiles/
+htmlcov/
+fixtures/
+private/
+uv.lock
+package-lock.json
+*.html
+*.md
+**/static/**/vendor/

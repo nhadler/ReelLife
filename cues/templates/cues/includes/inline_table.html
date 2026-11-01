@@ -1,0 +1,27 @@
+{# An editable list for an inline formset `fs` (inline-table.js): a drag handle when it has an order, × to remove a row, and Add, named by `add`. Without scripts the order is kept and the Remove boxes show. #}
+{% load text %}
+<div class="inline-table" data-inline-table>
+  {{ fs.management_form }}
+  {{ fs.non_form_errors }}
+  <table class="table table--edit">
+    <thead>
+      <tr>
+        {% if "order" in fs.empty_form.fields %}<th scope="col" class="inline-table__handle"><span class="visually-hidden">Order</span></th>{% endif %}
+        {% for field in fs.empty_form.visible_fields %}
+          {% if field.name != "DELETE" and field.name != "order" %}<th scope="col">{{ field.label|title_case }}</th>{% endif %}
+        {% endfor %}
+        <th scope="col" class="inline-table__remove"><span class="visually-hidden">Remove</span></th>
+      </tr>
+    </thead>
+    <tbody data-inline-rows>
+      {% for form in fs %}
+        {% include "cues/includes/inline_row.html" with number=forloop.counter %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="inline-table__empty" data-inline-empty{% if fs.forms %} hidden{% endif %}>None yet.</p>
+  <template data-row-template>
+    {% include "cues/includes/inline_row.html" with form=fs.empty_form number="new" %}
+  </template>
+  <button class="button button--quiet button--small inline-table__add" type="button" data-add-row>{% include "cues/includes/icon.html" with name="plus" %}{{ add|default:"Add Row" }}</button>
+</div>

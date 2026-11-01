@@ -1,0 +1,44 @@
+{% extends "app.html" %}
+
+{% block title %}Overview · ReelLife{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>Overview</h1>
+    {% if request.user.role != "viewer" %}
+      <div class="page-head__actions">
+        <a class="button" href="{% url 'cues:project_create' %}" data-palette="New Project">New Project</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <section class="overview__section" aria-labelledby="overview-week">
+    <div class="overview__head">
+      <h2 id="overview-week">This Week</h2>
+      <a href="{% url 'cues:schedule' %}">Open Schedule</a>
+    </div>
+    <p class="schedule__line">{{ line }}</p>
+    {% if risks %}
+      <ul class="schedule__risks">
+        {% for risk in risks %}<li>{{ risk }}</li>{% endfor %}
+      </ul>
+    {% endif %}
+    {% include "cues/includes/calendar.html" with size="strip" title="The next seven days" %}
+  </section>
+
+  <section class="overview__section" aria-labelledby="overview-projects">
+    <div class="overview__head">
+      <h2 id="overview-projects">Active Projects</h2>
+      <a href="{% url 'cues:dashboard' %}">All Projects</a>
+    </div>
+    {% if rows %}
+      <ul class="projects">
+        {% for row in rows %}
+          {% include "cues/includes/project_card.html" with s=row.s week=row.week %}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">No active projects. Create one to start spotting.</p>
+    {% endif %}
+  </section>
+{% endblock %}

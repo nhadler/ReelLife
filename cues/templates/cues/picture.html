@@ -1,0 +1,80 @@
+{% extends "app.html" %}
+{% load timecodes %}
+
+{% block title %}Picture · {{ project.title }} · ReelLife{% endblock %}
+
+{% block subheader %}
+  <div class="project-band">{% include "cues/includes/project_header.html" %}</div>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h2>Turnovers</h2>
+    {% if request.user.role != "viewer" %}
+      <div class="page-head__actions">
+        <a class="button" href="{% url 'cues:turnover_create' project.pk %}">Log a Turnover</a>
+      </div>
+    {% endif %}
+  </div>
+  {% if turnovers %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">{{ project.reel_word }}</th>
+          {% for t in turnovers %}
+            <th scope="col">
+              {% if request.user.role != "viewer" %}<a href="{% url 'cues:turnover_edit' project.pk t.pk %}" title="Edit {{ t.label }}">{{ t.label }}</a>{% else %}{{ t.label }}{% endif %}<br><span class="muted">{{ t.received_date|date:day_format }}</span>
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+          <tr>
+            <th scope="row">{{ row.picture.name }}</th>
+            {% for cell in row.cells %}
+              <td class="tc {% if cell.current %}reel-version--current{% else %}reel-version--old{% endif %}">
+                {% if cell.version %}
+                  {{ cell.version.tc_in|tc:project }}–{{ cell.version.tc_out|tc:project }}
+                  {% if cell.current %}<span class="visually-hidden">(current)</span>{% endif %}
+                {% else %}
+                  <span class="muted" aria-label="unchanged">·</span>
+                {% endif %}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">No turnovers yet. Log the cut you're spotting from to place cues on the timeline.</p>
+  {% endif %}
+  {% if unplaced %}
+    <section class="form-section" aria-labelledby="unplaced-title">
+      <h2 id="unplaced-title">Cues Not on a {{ project.reel_word }}</h2>
+      <form method="post" action="{% url 'cues:place_cues' project.pk %}">
+        {% csrf_token %}
+        <table class="table conform-table">
+          <thead>
+            <tr>
+              <th scope="col">{% if request.user.role != "viewer" %}<input type="checkbox" data-select-all="cue" checked aria-label="Select all cues to place">{% else %}<span class="visually-hidden">Place</span>{% endif %}</th>
+              <th scope="col">Cue #</th><th scope="col">Title</th><th scope="col">IN</th><th scope="col">{{ project.reel_word }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in unplaced %}
+              <tr>
+                <td><input type="checkbox" name="cue" value="{{ item.cue.pk }}" checked aria-label="Place {{ item.cue.number }}"{% if request.user.role == "viewer" %} disabled{% endif %}></td>
+                <td><a href="{% url 'cues:cue' item.cue.pk %}">{{ item.cue.number }}</a></td>
+                <td>{{ item.cue.title }}</td>
+                <td class="tc">{{ item.cue.tc_in|tc:project }}</td>
+                <td>{{ item.picture.title }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if request.user.role != "viewer" %}<div class="form-actions"><button class="button" type="submit">Place Cues</button></div>{% endif %}
+      </form>
+    </section>
+  {% endif %}
+{% endblock %}

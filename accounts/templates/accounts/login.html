@@ -1,0 +1,18 @@
+{% extends "accounts/sign_in_base.html" %}
+
+{% block title %}Sign in · ReelLife{% endblock %}
+
+{% block mark %}
+  <h1 class="sign-in__mark"><span class="wordmark__reel">Reel</span>Life</h1>
+{% endblock %}
+
+{% block sign_in %}
+  <p class="sign-in__lede">Cue tracking from spotting to cue sheet.</p>
+  <p>
+    <a class="button sign-in__button"
+       href="{% url 'accounts:oidc_start' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Sign In with PocketID</a>
+  </p>
+  {% if breakglass_enabled %}
+    <p class="sign-in__aside"><a href="{% url 'accounts:local_login' %}">Emergency Local Sign-In</a></p>
+  {% endif %}
+{% endblock %}

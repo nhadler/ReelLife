@@ -1,0 +1,17 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <form class="project-form" method="post" novalidate>
+    {% csrf_token %}
+    {% include "cues/includes/form_errors.html" %}
+    <div class="fields">
+      {% include "cues/includes/field.html" with field=form.frame_rate %}
+      {% include "cues/includes/field.html" with field=form.drop_frame %}
+      {% include "cues/includes/field.html" with field=form.picture_type %}
+      {% include "cues/includes/field.html" with field=form.lanes %}
+    </div>
+    <div class="form-actions">
+      <button class="button" type="submit">Save</button>
+    </div>
+  </form>
+{% endblock %}

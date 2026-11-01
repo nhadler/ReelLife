@@ -1,0 +1,6 @@
+{# One new picture: `row` (a ReelRowForm) and `number` for its labels. #}
+<tr>
+  <td class="reel-row__name"><label class="visually-hidden" for="{{ row.name.id_for_label }}">Picture {{ number }} name</label>{{ row.name }}{{ row.name.errors }}</td>
+  <td><label class="visually-hidden" for="{{ row.tc_in.id_for_label }}">Picture {{ number }} IN</label>{{ row.tc_in }}{{ row.tc_in.errors }}</td>
+  <td><label class="visually-hidden" for="{{ row.tc_out.id_for_label }}">Picture {{ number }} OUT</label>{{ row.tc_out }}{{ row.tc_out.errors }}</td>
+</tr>

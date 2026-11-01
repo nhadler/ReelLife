@@ -1,0 +1,37 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <form class="project-form" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% include "cues/includes/form_errors.html" %}
+    <fieldset class="form-section">
+      <div class="fields">
+        {% include "cues/includes/field.html" with field=form.title wide=True %}
+        {% include "cues/includes/field.html" with field=form.sub_title %}
+        {% include "cues/includes/field.html" with field=form.production_number %}
+        {% include "cues/includes/field.html" with field=form.kind %}
+        <div class="episode-only field--wide fields">
+          {% include "cues/includes/field.html" with field=form.series %}
+          {% include "cues/includes/field.html" with field=form.season %}
+          {% include "cues/includes/field.html" with field=form.episode_number %}
+        </div>
+      </div>
+    </fieldset>
+    <fieldset class="form-section">
+      <legend>Thumbnail</legend>
+      <div class="thumb-edit">
+        {% include "cues/includes/thumbnail.html" %}
+        <div class="fields">
+          {% include "cues/includes/dropzone.html" with field=form.thumbnail_upload prompt="Drop a new still" %}
+          {% if project.thumbnail %}
+            {% include "cues/includes/field.html" with field=form.remove_thumbnail %}
+          {% endif %}
+          {% include "cues/includes/field.html" with field=form.cue_thumbnail_fallback wide=True %}
+        </div>
+      </div>
+    </fieldset>
+    <div class="form-actions">
+      <button class="button" type="submit">Save</button>
+    </div>
+  </form>
+{% endblock %}

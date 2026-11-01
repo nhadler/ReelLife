@@ -1,0 +1,70 @@
+{% extends "app.html" %}
+{% load text %}
+
+{% block title %}Trash · {{ project.title }} · ReelLife{% endblock %}
+
+{% block subheader %}
+  <div class="project-band">{% include "cues/includes/project_header.html" %}</div>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>Trash</h1>
+    {% include "cues/includes/help_link.html" with slug="undo-and-history" %}
+    <div class="page-head__actions">
+      <a class="button button--quiet button--small" href="{% url 'cues:activity' project.pk %}">Activity</a>
+    </div>
+  </div>
+
+  {% if entries %}
+    <div class="activity__body">
+      <table class="table activity">
+        <thead>
+          <tr>
+            <th scope="col">Cue #</th>
+            <th scope="col">Title</th>
+            <th scope="col">Deleted</th>
+            <th scope="col">By</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr>
+              <td>{{ entry.number }}</td>
+              <td>{{ entry.title|default:"—" }}</td>
+              <td class="activity__when"><time datetime="{{ entry.when|date:'c' }}">{{ entry.when|stamp:short_format }}</time></td>
+              <td>{{ entry.by }}{% if entry.user %} <span class="muted">({{ entry.user }})</span>{% endif %}</td>
+              <td class="activity__action">
+                {% if can_edit %}
+                  <form method="post" action="{% url 'cues:trash_restore' project.pk entry.cue_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="page" value="{{ page.number }}">
+                    {% if entry.taken and not entry.suggestion %}
+                      <span class="muted">{{ entry.number }} is taken; renumber that cue to restore this one.</span>
+                    {% elif entry.taken %}
+                      <input type="hidden" name="renumber" value="1">
+                      <span class="muted">{{ entry.number }} is taken.</span>
+                      <button class="button button--quiet button--small" type="submit">Restore as {{ entry.suggestion }}</button>
+                    {% else %}
+                      <button class="button button--quiet button--small" type="submit">Restore<span class="visually-hidden"> {{ entry.number }}</span></button>
+                    {% endif %}
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page.has_other_pages %}
+      <nav class="activity__pages" aria-label="Trash pages">
+        {% if page.has_previous %}<a class="button button--quiet button--small" href="?page={{ page.previous_page_number }}">Newer</a>{% endif %}
+        <span class="muted">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a class="button button--quiet button--small" href="?page={{ page.next_page_number }}">Older</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p class="muted">The Trash is empty.</p>
+  {% endif %}
+{% endblock %}

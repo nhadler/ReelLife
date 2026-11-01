@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in ReelLife doesn't work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Thanks for reporting. For a security problem, don't use this
+        form: see SECURITY.md.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open a project with …
+        2. Click …
+        3. See …
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The image tag or release (Help shows it), or the commit.
+      placeholder: 0.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How you run it
+      options:
+        - Docker Compose
+        - Docker (other)
+        - systemd + uv
+        - Development (just dev)
+    validations:
+      required: true
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Firefox 140 on macOS 27
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: >-
+        Server logs around the time (docker compose logs web), or a
+        screenshot. Remove anything private first.
+      render: text

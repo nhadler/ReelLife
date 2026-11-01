@@ -1,0 +1,8 @@
+{# A project's thumbnail, or a quiet frame with its initials. Pass labelled=True inside a link, so the initials are part of its name. #}
+{% load text %}
+{% if project.thumbnail %}
+  <img class="thumb" src="{% url 'cues:thumbnail' project.pk project.thumbnail_name %}"
+       alt="" width="160" height="90" loading="lazy">
+{% else %}
+  <span class="thumb thumb--empty"{% if not labelled %} aria-hidden="true"{% endif %}>{{ project.title|initials }}</span>
+{% endif %}

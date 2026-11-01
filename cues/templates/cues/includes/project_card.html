@@ -1,0 +1,75 @@
+{# One project as a card (Projects and the Overview): identity, three figures that line up from card to card, a ⋯ menu, and the cue map along the bottom. Needs s (a ProjectSummary); week shows This Week instead of the daily pace; listed (the Projects page) adds the search data and, for editors, the bulk checkbox. #}
+<li class="project{% if s.project.archived %} project--archived{% endif %}"{% if listed %} data-search="{{ s.project.title|lower }} {{ s.project.production_number|lower }} {{ s.project.series.title|lower }}"{% if s.project.pk in hidden %} hidden{% endif %}
+    data-title="{{ s.project.title|lower }}" data-number="{{ s.project.production_number|lower }}"
+    data-changed="{{ s.project.updated_at|date:'c' }}" data-deadline="{{ s.next_deadline.date|date:'Y-m-d' }}"{% endif %}>
+  <div class="project__media">
+    <a class="project__thumb" href="{% url 'cues:project' s.project.pk %}" tabindex="-1" aria-hidden="true">
+      {% include "cues/includes/thumbnail.html" with project=s.project %}
+    </a>
+    {% if listed and request.user.role != "viewer" %}
+      <input class="project__check" type="checkbox" name="project" value="{{ s.project.pk }}" form="bulk-form" data-bulk-item aria-label="Select {{ s.project }}">
+    {% endif %}
+  </div>
+  <div class="project__id">
+    <h2 class="project__title"><a href="{% url 'cues:project' s.project.pk %}">{{ s.project.title }}</a></h2>
+    <p class="project__meta">
+      {% if s.project.production_number %}<span>{{ s.project.production_number }}</span>{% endif %}
+      {% if s.project.series %}<span>{{ s.project.series }}</span>{% endif %}
+      {% if s.project.archived %}<span>Archived</span>{% endif %}
+      {% if not s.has_cues %}<span>No Cues Yet</span>{% endif %}
+      {% if s.needs_conform %}<a class="project__flag" href="{% url 'cues:conform' s.project.pk %}">{{ s.needs_conform }} on older picture</a>{% endif %}
+    </p>
+  </div>
+  <p class="project__figure">
+    <span class="project__big">{% if s.has_cues %}{{ s.percent }}%{% else %}—{% endif %}</span>
+    <span class="project__small">{% if s.has_cues %}{{ s.cues_done }} of {{ s.cues_total }} cues{% else %}Composed{% endif %}</span>
+  </p>
+  {% if week is not None %}
+    <p class="project__figure">
+      <span class="project__big">{{ week|default:"—" }}</span>
+      <span class="project__small">This Week</span>
+    </p>
+  {% else %}
+    <p class="project__figure"{% if s.pace %} title="Write {{ s.pace.write }}{% if s.pace.revise_seconds %} and revise {{ s.pace.revise }}{% endif %} a day, {{ s.pace.days }} working day{{ s.pace.days|pluralize }} to {{ s.pace.due|date:day_format }}"{% endif %}>
+      {% if s.pace and s.pace.write_seconds or s.pace and s.pace.revise_seconds %}
+        <span class="project__big">{{ s.pace.total }}</span>
+        <span class="project__small">{% if s.pace.revise_seconds %}{{ s.pace.write }} + {{ s.pace.revise }}{% else %}Per Day{% endif %}</span>
+      {% else %}
+        <span class="project__big">—</span>
+        <span class="project__small">Per Day</span>
+      {% endif %}
+    </p>
+  {% endif %}
+  <p class="project__figure{% if s.next_deadline and s.next_deadline.days_left <= 7 %} project__figure--due{% endif %}">
+    {% if s.next_deadline %}
+      <span class="project__big">{{ s.next_deadline.days_left }} day{{ s.next_deadline.days_left|pluralize }}</span>
+      <span class="project__small">{{ s.next_deadline.label }} {{ s.next_deadline.date|date:short_format }}</span>
+    {% else %}
+      <span class="project__big">—</span>
+      <span class="project__small">No Deadline</span>
+    {% endif %}
+  </p>
+  <details class="menu project__more">
+    <summary class="button button--quiet button--icon" aria-label="More for {{ s.project.title }}" title="More">⋯</summary>
+    <div class="menu__panel">
+      <a class="menu__item" href="{% url 'cues:picture' s.project.pk %}">Picture &amp; Turnovers</a>
+      <a class="menu__item" href="{% url 'cues:settings' s.project.pk %}">Settings</a>
+      {% if request.user.role != "viewer" %}
+        <form method="post" action="{% url 'cues:projects_bulk' %}">
+          {% csrf_token %}
+          <input type="hidden" name="project" value="{{ s.project.pk }}">
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button class="menu__item" type="submit" name="action" value="duplicate">Duplicate</button>
+          {% if s.project.archived %}
+            <button class="menu__item" type="submit" name="action" value="unarchive">Unarchive</button>
+          {% else %}
+            <button class="menu__item" type="submit" name="action" value="archive">Archive</button>
+          {% endif %}
+        </form>
+      {% endif %}
+    </div>
+  </details>
+  <div class="project__map">
+    {% if s.cue_map and not s.cue_map.empty %}{% include "cues/includes/cuemap.html" with map=s.cue_map label=s.composed %}{% endif %}
+  </div>
+</li>

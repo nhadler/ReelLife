@@ -1,0 +1,14 @@
+{% extends "app.html" %}
+
+{% block title %}Project notes · {{ project.title }} · ReelLife{% endblock %}
+
+{% block subheader %}
+  <div class="project-band">{% include "cues/includes/project_header.html" %}</div>
+{% endblock %}
+
+{% block content %}
+  <h2>Project Notes</h2>
+  <div class="project-notes">
+    {% for note in notes %}{% include "cues/notes/note.html" %}{% endfor %}
+  </div>
+{% endblock %}

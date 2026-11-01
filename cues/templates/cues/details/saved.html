@@ -1,0 +1,15 @@
+{# The answer to a field save: the field again, plus out-of-band updates. #}
+{% for field, oob in rows %}
+  {% if forloop.first %}
+    {% include "cues/details/field.html" with field=field oob="" error=error %}
+  {% else %}
+    {% include "cues/details/field.html" with field=field oob=oob error="" %}
+  {% endif %}
+{% endfor %}
+{% if not error %}
+  <input type="hidden" id="cue-updated-at" name="updated_at" value="{{ cue.updated_at.isoformat }}" hx-swap-oob="true">
+  <div class="cue-head__title" id="cue-heading" hx-swap-oob="true">{% include "cues/details/heading.html" %}</div>
+  {% if versions is not None %}
+    <div id="cue-versions" hx-swap-oob="true">{% include "cues/details/versions.html" %}</div>
+  {% endif %}
+{% endif %}

@@ -1,0 +1,14 @@
+# Build the image from this checkout instead of pulling it (just up):
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+
+x-build: &build
+  image: ${REELLIFE_IMAGE:-reellife:local}
+  build:
+    context: ..
+    dockerfile: Dockerfile
+  # A local tag: never look for it on a registry.
+  pull_policy: never
+
+services:
+  web: *build
+  scheduler: *build

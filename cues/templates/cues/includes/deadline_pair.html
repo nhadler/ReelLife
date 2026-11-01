@@ -1,0 +1,12 @@
+{# One deadline's start and end dates. Pass name, start, end (bound fields). #}
+<fieldset class="deadline">
+  <legend>{{ name }}</legend>
+  <div class="deadline__dates">
+    <label class="visually-hidden" for="{{ start.id_for_label }}">{{ name }} start</label>
+    {{ start }}
+    <span class="deadline__to" aria-hidden="true">to</span>
+    <label class="visually-hidden" for="{{ end.id_for_label }}">{{ name }} end</label>
+    {{ end }}
+  </div>
+  {{ start.errors }}{{ end.errors }}
+</fieldset>

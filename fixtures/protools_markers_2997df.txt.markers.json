@@ -1,0 +1,38 @@
+{
+  "source": "Pro Tools markers",
+  "frame_rate": "29.97",
+  "drop_frame": true,
+  "warnings": [],
+  "rows": [
+    {
+      "line": 13,
+      "label": "101m01 Cold Open IN",
+      "number": "101m01",
+      "title": "Cold Open",
+      "in": "01:00:15;10",
+      "out": "01:01:02;04",
+      "in_frames": 108352,
+      "out_frames": 109754
+    },
+    {
+      "line": 15,
+      "label": "101m02 Title Card IN",
+      "number": "101m02",
+      "title": "Title Card",
+      "in": "01:02:30;00",
+      "out": "01:02:41;12",
+      "in_frames": 112388,
+      "out_frames": 112730
+    },
+    {
+      "line": 18,
+      "label": "101m03s Radio Song IN",
+      "number": "101m03s",
+      "title": "Radio Song",
+      "in": "01:09:59;28",
+      "out": "01:10:20;02",
+      "in_frames": 125872,
+      "out_frames": 126476
+    }
+  ]
+}

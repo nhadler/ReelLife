@@ -1,0 +1,46 @@
+{% load static %}<!doctype html>
+<html lang="en" data-theme="{{ theme|default:'dark' }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ReelLife{% endblock %}</title>
+    {# htmx under a strict CSP: no eval, no inline scripts or styles. #}
+    <meta name="htmx-config"
+          content='{"includeIndicatorStyles": false, "allowEval": false, "allowScriptTags": false, "selfRequestsOnly": true}'>
+    <link rel="icon" href="{% static 'cues/favicon.svg' %}" type="image/svg+xml">
+    <link rel="icon" href="{% static 'cues/favicon-32.png' %}" sizes="32x32" type="image/png">
+    <link rel="apple-touch-icon" href="{% static 'cues/apple-touch-icon.png' %}">
+    <link rel="stylesheet" href="{% static 'cues/app.css' %}">
+    <script src="{% static 'cues/vendor/htmx.min.js' %}" defer></script>
+    {# Rewrites keyboard hints for the computer in use (⌘ on a Mac). #}
+    <script src="{% static 'cues/keys.js' %}" type="module"></script>
+    <script src="{% static 'cues/dialog.js' %}" type="module"></script>
+    <script src="{% static 'cues/menus.js' %}" type="module"></script>
+    <script src="{% static 'cues/tooltip.js' %}" type="module"></script>
+    <script src="{% static 'cues/dropzone.js' %}" type="module"></script>
+    <script src="{% static 'cues/palette.js' %}" type="module"></script>
+    <script src="{% static 'cues/date-picker.js' %}" type="module"></script>
+    <script src="{% static 'cues/days-off.js' %}" type="module"></script>
+    <script src="{% static 'cues/inline-table.js' %}" type="module"></script>
+    <script src="{% static 'cues/select-all.js' %}" type="module"></script>
+    <script src="{% static 'cues/form-errors.js' %}" type="module"></script>
+    <script src="{% static 'cues/remember-open.js' %}" type="module"></script>
+    {% block scripts %}{% endblock %}
+  </head>
+  <body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% block header %}{% endblock %}
+    {# Full-width bands under the top bar, e.g. a project's bar. #}
+    {% block subheader %}{% endblock %}
+    <main class="page {% block page_class %}{% endblock %}" id="main">
+      {% if messages %}
+        <ul class="messages" data-keys>
+          {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+    {% block dialog %}{% endblock %}
+  </body>
+</html>

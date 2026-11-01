@@ -1,0 +1,20 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <nav aria-label="Departments">
+    <ul class="tabs tabs--sub">
+      {% for key, name in tabs %}
+        <li><a href="?list={{ key }}"{% if key == field %} aria-current="page"{% endif %}>{{ name }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+  <form method="post" action="?list={{ field }}" novalidate>
+    {% csrf_token %}
+    <section class="form-section">
+      {% include "cues/includes/inline_table.html" with fs=formset add="Add Status" %}
+    </section>
+    <div class="form-actions">
+      <button class="button" type="submit">Save</button>
+    </div>
+  </form>
+{% endblock %}

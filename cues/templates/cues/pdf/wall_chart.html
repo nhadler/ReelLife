@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ project.title }} Wall Chart</title></head>
+<body>
+  {% include "cues/pdf/header.html" with what="Wall Chart" %}
+  {% for reel, cards in reels.items %}
+    <h2>{{ reel }}</h2>
+    <div class="cards">
+      {% for card in cards %}
+        <div class="card">
+          <svg class="card__bar" viewBox="0 0 100 4" preserveAspectRatio="none"><rect width="100" height="4" fill="{{ card.color }}"/></svg>
+          <div class="card__number">{{ card.number }}</div>
+          <div class="card__title">{{ card.title }}</div>
+          <div class="card__facts">{{ card.duration }}{% if card.status %} · {{ card.status }}{% endif %}{% if card.version %} · {{ card.version }}{% endif %}{% if card.written_to %} on {{ card.written_to }}{% endif %}</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% empty %}
+    <p>No cues.</p>
+  {% endfor %}
+</body>
+</html>

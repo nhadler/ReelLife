@@ -1,0 +1,6 @@
+{# The cue's name and where it sits; refreshed after saves. #}
+<h1 class="cue-head__name">{{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %}</h1>
+{% if not cue.active %}<span class="chip">Inactive</span>{% endif %}
+<p class="cue-head__where muted">
+  <a href="{% url 'cues:project' cue.project.pk %}" title="Back to the cues (Esc)">{{ cue.project.title }}</a> › {{ cue.project.reel_word }} {{ cue.picture.name }}{% with current=cue.picture.current_version %}{% if current %} – {{ current.turnover.label }}{% endif %}{% endwith %}
+</p>

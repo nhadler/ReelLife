@@ -1,0 +1,49 @@
+{% extends "app.html" %}
+{% load static %}
+
+{% block title %}Schedule · ReelLife{% endblock %}
+
+{% block scripts %}<script src="{% static 'cues/schedule.js' %}" type="module"></script>{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>Schedule</h1>
+    {% include "cues/includes/help_link.html" with slug="schedule" %}
+    <p class="schedule__line">{{ line }}</p>
+  </div>
+  {% if risks %}
+    <ul class="schedule__risks">
+      {% for risk in risks %}<li>{{ risk }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% include "cues/includes/schedule_problems.html" %}
+
+  <div class="schedule">
+    <div class="schedule__main">
+      <div class="schedule__bar">
+        <nav class="schedule__nav" aria-label="Dates">
+          <a class="button button--quiet button--small" href="{{ back_url }}" aria-label="{% if week %}Previous Week{% else %}Previous Month{% endif %}">‹</a>
+          <a class="button button--quiet button--small" href="{{ today_url }}">Today</a>
+          <a class="button button--quiet button--small" href="{{ ahead_url }}" aria-label="{% if week %}Next Week{% else %}Next Month{% endif %}">›</a>
+          <h2 class="schedule__title">{{ title }}</h2>
+        </nav>
+        <div class="toggle" role="group" aria-label="Show">
+          {% if week %}
+            <a class="toggle__option" href="{{ other_url }}">Month</a><span class="toggle__option" aria-current="page">Week</span>
+          {% else %}
+            <span class="toggle__option" aria-current="page">Month</span><a class="toggle__option" href="{{ other_url }}">Week</a>
+          {% endif %}
+        </div>
+      </div>
+      {% if week %}
+        {% include "cues/includes/calendar.html" with size="week" %}
+      {% else %}
+        {% include "cues/includes/calendar.html" with size="month" %}
+      {% endif %}
+    </div>
+    <aside class="schedule__side" aria-label="Projects and the chosen day">
+      {% if projects %}{% include "cues/includes/schedule_projects.html" %}{% endif %}
+      {% include "cues/includes/schedule_day.html" %}
+    </aside>
+  </div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{# One form field: label, widget, help, errors. Pass field=..., wide=True. #}
+{% load text %}
+<div class="field{% if wide %} field--wide{% endif %}{% if field.widget_type == 'checkbox' %} field--check{% endif %}">
+  {% if field.widget_type == "checkbox" %}
+    {{ field }}
+    <label for="{{ field.id_for_label }}">{{ field.label|title_case }}</label>
+  {% else %}
+    <label for="{{ field.id_for_label }}">{{ field.label|title_case }}</label>
+    {{ field }}
+  {% endif %}
+  {% if field.help_text %}<span class="helptext" id="{{ field.auto_id }}_help">{{ field.help_text }}</span>{% endif %}
+  {{ field.errors }}
+</div>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{# Shown once after a restore; the user has just been signed out. #}
+
+{% block title %}Restored · ReelLife{% endblock %}
+
+{% block content %}
+  <div class="notice" role="status">
+    <h1>Backup Restored</h1>
+    <p>Everyone has been signed out. Sign in again to carry on.</p>
+    <ul>{% for label, count in counts %}<li>{{ label }}: {{ count }}</li>{% endfor %}</ul>
+    {% if snapshot %}<p class="muted">The database as it was before is in {{ snapshot }}.</p>{% endif %}
+    <p><a class="button" href="{% url 'accounts:login' %}">Sign In</a></p>
+  </div>
+{% endblock %}

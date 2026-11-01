@@ -1,0 +1,19 @@
+{# How the current version sits against today's picture; refreshed after saves. #}
+<div class="conform-strip{% if compare.needs_conform %} conform-strip--old{% endif %}" id="cue-compare"
+     hx-get="{% url 'cues:cue_compare' cue.pk %}" hx-trigger="cues:changed from:body" hx-swap="outerHTML">
+  {% with version=compare.version current=compare.current %}
+    {% if not version %}
+      <p>No version yet, so there's nothing to compare.</p>
+    {% elif not version.written_to %}
+      <p>{{ version.label }} isn't tied to a turnover. Set "Written to picture" to compare it with today's picture.</p>
+    {% elif compare.needs_conform %}
+      <p><strong>Needs conform.</strong> {{ version.label }} was written to {{ version.written_to.turnover.label }}; the picture is now {{ current.turnover.label }}.</p>
+      <dl class="conform-strip__facts">
+        <div><dt>Start Offset</dt><dd class="tc">{{ compare.start_offset|default:"—" }}</dd></div>
+        <div><dt>Duration Change</dt><dd class="tc">{{ compare.duration_difference|default:"—" }}</dd></div>
+      </dl>
+    {% else %}
+      <p>{{ version.label }} was written to the current picture ({{ current.turnover.label }}).</p>
+    {% endif %}
+  {% endwith %}
+</div>

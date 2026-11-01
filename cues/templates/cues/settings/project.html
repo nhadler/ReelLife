@@ -1,0 +1,37 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <section class="form-section">
+    <h2>Duplicate</h2>
+    <form method="post" action="{% url 'cues:project_duplicate' project.pk %}" novalidate>
+      {% csrf_token %}
+      <div class="fields">{% include "cues/includes/field.html" with field=duplicate_form.title wide=True %}</div>
+      <div class="form-actions"><button class="button button--quiet" type="submit">Duplicate Project</button></div>
+    </form>
+  </section>
+
+  <section class="form-section">
+    <h2>{% if project.archived %}Archived{% else %}Archive{% endif %}</h2>
+    <form method="post" action="{% url 'cues:project_archive' project.pk %}">
+      {% csrf_token %}
+      {% if project.archived %}
+        <input type="hidden" name="archived" value="0">
+        <div class="form-actions"><button class="button" type="submit">Unarchive Project</button></div>
+      {% else %}
+        <input type="hidden" name="archived" value="1">
+        <div class="form-actions"><button class="button button--quiet" type="submit">Archive Project</button></div>
+      {% endif %}
+    </form>
+  </section>
+
+  {% if can_delete %}
+  <section class="form-section danger-zone">
+    <h2>Delete</h2>
+      <form method="post" action="{% url 'cues:project_delete' project.pk %}" novalidate>
+        {% csrf_token %}
+        <div class="fields">{% include "cues/includes/field.html" with field=delete_form.confirm wide=True %}</div>
+        <div class="form-actions"><button class="button button--danger" type="submit">Delete Project</button></div>
+      </form>
+  </section>
+  {% endif %}
+{% endblock %}

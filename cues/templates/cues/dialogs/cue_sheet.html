@@ -1,0 +1,29 @@
+{# The cue sheet export. A plain GET form: the browser downloads the file; the checklist redraws as the choices change. #}
+{% load text %}
+<form class="dialog__form cue-sheet-export" method="get" action="{% url 'cues:cue_sheet_download' project.pk %}"
+      hx-get="{% url 'cues:cue_sheet_checklist' project.pk %}" hx-trigger="change" hx-target="#cue-sheet-checklist" hx-swap="innerHTML">
+  <header class="dialog__head">
+    <h2 id="dialog-title">Export Cue Sheet</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  <fieldset class="segmented">
+    <legend>{{ form.format.label|title_case }}</legend>
+    {% for choice in form.format %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  </fieldset>
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.revision wide=True %}
+    {% include "cues/includes/field.html" with field=form.prefix_numbers wide=True %}
+    {% include "cues/includes/field.html" with field=form.include_ipi wide=True %}
+    {% include "cues/includes/field.html" with field=form.include_notes wide=True %}
+    {% include "cues/includes/field.html" with field=form.include_artist wide=True %}
+    {% include "cues/includes/field.html" with field=form.include_inactive wide=True %}
+  </div>
+  <section class="cue-sheet-checklist" id="cue-sheet-checklist" aria-live="polite">
+    {% include "cues/dialogs/cue_sheet_checklist.html" %}
+  </section>
+  <p class="muted">Durations are timecode time, rounded to the nearest second{% if fractional %}; at {{ project.rate.label }} that runs a little shorter than clock time{% endif %}. RapidCue sheets go to cuesheets@rapidcue.com.</p>
+  <footer class="form-actions">
+    <button class="button" type="submit">Download</button>
+    <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+  </footer>
+</form>

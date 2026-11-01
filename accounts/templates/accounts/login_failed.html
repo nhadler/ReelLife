@@ -1,0 +1,9 @@
+{% extends "accounts/sign_in_base.html" %}
+
+{% block title %}Sign-in failed · ReelLife{% endblock %}
+
+{% block sign_in %}
+  <h1>Sign-In Didn't Complete</h1>
+  <p>Something went wrong talking to PocketID. Please try again.</p>
+  <p><a class="button" href="{% url 'accounts:login' %}">Try Again</a></p>
+{% endblock %}

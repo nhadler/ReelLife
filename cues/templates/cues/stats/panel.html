@@ -1,0 +1,95 @@
+{# The stats side panel. Refreshes itself after any change. #}
+<div class="stats" id="stats"
+     hx-get="{% url 'cues:stats_panel' project.pk %}" hx-trigger="cues:changed from:body"
+     hx-swap="outerHTML">
+  <div class="side-panel__head">
+    <h2 class="side-panel__title">Stats</h2>
+    <button class="dialog__close" type="button" data-side-panel-close aria-label="Close stats">×</button>
+  </div>
+  <div class="side-panel__body stats__body">
+    <section class="stats__section" aria-labelledby="stats-totals">
+      <h3 class="stats__heading" id="stats-totals">Totals</h3>
+      {% include "cues/stats/rows.html" with rows=stats.totals title="Totals" %}
+    </section>
+
+    <section class="stats__section" aria-labelledby="stats-progress">
+      <h3 class="stats__heading" id="stats-progress">Progress <span class="stats__note">of compositions</span></h3>
+      {% include "cues/stats/rows.html" with rows=stats.progress title="Progress" %}
+    </section>
+
+    <section class="stats__section" aria-labelledby="stats-pace">
+      <h3 class="stats__heading" id="stats-pace">Per Day</h3>
+      {% if stats.pace %}
+        <dl class="stats__figures">
+          <div><dt>Write</dt><dd>{{ stats.pace.write }}</dd></div>
+          <div><dt>Revise</dt><dd>{{ stats.pace.revise }}</dd></div>
+          <div><dt>Total</dt><dd>{{ stats.pace.total }}</dd></div>
+        </dl>
+        <p class="stats__note">To {{ stats.pace_label }}, {{ stats.pace.due|date:short_format }}: {{ stats.pace.days }} working day{{ stats.pace.days|pluralize }} (days off left out).</p>
+      {% else %}
+        <p class="stats__note">No deadline ahead. <a href="{% url 'cues:settings_deadlines' project.pk %}">Add one</a></p>
+      {% endif %}
+    </section>
+
+    <section class="stats__section" aria-labelledby="stats-deadlines">
+      <h3 class="stats__heading" id="stats-deadlines">Deadlines
+        <a class="stats__link" href="{% url 'cues:settings_deadlines' project.pk %}">Edit</a></h3>
+      {% if stats.deadlines %}
+        <form class="stats__deadlines" hx-post="{% url 'cues:stats_deadline' project.pk %}" hx-trigger="change" hx-swap="none">
+          {% csrf_token %}
+          <fieldset>
+            <legend class="visually-hidden">The deadline the daily pace counts down to</legend>
+            {% for deadline in stats.deadlines %}
+              <label class="stats__deadline{% if deadline.passed %} stats__deadline--passed{% endif %}">
+                <input type="radio" name="deadline" value="{{ deadline.pk }}"{% if deadline.chosen %} checked{% endif %}{% if deadline.passed or not can_edit %} disabled{% endif %}>
+                <span class="stats__deadline-label">{{ deadline.label }}</span>
+                <span class="stats__deadline-when">{{ deadline.date|date:short_format }},
+                  {% if deadline.passed %}passed{% elif deadline.days_left == 0 %}today{% else %}{{ deadline.days_left }} day{{ deadline.days_left|pluralize }}{% endif %}</span>
+              </label>
+            {% endfor %}
+          </fieldset>
+        </form>
+      {% else %}
+        <p class="stats__note">None yet.</p>
+      {% endif %}
+    </section>
+
+    <section class="stats__section" aria-labelledby="stats-status">
+      <h3 class="stats__heading" id="stats-status">Status</h3>
+      {% include "cues/stats/rows.html" with rows=stats.status title="Status" %}
+    </section>
+
+    <section class="stats__section" aria-labelledby="stats-type">
+      <h3 class="stats__heading" id="stats-type">Cue Type</h3>
+      {% include "cues/stats/rows.html" with rows=stats.cue_type title="Cue type" %}
+    </section>
+
+    {% if stats.sub_status %}
+      <section class="stats__section" aria-labelledby="stats-sub-status">
+        <h3 class="stats__heading" id="stats-sub-status">Sub Status</h3>
+        {% include "cues/stats/rows.html" with rows=stats.sub_status title="Sub status" %}
+      </section>
+    {% endif %}
+
+    {% if stats.themes %}
+      <section class="stats__section" aria-labelledby="stats-themes">
+        <h3 class="stats__heading" id="stats-themes">Themes</h3>
+        {% include "cues/stats/rows.html" with rows=stats.themes title="Themes" %}
+      </section>
+    {% endif %}
+
+    {% if stats.instrumentation %}
+      <section class="stats__section" aria-labelledby="stats-instrumentation">
+        <h3 class="stats__heading" id="stats-instrumentation">Instrumentation</h3>
+        {% include "cues/stats/rows.html" with rows=stats.instrumentation title="Instrumentation" %}
+      </section>
+    {% endif %}
+
+    <section class="stats__section" aria-labelledby="stats-details">
+      <h3 class="stats__heading" id="stats-details">Project Details</h3>
+      <dl class="stats__details">
+        {% for name, value in stats.details %}<div><dt>{{ name }}</dt><dd>{{ value }}</dd></div>{% endfor %}
+      </dl>
+    </section>
+  </div>
+</div>

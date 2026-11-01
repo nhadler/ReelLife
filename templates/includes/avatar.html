@@ -1,0 +1,1 @@
+{% if user.picture_hash %}<img class="avatar{% if large %} avatar--large{% endif %}" src="{% url 'accounts:picture' %}?v={{ user.picture_hash }}" alt="" width="96" height="96">{% else %}<span class="avatar avatar--initials{% if large %} avatar--large{% endif %}" aria-hidden="true">{{ user.initials }}</span>{% endif %}

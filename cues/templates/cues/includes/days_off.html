@@ -1,0 +1,64 @@
+{# Days off: a clickable calendar (days_off.js) over the days-off formset `fs`, which stays the source of truth and works without JavaScript. #}
+{% load text %}
+<div class="days-off-picker" data-days-off data-prefix="{{ fs.prefix }}">
+  <div class="calendar" data-calendar hidden>
+    <div class="calendar__head">
+      <button class="button button--quiet button--icon" type="button" data-calendar-step="-1" aria-label="Previous month">‹</button>
+      <span class="calendar__hint muted">Click a day to add or remove it; Shift-click marks a range.</span>
+      <button class="button button--quiet button--small" type="button" data-calendar-today>Today</button>
+      <button class="button button--quiet button--icon" type="button" data-calendar-step="1" aria-label="Next month">›</button>
+    </div>
+    <div class="calendar__months" data-calendar-months></div>
+  </div>
+  {{ fs.management_form }}
+  {{ fs.non_form_errors }}
+  <table class="table table--edit days-off__table">
+    <thead>
+      <tr>
+        <th scope="col">{{ fs.empty_form.date.label|title_case }}</th>
+        <th scope="col">{{ fs.empty_form.note.label|title_case }}</th>
+        <th scope="col">Remove</th>
+      </tr>
+    </thead>
+    <tbody data-days-rows>
+      {% for form in fs %}
+        {% if form.non_field_errors %}
+          <tr><td colspan="3">{{ form.non_field_errors }}</td></tr>
+        {% endif %}
+        <tr data-day-row{% if form.instance.pk %} data-saved{% endif %}>
+          <td>
+            <label class="visually-hidden" for="{{ form.date.id_for_label }}">Date {{ forloop.counter }}</label>
+            {{ form.date }}{{ form.date.errors }}
+          </td>
+          <td>
+            <label class="visually-hidden" for="{{ form.note.id_for_label }}">Note {{ forloop.counter }}</label>
+            {{ form.note }}{{ form.note.errors }}
+          </td>
+          <td>
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            {% if form.instance.pk %}
+              <span data-day-checkbox>
+                <label class="visually-hidden" for="{{ form.DELETE.id_for_label }}">Remove row {{ forloop.counter }}</label>
+                {{ form.DELETE }}
+              </span>
+            {% endif %}
+            <button class="button button--quiet button--icon days-off__remove" type="button" data-day-remove hidden aria-label="Remove this day">×</button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <template data-day-template>
+    <tr data-day-row>
+      <td>
+        <label class="visually-hidden" for="{{ fs.empty_form.date.id_for_label }}">Date</label>
+        {{ fs.empty_form.date }}
+      </td>
+      <td>
+        <label class="visually-hidden" for="{{ fs.empty_form.note.id_for_label }}">Note</label>
+        {{ fs.empty_form.note }}
+      </td>
+      <td>{% for hidden in fs.empty_form.hidden_fields %}{{ hidden }}{% endfor %}<button class="button button--quiet button--icon days-off__remove" type="button" data-day-remove hidden aria-label="Remove this day">×</button></td>
+    </tr>
+  </template>
+</div>

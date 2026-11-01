@@ -1,0 +1,72 @@
+{% extends "app.html" %}
+{% load static %}
+
+{% block title %}Projects · ReelLife{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'cues/projects.js' %}" type="module"></script>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>Projects</h1>
+    <p class="page-head__summary">{{ active_count }} active{% if total_pace and request.user.role != "viewer" %} · write <strong>{{ total_pace.0 }}</strong> and revise <strong>{{ total_pace.1 }}</strong> a day across them{% endif %}</p>
+    {% if request.user.role != "viewer" %}
+      <div class="page-head__actions">
+        <a class="button" href="{% url 'cues:project_create' %}">New Project</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {# Filters and sorts as you type or choose (projects.js); Enter submits without it. #}
+  <form class="search" method="get" role="search" data-project-search>
+    <label class="visually-hidden" for="project-search">Search Projects</label>
+    <input type="search" id="project-search" name="q" value="{{ query }}"
+           placeholder="Title, production number or series" autocomplete="off">
+    <label class="search__sort">
+      <span>Sort</span>
+      <select name="sort" id="project-sort">
+        {% for value, label in sorts.items %}<option value="{{ value }}" data-direction="{% cycle 'desc' 'asc' 'asc' 'asc' %}"{% if value == sort %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    {# Enter searches (this comes first); the arrow flips the order. #}
+    <button class="visually-hidden" type="submit">Search</button>
+    <input type="hidden" name="dir" value="{{ direction }}">
+    <button class="button button--quiet button--icon search__direction" type="submit"
+            name="dir" value="{% if direction == 'asc' %}desc{% else %}asc{% endif %}"
+            data-direction="{{ direction }}" title="Reverse the order"
+            aria-label="{% if direction == 'asc' %}Ascending; reverse{% else %}Descending; reverse{% endif %}">{% if direction == 'asc' %}↑{% else %}↓{% endif %}</button>
+    <span class="field--check">
+      <input type="checkbox" id="show-archived" name="archived"{% if show_archived %} checked{% endif %}>
+      <label for="show-archived">Show Archived</label>
+    </span>
+  </form>
+
+  {% if summaries %}
+    {% if request.user.role != "viewer" %}
+      {# Tick projects, then act on them all (projects.js keeps the count). #}
+      <form class="bulk-bar" id="bulk-form" method="post" action="{% url 'cues:projects_bulk' %}" data-bulk hidden>
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <span class="bulk-bar__count" data-bulk-count role="status"></span>
+        <button class="button button--quiet button--small" type="button" data-bulk-all>Select All</button>
+        <div class="bulk-bar__actions">
+          <button class="button button--quiet button--small" type="submit" name="action" value="archive" data-bulk-action>Archive</button>
+          {% if show_archived %}<button class="button button--quiet button--small" type="submit" name="action" value="unarchive" data-bulk-action>Unarchive</button>{% endif %}
+          <button class="button button--quiet button--small" type="submit" name="action" value="duplicate" data-bulk-action title="Copies setup, lists, views and deadlines; not cues">Duplicate</button>
+          <button class="button button--quiet button--small" type="button" data-bulk-clear>Clear</button>
+        </div>
+      </form>
+    {% endif %}
+    <ul class="projects">
+      {% for s in summaries %}
+        {% include "cues/includes/project_card.html" with listed=True %}
+      {% endfor %}
+    </ul>
+    <p class="empty" data-no-match{% if shown %} hidden{% endif %}>No projects match.</p>
+  {% elif query %}
+    <p class="empty">No projects match “{{ query }}”.</p>
+  {% else %}
+    <p class="empty">No projects yet. Create one to start spotting.</p>
+  {% endif %}
+{% endblock %}

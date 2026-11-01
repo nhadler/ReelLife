@@ -1,0 +1,11 @@
+# Runs reellife-snapshot.service every night (host local time).
+[Unit]
+Description=Nightly ReelLife snapshot and housekeeping
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+# Catch up after the host was off at 03:00.
+Persistent=true
+
+[Install]
+WantedBy=timers.target

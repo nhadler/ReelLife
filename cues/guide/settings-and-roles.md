@@ -1,0 +1,35 @@
+# Settings and Roles
+
+## Project settings
+
+The project bar's **Settings** menu lists them:
+
+- **General**: title, numbers, thumbnail.
+- **Picture**: frame rate, picture type, timeline lanes.
+- **Cue Sheet**: the cue sheet's header, numbering, default shares.
+- **Statuses**: the status and sub status lists and colours.
+- **Lists**: themes and instruments.
+- **Departments**: orchestration, recording, mix and other status lists.
+- **Deadlines**: deadlines and this project's own days off.
+- **Views**: the grid's views, in order; reset, duplicate, delete, or
+  copy from another project.
+- **Project**: archive or duplicate the project; admins can delete it.
+
+## App settings
+
+**Settings** in the top bar is for everyone: theme (dark or light),
+date format, timecodes (leading zero, subframes), one-click editing,
+Enter in notes cells, how new versions are numbered, and what progress
+counts.
+
+## Roles
+
+ReelLife signs in through PocketID, and your role comes from your
+PocketID groups:
+
+- **Viewers** see everything and change nothing.
+- **Editors** do everything in projects.
+- **Admins** also have **Backup** (download a backup, or restore one
+  into a new install) and the admin pages.
+
+Someone removed from the ReelLife groups is signed out within minutes.

@@ -1,0 +1,35 @@
+SESSION NAME:	ZZT Reel 1 Cues
+SAMPLE RATE:	48000.000000
+BIT DEPTH:	24-bit
+SESSION START TIMECODE:	00:59:50:00
+TIMECODE FORMAT:	23.976 Frame
+# OF AUDIO TRACKS:	2
+# OF AUDIO CLIPS:	4
+# OF AUDIO FILES:	0
+
+
+T R A C K  L I S T I N G
+TRACK NAME:	Cues
+COMMENTS:	
+USER DELAY:	0 Samples
+STATE: 
+PLUG-INS: 
+CHANNEL 	EVENT   	CLIP NAME                     	START TIME    	END TIME      	DURATION      	STATE
+1       	1       	1m01 Main Title               	   01:00:10:00	   01:01:30:12	   00:01:20:12	Unmuted
+1       	2       	1m02 The Chase                	   01:03:00:00	   01:05:12:08	   00:02:12:08	Unmuted
+1       	3       	1m03 Aftermath                	   01:06:01:15	   01:07:44:00	   00:01:42:09	Unmuted
+1       	4       	1m03 Aftermath                	   01:07:50:00	   01:08:20:00	   00:00:30:00	Unmuted
+
+
+TRACK NAME:	Dialogue
+COMMENTS:	
+USER DELAY:	0 Samples
+STATE: 
+PLUG-INS: 
+CHANNEL 	EVENT   	CLIP NAME                     	START TIME    	END TIME      	DURATION      	STATE
+1       	1       	DX_01                         	   01:00:00:00	   01:10:00:00	   00:10:00:00	Unmuted
+
+
+M A R K E R S  L I S T I N G
+#   	LOCATION     	TIME REFERENCE    	UNITS    	NAME                             	TRACK NAME                       	TRACK TYPE   	COMMENTS
+1   	   01:00:00:00	480480            	Samples  	FFOA                             	Markers                          	Ruler        	

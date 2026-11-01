@@ -1,0 +1,25 @@
+{# Cues the plan leaves out, as callouts with the cues as chips. #}
+{% if unplaced %}
+  <div class="callout">
+    {% include "cues/includes/icon.html" with name="calendar" %}
+    <div class="callout__body">
+      <p class="callout__title">{{ unplaced|length }} cue{{ unplaced|length|pluralize }} not planned</p>
+      <p class="callout__text">No composition deadline ahead and no daily maximum to plan toward.</p>
+      <ul class="callout__chips">
+        {% for cue, owner in unplaced %}<li><a class="cue-chip" href="{{ cue.url }}"><span class="cue-chip__number">{{ cue.number }}</span> {{ cue.title }} <span class="cue-chip__project">{{ owner.title }}</span></a></li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
+{% if unschedulable %}
+  <div class="callout callout--warning">
+    {% include "cues/includes/icon.html" with name="alert" %}
+    <div class="callout__body">
+      <p class="callout__title">{{ unschedulable|length }} cue{{ unschedulable|length|pluralize }} without an IN or OUT</p>
+      <p class="callout__text">Give {{ unschedulable|length|pluralize:"it,them" }} a length to plan {{ unschedulable|length|pluralize:"it,them" }}.</p>
+      <ul class="callout__chips">
+        {% for cue, owner in unschedulable %}<li><a class="cue-chip" href="{{ cue.url }}"><span class="cue-chip__number">{{ cue.number }}</span> {{ cue.title }} <span class="cue-chip__project">{{ owner.title }}</span></a></li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}

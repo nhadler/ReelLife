@@ -1,0 +1,26 @@
+# Dependency updates. Weekly, grouped so
+# each ecosystem is one reviewable PR.
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      python:
+        patterns: ['*']
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      frontend-tooling:
+        patterns: ['*']
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

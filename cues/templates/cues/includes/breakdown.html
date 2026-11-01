@@ -1,0 +1,16 @@
+{# The spreadsheet-style breakdown under the header's figures (Nick, Nov 1), folded; remember-open.js keeps it open or shut per browser. Needs b (summaries.Breakdown) and summary. #}
+<details class="breakdown" data-remember="breakdown">
+  <summary>Breakdown</summary>
+  <dl class="breakdown__list">
+    <div><dt>Total</dt><dd>{{ b.total }} <span class="breakdown__dim">({{ b.cues }} cue{{ b.cues|pluralize }})</span></dd></div>
+    {% for label, duration in b.by_type %}<div><dt>{{ label }}</dt><dd>{{ duration }}</dd></div>{% endfor %}
+    {% if b.licensed %}<div><dt>To License</dt><dd>{{ b.licensed }}</dd></div>{% endif %}
+    {% for label, css, duration in b.parts %}
+      <div><dt><span class="swatch swatch--{{ css }}" aria-hidden="true"></span>{{ label }}</dt><dd>{{ duration }}</dd></div>
+    {% endfor %}
+    <div><dt>Remaining</dt><dd>{{ b.remaining }}</dd></div>
+    {% if summary.pace and summary.pace.write_seconds %}
+      <div><dt>Per Day to {{ summary.pace.due|date:short_format }}</dt><dd>{{ summary.pace.write }}{% if summary.pace.revise_seconds %} + {{ summary.pace.revise }} revise{% endif %}</dd></div>
+    {% endif %}
+  </dl>
+</details>

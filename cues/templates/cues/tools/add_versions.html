@@ -1,0 +1,10 @@
+{% extends "cues/tools/base.html" %}
+{% block intro %}<p class="muted">Each new version is written to its cue's current picture, at the cue's current timecodes.</p>{% endblock %}
+{% block fields %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.increment wide=True %}
+    {% include "cues/includes/field.html" with field=form.keep_notes wide=True %}
+    {% include "cues/includes/field.html" with field=form.keep_sub_status wide=True %}
+    {% include "cues/includes/field.html" with field=form.mark_composed wide=True %}
+  </div>
+{% endblock %}

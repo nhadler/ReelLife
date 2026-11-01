@@ -1,0 +1,23 @@
+{% extends "accounts/sign_in_base.html" %}
+{% load text %}
+
+{% block title %}Emergency sign-in · ReelLife{% endblock %}
+
+{% block sign_in %}
+  <h1>Emergency Sign-In</h1>
+  <p>For when PocketID is down. Every use is logged.</p>
+  {% if failed %}
+    <p class="errorlist">Those details didn't work.</p>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-row">
+        <label for="{{ field.id_for_label }}">{{ field.label|title_case }}</label>
+        {{ field }}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <button class="button" type="submit">Sign In</button>
+  </form>
+{% endblock %}

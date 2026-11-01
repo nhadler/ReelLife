@@ -1,0 +1,10 @@
+{% extends "cues/tools/base.html" %}
+{% block intro %}<p class="muted">Moves IN, OUT and Seq. start; versions keep their timecodes. Times are {{ project.rate.label }} timecode.</p>{% endblock %}
+{% block fields %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.by wide=True %}
+    {% include "cues/includes/field.html" with field=form.offset %}
+    {% include "cues/includes/field.html" with field=form.reference %}
+    {% include "cues/includes/field.html" with field=form.new_time %}
+  </div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{# The cue sheet checklist: what a PRO would query. Needs sheet, issues, project. #}
+<p class="cue-sheet-checklist__summary">
+  {{ sheet.lines|length }} cue{{ sheet.lines|length|pluralize }}:
+  {% if issues %}{{ issues|length }} thing{{ issues|length|pluralize }} to check before sending:{% else %}ready to send.{% endif %}
+</p>
+{% if issues %}
+  {# Focusable, as it scrolls when the list is long. #}
+  <ul class="cue-sheet-checklist__issues" tabindex="0" aria-label="Checklist">
+    {% for issue in issues %}
+      <li>{% if issue.number %}<strong>{{ issue.number }}</strong> {% endif %}{{ issue.message }}</li>
+    {% endfor %}
+  </ul>
+  <p class="muted">Production details are in <a href="{% url 'cues:settings_cue_sheet' project.pk %}">Cue Sheet settings</a>; writers and publishers on each cue's page.</p>
+{% endif %}

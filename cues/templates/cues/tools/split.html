@@ -1,0 +1,11 @@
+{% extends "cues/tools/base.html" %}
+{% block intro %}
+  <p class="muted">{{ form.facts }} Times are {{ project.rate.label }} timecode.</p>
+{% endblock %}
+{% block fields %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.at %}
+    {% include "cues/includes/field.html" with field=form.number %}
+    {% include "cues/includes/field.html" with field=form.new_takes wide=True %}
+  </div>
+{% endblock %}

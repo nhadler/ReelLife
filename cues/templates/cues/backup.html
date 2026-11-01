@@ -1,0 +1,32 @@
+{% extends "app.html" %}
+{# Admins: download a full backup, or restore one. #}
+
+{% block title %}Backup · ReelLife{% endblock %}
+
+{% block content %}
+  <div class="page-head"><h1>Backup</h1></div>
+
+  <section class="form-section" aria-labelledby="download-title">
+    <h2 id="download-title">Download a Backup</h2>
+    <p class="muted">Every project, cue, setting and change, with thumbnails. Not the break-glass sign-in.</p>
+    <p><a class="button" href="{% url 'cues:backup_download' %}">Download Backup</a></p>
+  </section>
+
+  <section class="form-section" aria-labelledby="restore-title">
+    <h2 id="restore-title">Restore a Backup</h2>
+    <p class="muted">Into a fresh install only, from this version of ReelLife. Everyone is signed out after.</p>
+    {% if error %}<p class="import__problem" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="fields">
+        {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a backup ZIP" %}
+        {% include "cues/includes/field.html" with field=form.confirm %}
+      </div>
+      <div class="form-actions"><button class="button button--quiet backup__restore" type="submit">Restore</button></div>
+    </form>
+    <details class="backup__details">
+      <summary>Technical Details</summary>
+      <p class="muted">Schema: {% for app, name in schema.items %}{{ app }} {{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}. A database snapshot is also written every night to the data directory's <code>snapshots</code> folder, keeping 14.</p>
+    </details>
+  </section>
+{% endblock %}

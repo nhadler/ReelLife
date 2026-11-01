@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ project.title }} Version Notes</title></head>
+<body>
+  {% include "cues/pdf/header.html" with what=all_versions|yesno:"Version Notes (All Versions),Version Notes" %}
+  {% for reel, cues in reels.items %}
+    <h2>{{ reel }}</h2>
+    {% for cue, notes in cues %}
+      <div class="cue">
+        <h3>{{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %}</h3>
+        {% for note in notes %}
+          <div class="version">
+            <span class="version__label">{{ note.label }}</span>{% if note.written_to %} on {{ note.written_to }}{% endif %}
+            {% if note.revision_notes %}<p class="notes"><strong>Revisions:</strong> {{ note.revision_notes }}</p>{% endif %}
+            {% if note.change_notes %}<p class="notes"><strong>Conform:</strong> {{ note.change_notes }}</p>{% endif %}
+            {% if note.notes %}<p class="notes"><strong>Notes:</strong> {{ note.notes }}</p>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% empty %}
+    <p>No version notes yet.</p>
+  {% endfor %}
+</body>
+</html>

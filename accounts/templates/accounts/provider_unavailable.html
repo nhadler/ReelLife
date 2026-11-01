@@ -1,0 +1,9 @@
+{% extends "accounts/sign_in_base.html" %}
+
+{% block title %}Sign-in unavailable · ReelLife{% endblock %}
+
+{% block sign_in %}
+  <h1>Sign-In Is Unavailable</h1>
+  <p>ReelLife can't reach PocketID right now. Try again in a minute.</p>
+  <p><a class="button" href="{% url 'accounts:login' %}">Try Again</a></p>
+{% endblock %}

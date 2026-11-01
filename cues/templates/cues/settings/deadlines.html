@@ -1,0 +1,18 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <section class="form-section">
+      {# The page's own title already says Deadlines. #}
+      {% include "cues/includes/inline_table.html" with fs=deadline_set add="Add Deadline" %}
+    </section>
+    <section class="form-section" aria-labelledby="project-days-title">
+      <div class="section-head"><h2 id="project-days-title">This Project's Days Off</h2><a href="{% url 'cues:days_off' %}">Your Own Days Off</a></div>
+      {% include "cues/includes/days_off.html" with fs=project_days %}
+    </section>
+    <div class="form-actions">
+      <button class="button" type="submit">Save</button>
+    </div>
+  </form>
+{% endblock %}

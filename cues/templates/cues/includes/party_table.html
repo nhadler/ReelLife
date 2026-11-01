@@ -1,0 +1,87 @@
+{# One Credits table (credits.js adds and removes rows): `fs` the formset, `writers` true for the writers' table. Fields stay quiet until hovered or focused, like a spreadsheet. #}
+<div class="party-table" data-party-table data-prefix="{{ fs.prefix }}">
+  {{ fs.management_form }}
+  {{ fs.non_form_errors }}
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">{% if writers %}Name{% else %}Company{% endif %}</th>
+        <th scope="col" class="party-table__pro">PRO</th>
+        <th scope="col" class="party-table__ipi">IPI/CAE #</th>
+        <th scope="col" class="party-table__own">Composer's Own</th>
+        <th scope="col" class="party-table__uses">Credited On</th>
+        <th scope="col" class="party-table__remove-cell"><span class="visually-hidden">Remove</span></th>
+      </tr>
+    </thead>
+    <tbody data-party-rows>
+      {% for form in fs %}
+        {% if form.non_field_errors %}
+          <tr><td colspan="6">{{ form.non_field_errors }}</td></tr>
+        {% endif %}
+        <tr data-party-row{% if form.instance.pk %} data-saved{% endif %}>
+          <td>
+            <div class="party-name">
+              {% if writers %}
+                <span class="monogram" aria-hidden="true">{{ form.instance.first_name|slice:":1"|upper }}{{ form.instance.last_name|slice:":1"|upper }}</span>
+                <span class="party-name__fields">
+                  <label class="visually-hidden" for="{{ form.first_name.id_for_label }}">First name {{ forloop.counter }}</label>{{ form.first_name }}
+                  <label class="visually-hidden" for="{{ form.last_name.id_for_label }}">Last name {{ forloop.counter }}</label>{{ form.last_name }}
+                </span>
+              {% else %}
+                <span class="monogram monogram--company" aria-hidden="true">{{ form.instance.name|slice:":1"|upper }}</span>
+                <span class="party-name__fields party-name__fields--one">
+                  <label class="visually-hidden" for="{{ form.name.id_for_label }}">Company name {{ forloop.counter }}</label>{{ form.name }}
+                </span>
+              {% endif %}
+            </div>
+            {{ form.first_name.errors }}{{ form.last_name.errors }}{{ form.name.errors }}
+          </td>
+          <td class="party-table__pro"><label class="visually-hidden" for="{{ form.society.id_for_label }}">PRO {{ forloop.counter }}</label>{{ form.society }}{{ form.society.errors }}</td>
+          <td class="party-table__ipi"><label class="visually-hidden" for="{{ form.ipi.id_for_label }}">IPI/CAE number {{ forloop.counter }}</label>{{ form.ipi }}{{ form.ipi.errors }}</td>
+          <td class="party-table__own"><label class="switch">{{ form.is_mine }}<span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span><span class="visually-hidden">The composer's own {{ forloop.counter }}</span></label></td>
+          <td class="party-table__uses">{% if form.instance.pk %}{{ form.uses|default:"Not yet" }}{% else %}New{% endif %}</td>
+          <td class="party-table__remove-cell">
+            {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+            {% if form.instance.pk %}
+              <span data-party-checkbox>
+                <label class="visually-hidden" for="{{ form.DELETE.id_for_label }}">Remove row {{ forloop.counter }}</label>
+                {{ form.DELETE }}
+              </span>
+            {% endif %}
+            <button class="party-table__remove" type="button" data-party-remove hidden
+                    {% if form.in_use %}disabled title="Credited on {{ form.uses }}; remove those shares first"{% endif %}
+                    aria-label="Remove this row">×</button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="party-table__empty" data-party-empty hidden>
+    {% if writers %}No writers yet. Add the composer first.{% else %}No publishers yet. Add the composer's publishing company.{% endif %}
+  </p>
+  <template data-party-template>
+    <tr data-party-row>
+      <td>
+        <div class="party-name">
+          {% if writers %}
+            <span class="monogram" aria-hidden="true"></span>
+            <span class="party-name__fields">
+              <label class="visually-hidden" for="{{ fs.empty_form.first_name.id_for_label }}">First name</label>{{ fs.empty_form.first_name }}
+              <label class="visually-hidden" for="{{ fs.empty_form.last_name.id_for_label }}">Last name</label>{{ fs.empty_form.last_name }}
+            </span>
+          {% else %}
+            <span class="monogram monogram--company" aria-hidden="true"></span>
+            <span class="party-name__fields party-name__fields--one">
+              <label class="visually-hidden" for="{{ fs.empty_form.name.id_for_label }}">Company name</label>{{ fs.empty_form.name }}
+            </span>
+          {% endif %}
+        </div>
+      </td>
+      <td class="party-table__pro"><label class="visually-hidden" for="{{ fs.empty_form.society.id_for_label }}">PRO</label>{{ fs.empty_form.society }}</td>
+      <td class="party-table__ipi"><label class="visually-hidden" for="{{ fs.empty_form.ipi.id_for_label }}">IPI/CAE number</label>{{ fs.empty_form.ipi }}</td>
+      <td class="party-table__own"><label class="switch">{{ fs.empty_form.is_mine }}<span class="switch__track" aria-hidden="true"><span class="switch__knob"></span></span><span class="visually-hidden">The composer's own</span></label></td>
+      <td class="party-table__uses">New</td>
+      <td class="party-table__remove-cell">{% for hidden in fs.empty_form.hidden_fields %}{{ hidden }}{% endfor %}<button class="party-table__remove" type="button" data-party-remove aria-label="Remove this row">×</button></td>
+    </tr>
+  </template>
+</div>

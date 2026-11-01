@@ -1,0 +1,10 @@
+{# Above a form sent back with errors: errors that belong to no field, and how many fields are marked. form-errors.js then focuses the first one. Pass form. #}
+{% load text %}
+{% if form.errors %}
+  <div class="form-errors" role="alert">
+    {% for problem in form.non_field_errors %}<p>{{ problem }}</p>{% endfor %}
+    {% with count=form|invalid_fields %}
+      {% if count == 1 %}<p>Fix the field marked below.</p>{% elif count %}<p>Fix the {{ count }} fields marked below.</p>{% endif %}
+    {% endwith %}
+  </div>
+{% endif %}

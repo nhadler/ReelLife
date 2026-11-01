@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.hypothesis/
+
+# Local data and secrets
+/data/
+*.sqlite3
+.env
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+
+# Collected static files (built into the image or app directory)
+/staticfiles/
+/deploy/.env
+node_modules/
+
+# The composer's real exports stay on this machine (Nick, Oct 31).
+fixtures/real/*
+!fixtures/real/README.md
+
+# The maintainer's design notes, research and screenshots, and local
+# AI-assistant files: kept on the maintainer's machine, never published.
+/private/
+/CLAUDE.md
+/.claude/

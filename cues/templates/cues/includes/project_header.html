@@ -1,0 +1,83 @@
+{# The project bar and progress bar. Needs project, summary, tab. #}
+<header class="project-bar">
+  <span class="project-bar__thumb" aria-hidden="true">
+    {% include "cues/includes/thumbnail.html" %}
+  </span>
+  <div class="project-bar__main">
+    <div class="project-bar__name">
+      <h1><a href="{% url 'cues:project' project.pk %}">{{ project.title }}</a></h1>
+    </div>
+    {% if summary.has_cues %}
+      {# Four columns: label, cues, times, then the pace and conform. #}
+      <div class="project-bar__figures">
+        <p class="project-bar__line">
+          <span class="project-bar__label">Composed</span>
+          <span>{{ summary.figures.0 }}</span>
+          <span class="project-bar__dim">{{ summary.figures.1 }}</span>
+          <span></span>
+        </p>
+        <p class="project-bar__line">
+          <span class="project-bar__label">Remaining</span>
+          <span>{{ summary.figures.2 }}</span>
+          {% if summary.pace and summary.pace.write_seconds or summary.pace and summary.pace.revise_seconds %}
+            <span class="project-bar__dim pace"
+                  title="{{ summary.pace.days }} working day{{ summary.pace.days|pluralize }} to {{ summary.pace.due|date:day_format }}">Per day
+              <strong>{{ summary.pace.write }}</strong> write{% if summary.pace.revise_seconds %}, <strong>{{ summary.pace.revise }}</strong> revise{% endif %}</span>
+          {% elif summary.next_deadline %}
+            <span class="project-bar__dim{% if summary.next_deadline.soon %} deadline--soon{% endif %}">
+              {{ summary.next_deadline.label }} due {{ summary.next_deadline.date|date:day_format }}</span>
+          {% else %}
+            <span></span>
+          {% endif %}
+          {% if summary.needs_conform %}
+            <a class="conform" href="{% url 'cues:conform' project.pk %}" data-palette="Conform" title="Conform them">{{ summary.needs_conform }} on older picture</a>
+          {% else %}
+            <span></span>
+          {% endif %}
+        </p>
+      </div>
+      {% include "cues/includes/breakdown.html" with b=summary.breakdown %}
+    {% else %}
+      <p class="project-bar__figures project-bar__quiet">No cues yet</p>
+    {% endif %}
+  </div>
+  <nav class="project-bar__links" aria-label="Project">
+    <a href="{% url 'cues:project' project.pk %}"{% if tab == "cues" %} aria-current="page"{% endif %} title="The cues">
+      {% include "cues/includes/icon.html" with name="cues" %}<span>Cues</span></a>
+    {# Labelled when there's room; icons with tooltips in narrow windows (Nick, Oct 31). #}
+    <a class="project-bar__icon" href="{% url 'cues:picture' project.pk %}"{% if tab == "picture" %} aria-current="page"{% endif %} data-palette="Picture" title="Picture">
+      {% include "cues/includes/icon.html" with name="picture" %}<span>Picture</span></a>
+    {% if tab == "cues" %}
+      {# Opens beside the grid, to stay open while you work. #}
+      <button type="button" class="project-bar__link project-bar__icon" id="notes-toggle" data-palette="Project Notes"
+              data-panel-url="{% url 'cues:project_notes_panel' project.pk %}"
+              title="Project notes" aria-expanded="false">
+        {% include "cues/includes/icon.html" with name="notes" %}<span>Notes</span></button>
+    {% else %}
+      <a class="project-bar__icon" href="{% url 'cues:project_notes' project.pk %}"{% if tab == "notes" %} aria-current="page"{% endif %} data-palette="Project Notes" title="Project notes">
+        {% include "cues/includes/icon.html" with name="notes" %}<span>Notes</span></a>
+    {% endif %}
+    {% include "cues/includes/project_menu.html" %}
+  </nav>
+  {% if request.user.role != "viewer" %}
+    {% if tab == "cues" %}
+      <button class="button project-bar__new" id="grid-new-cue" type="button" data-palette="New Cue" data-palette-keys="Control+N" title="New cue (Control+N)"
+              hx-get="{% url 'cues:new_cue' project.pk %}"
+              hx-target="#app-dialog" hx-swap="innerHTML">New Cue</button>
+    {% else %}
+      {# Opens the overview with the new cue dialog up (grid.js). #}
+      <a class="button button--quiet project-bar__new" href="{% url 'cues:project' project.pk %}?new=1" data-palette="New Cue">New Cue</a>
+    {% endif %}
+  {% endif %}
+</header>
+{% if summary.segments %}
+  <svg class="progress-bar" viewBox="0 0 100 1" preserveAspectRatio="none"
+       role="img" aria-label="{% for s in summary.segments %}{{ s.label }} {{ s.percent }}%{% if not forloop.last %}, {% endif %}{% endfor %}">
+    {% for s in summary.segments %}
+      <rect class="progress-bar__{{ s.css }}" x="{{ s.start|floatformat:'4u' }}" y="0"
+            width="{{ s.width|floatformat:'4u' }}" height="1"><title>{{ s.label }} ({{ s.percent }}%)</title></rect>
+    {% endfor %}
+  </svg>
+{% else %}
+  <div class="progress-bar progress-bar--empty" aria-hidden="true"></div>
+{% endif %}

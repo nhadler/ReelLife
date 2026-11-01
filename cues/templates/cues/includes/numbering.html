@@ -1,0 +1,11 @@
+{# Which cue numbers are valid: plain choices, the regex only for "Custom". #}
+{% load text %}
+<fieldset class="field field--wide numbering">
+  <legend class="field__label">{{ form.numbering.label|title_case }}</legend>
+  {% for choice in form.numbering %}<label class="menu__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  <span class="helptext">{{ form.numbering.help_text }}</span>
+  {{ form.numbering.errors }}
+</fieldset>
+<div class="numbering-custom field--wide">
+  {% include "cues/includes/field.html" with field=form.cue_number_pattern wide=True %}
+</div>

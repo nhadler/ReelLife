@@ -1,0 +1,24 @@
+{# One details-page field. It saves itself on change (hx-* attributes on the widget) and the response replaces this wrapper. Pass field, error, oob. #}
+{% load text %}
+{% if field.field.disabled %}
+  {% with shown=field|readout %}
+    {% if shown %}
+      <div class="field field--readout{% if field.widget_type == 'textarea' %} field--wide{% endif %}" id="f-{{ field.auto_id }}">
+        <span class="field__label">{{ field.label|title_case }}</span>
+        <p class="field__value">{{ shown|linebreaksbr }}</p>
+      </div>
+    {% endif %}
+  {% endwith %}
+{% else %}
+<div class="field{% if field.widget_type == 'textarea' %} field--wide{% endif %}{% if field.widget_type == 'checkbox' %} field--check{% endif %}"
+     id="f-{{ field.auto_id }}"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if field.widget_type == "checkbox" %}
+    {{ field }}
+    <label for="{{ field.id_for_label }}">{{ field.label|title_case }}</label>
+  {% else %}
+    <label for="{{ field.id_for_label }}">{{ field.label|title_case }}</label>
+    {{ field }}
+  {% endif %}
+  {% if error %}<ul class="errorlist" role="alert"><li>{{ error }}</li></ul>{% endif %}
+</div>
+{% endif %}

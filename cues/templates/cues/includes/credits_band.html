@@ -1,0 +1,11 @@
+{# A Credits card: icon, title, count and Add over its table. #}
+<section class="credit-card" data-party-section aria-labelledby="{{ fs.prefix }}-title">
+  <header class="credit-card__head">
+    <span class="credit-card__icon">{% include "cues/includes/icon.html" with name=icon %}</span>
+    <div class="credit-card__titles">
+      <h2 id="{{ fs.prefix }}-title">{{ title }} <span class="count-pill" data-party-count>{{ count }}</span></h2>
+    </div>
+    <button class="button button--quiet button--small" type="button" data-party-add="{{ fs.prefix }}" hidden>{% include "cues/includes/icon.html" with name="plus" %}{{ add }}</button>
+  </header>
+  {% include "cues/includes/party_table.html" with fs=fs writers=writers %}
+</section>

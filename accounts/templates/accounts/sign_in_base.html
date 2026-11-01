@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{# Sign-in and its error pages: the wordmark, a few words, the cue strip. #}
+
+{% block page_class %}sign-in{% endblock %}
+
+{% block content %}
+  <section class="sign-in__copy">
+    {% block mark %}
+      <p class="sign-in__mark sign-in__mark--small"><span class="wordmark__reel">Reel</span>Life</p>
+    {% endblock %}
+    {% block sign_in %}{% endblock %}
+  </section>
+  {% include "accounts/includes/cue_strip.html" %}
+{% endblock %}

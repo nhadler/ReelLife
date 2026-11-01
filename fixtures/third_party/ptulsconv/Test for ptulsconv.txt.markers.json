@@ -1,0 +1,10 @@
+{
+  "source": "Pro Tools markers",
+  "frame_rate": "23.976",
+  "drop_frame": false,
+  "warnings": [
+    "Line 23: '{Title=Multiple Marker Rulers Project}' isn't a cue; skipped.",
+    "Line 24: 'Track Marker' isn't a cue; skipped."
+  ],
+  "rows": []
+}

@@ -1,0 +1,181 @@
+[project]
+name = "reellife"
+version = "0.4.0"
+description = "Self-hosted music cue tracking for film and TV composers."
+readme = "README.md"
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE", "NOTICE.md"]
+authors = [{ name = "Nicholas Hadler" }]
+keywords = ["film scoring", "music cues", "cue sheet", "timecode", "self-hosted"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Web Environment",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio",
+]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "argon2-cffi>=25.1.0",
+    "defusedxml>=0.7.1",
+    "django>=5.2,<5.3",
+    "django-csp>=4.0",
+    "django-otp>=1.7.5",
+    "django-ratelimit>=4.1.0",
+    "django-simple-history>=3.13.0",
+    "gunicorn>=26.2.0",
+    "markdown>=3.7",
+    "mcp>=1.20",
+    "mido>=1.3",
+    "mozilla-django-oidc>=5.0.2",
+    "openpyxl>=3.1.5",
+    "pillow>=13.0.0",
+    "tzdata>=2026.6",
+    "weasyprint>=70.0",
+    "whitenoise>=6.12.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/nhadler/reellife"
+Documentation = "https://github.com/nhadler/reellife/tree/main/docs"
+Changelog = "https://github.com/nhadler/reellife/blob/main/CHANGELOG.md"
+Issues = "https://github.com/nhadler/reellife/issues"
+
+[project.scripts]
+# Bare-metal entry point: `reellife migrate`, `reellife nightly`, ...
+reellife = "reellife.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["accounts", "cues", "mcp_server", "reellife"]
+
+[dependency-groups]
+dev = [
+    "bandit",
+    "django-stubs[compatible-mypy]>=6.1.2",
+    "factory-boy>=3.3.3",
+    "freezegun>=1.5.5",
+    "hypothesis",
+    "mypy",
+    "pip-audit",
+    "pre-commit>=4.7.0",
+    "pylint",
+    "pylint-django>=2.8.0",
+    "pytest",
+    "pytest-cov",
+    "pytest-django>=4.14.0",
+    "pytest-playwright>=0.10.0",
+    "pytest-xdist",
+    "responses>=0.26.3",
+    "ruff",
+    "types-defusedxml>=0.7.0.20260504",
+    "types-markdown>=3.11.2.20261029",
+    "types-openpyxl>=3.1.5.20261017",
+    "types-requests>=2.33.0.20261030",
+]
+
+[tool.ruff]
+line-length = 80
+target-version = "py312"
+extend-exclude = [".claude", "fixtures", "private"]
+
+[tool.ruff.lint]
+# pycodestyle, pyflakes, isort, pep8-naming, bugbear, bandit, Google
+# docstrings and pyupgrade.
+select = ["E", "W", "F", "I", "N", "B", "S", "D", "UP"]
+# Django's inner Meta classes are configuration, not API.
+ignore = ["D106"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.isort]
+# Google style: one import per line, sorted within each section.
+force-single-line = true
+force-sort-within-sections = true
+single-line-exclusions = ["typing", "collections.abc"]
+
+[tool.ruff.lint.per-file-ignores]
+# Test names say what they check; asserts are how pytest works.
+"tests/**" = ["D", "S101", "S105", "S106"]
+"**/migrations/**" = ["D", "E501", "I"]
+
+[tool.mypy]
+strict = true
+python_version = "3.12"
+files = ["accounts", "cues", "mcp_server", "reellife", "tests", "scripts", "manage.py"]
+plugins = ["mypy_django_plugin.main"]
+
+[[tool.mypy.overrides]]
+# No type information published.
+module = [
+    "mozilla_django_oidc.*",
+    "django_ratelimit.*",
+    "django_otp.*",
+    "simple_history.*",
+    "weasyprint",
+    "weasyprint.*",
+    "mido",
+    "mido.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# Migrations are generated code; their schema is checked by
+# makemigrations --check and the migration tests instead.
+module = ["accounts.migrations.*", "cues.migrations.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# factory_boy's declarations are untyped and re-exported from its
+# package root; factories themselves are typed by model.
+module = ["factory", "factory.*"]
+implicit_reexport = true
+
+[[tool.mypy.overrides]]
+module = ["tests.factories"]
+disallow_untyped_calls = false
+
+[tool.django-stubs]
+django_settings_module = "reellife.settings.test"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+DJANGO_SETTINGS_MODULE = "reellife.settings.test"
+# Large tests need Docker or a browser: `just test-container`, `just e2e`.
+addopts = "-ra --strict-markers -m 'not large'"
+markers = [
+    "small: pure logic, no database or network",
+    "medium: Django test client and SQLite",
+    "large: the container, systemd and the browser end to end",
+]
+filterwarnings = [
+    # pytest-playwright's own base_url fixture; nothing of ours.
+    "ignore:Session-scoped fixtures defined as instance methods:pytest.PytestRemovedIn10Warning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["accounts", "cues", "mcp_server", "reellife"]
+# Production and dev settings load in subprocesses (tests/medium/
+# test_prod_settings.py) or not at all under test, so coverage can't see them.
+omit = [
+    "*/migrations/*",
+    "reellife/wsgi.py",
+    "reellife/settings/dev.py",
+    "reellife/settings/prod.py",
+    "reellife/settings/build.py",
+]
+
+[tool.coverage.report]
+# Script entry points run in the large container tests, not under coverage.
+exclude_also = ['if __name__ == "__main__":']
+show_missing = true
+skip_covered = true
+fail_under = 90

@@ -1,0 +1,157 @@
+/* PDFs (cues/exporters/pdf.py): landscape Letter, the app's type. */
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('{fonts}/instrument-sans-latin-wght.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  src: url('{fonts}/ibm-plex-mono-400.woff2') format('woff2');
+}
+
+@page {
+  size: letter landscape;
+  margin: 0.5in 0.5in 0.6in;
+
+  @bottom-left {
+    content: string(project);
+    color: #6b7280;
+    font:
+      8pt 'Instrument Sans',
+      sans-serif;
+  }
+
+  @bottom-right {
+    content: 'Page ' counter(page) ' of ' counter(pages);
+    color: #6b7280;
+    font:
+      8pt 'Instrument Sans',
+      sans-serif;
+  }
+}
+
+body {
+  color: #111827;
+  font:
+    9pt/1.35 'Instrument Sans',
+    sans-serif;
+}
+
+h1 {
+  margin: 0 0 2pt;
+  font-size: 15pt;
+  string-set: project content();
+}
+
+.meta {
+  margin: 0 0 10pt;
+  color: #6b7280;
+}
+
+h2 {
+  margin: 12pt 0 4pt;
+  font-size: 11pt;
+  break-after: avoid;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 2pt 4pt;
+  border-bottom: 0.5pt solid #d1d5db;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: #374151;
+  font-weight: 600;
+}
+
+thead {
+  display: table-header-group;
+}
+
+tr {
+  break-inside: avoid;
+}
+
+.tc {
+  font-family: 'IBM Plex Mono', monospace;
+  white-space: nowrap;
+}
+
+.subtotal td {
+  border-bottom: 1pt solid #9ca3af;
+  font-weight: 600;
+}
+
+.block {
+  margin: 0 0 10pt;
+  width: auto;
+}
+
+/* Wall chart: cards by reel. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6pt;
+}
+
+.card {
+  padding: 5pt 6pt;
+  border: 0.75pt solid #9ca3af;
+  border-radius: 4pt;
+  break-inside: avoid;
+}
+
+.card__bar {
+  display: block;
+  width: 100%;
+  height: 4pt;
+  margin-bottom: 4pt;
+}
+
+.card__number {
+  font:
+    600 12pt 'IBM Plex Mono',
+    monospace;
+}
+
+.card__title {
+  margin: 1pt 0 3pt;
+  font-weight: 600;
+}
+
+.card__facts {
+  color: #374151;
+  font-size: 8pt;
+}
+
+/* Version notes. */
+.cue {
+  margin: 0 0 8pt;
+  break-inside: avoid;
+}
+
+.cue h3 {
+  margin: 0 0 2pt;
+  font-size: 10pt;
+}
+
+.version {
+  margin: 0 0 4pt 10pt;
+}
+
+.version__label {
+  font-weight: 600;
+}
+
+.notes {
+  margin: 1pt 0 0;
+  white-space: pre-line;
+}

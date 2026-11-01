@@ -1,0 +1,9 @@
+{% extends "cues/tools/base.html" %}
+{% block fields %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.tc_in %}
+    {% include "cues/includes/field.html" with field=form.tc_out %}
+    {% include "cues/includes/field.html" with field=form.keeper wide=True %}
+    {% include "cues/includes/field.html" with field=form.others wide=True %}
+  </div>
+{% endblock %}

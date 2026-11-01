@@ -1,0 +1,48 @@
+{# The new version dialog's contents, loaded into #app-dialog by htmx. #}
+<form class="dialog__form" method="post" novalidate
+      hx-post="{% url 'cues:new_version' cue.pk %}"
+      hx-target="#app-dialog" hx-swap="innerHTML">
+  {% csrf_token %}
+  <header class="dialog__head">
+    <h2 id="dialog-title">New Version of {{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %}</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  <p class="muted">Saving makes it the current version. Times are {{ project.rate.label }} timecode.</p>
+  {% include "cues/includes/form_errors.html" %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.label %}
+    {% include "cues/includes/field.html" with field=form.written_to %}
+    {% include "cues/includes/field.html" with field=form.status %}
+    {% include "cues/includes/field.html" with field=form.review_status %}
+    {% include "cues/includes/field.html" with field=form.sub_status %}
+    {% include "cues/includes/field.html" with field=form.tc_in %}
+    {% include "cues/includes/field.html" with field=form.tc_out %}
+    {% include "cues/includes/field.html" with field=form.duration %}
+    {% include "cues/includes/field.html" with field=form.seq_start %}
+    {% include "cues/includes/field.html" with field=form.in_note %}
+    {% include "cues/includes/field.html" with field=form.out_note %}
+    {% include "cues/includes/field.html" with field=form.update_cue wide=True %}
+    {% include "cues/includes/field.html" with field=form.revision_notes wide=True %}
+    {% include "cues/includes/field.html" with field=form.file_link %}
+    {% include "cues/includes/field.html" with field=form.delivered_at %}
+    {% include "cues/includes/field.html" with field=form.notes wide=True %}
+    {% include "cues/includes/field.html" with field=form.change_notes wide=True %}
+  </div>
+  {# Copied from the current version; collapsed fields still submit. #}
+  <details class="dialog__section">
+    <summary>Spotting</summary>
+    <div class="fields">
+      {% include "cues/includes/field.html" with field=form.spotting_notes wide=True %}
+      {% include "cues/includes/field.html" with field=form.temp %}
+      {% include "cues/includes/field.html" with field=form.scene_description wide=True %}
+      {% include "cues/includes/field.html" with field=form.key %}
+      {% include "cues/includes/field.html" with field=form.bpm %}
+      {% include "cues/includes/field.html" with field=form.meter %}
+    </div>
+  </details>
+  <footer class="form-actions">
+    <button class="button" type="submit">Save Version</button>
+    <button class="button button--quiet" type="submit" name="and_open" value="1">Save and Open Cue Details</button>
+    <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+  </footer>
+</form>

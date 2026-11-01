@@ -1,0 +1,22 @@
+{# One kind of project notes; saves itself on change. Needs project, note, can_edit; optional error, saved, draft (text refused because the note changed elsewhere). #}
+<section class="project-note" id="note-{{ note.kind }}" aria-labelledby="note-{{ note.kind }}-title">
+  <h3 class="project-note__title" id="note-{{ note.kind }}-title">{{ note }}</h3>
+  {% if can_edit %}
+    <form hx-post="{% url 'cues:project_note_save' project.pk note.kind %}"
+          hx-trigger="change from:find textarea" hx-target="closest .project-note" hx-swap="outerHTML">
+      <input type="hidden" name="updated_at" value="{% if note.pk %}{{ note.updated_at.isoformat }}{% endif %}">
+      <textarea name="text" rows="5" aria-labelledby="note-{{ note.kind }}-title">{% if draft is not None %}{{ draft }}{% else %}{{ note.text }}{% endif %}</textarea>
+    </form>
+    {% if error %}<p class="errorlist" role="alert">{{ error }}</p>{% elif saved %}<p class="project-note__saved" role="status">Saved.</p>{% endif %}
+    {% if draft is not None %}
+      <div class="project-note__theirs">
+        <p class="project-note__theirs-title">Saved Text</p>
+        {% if note.text %}<div class="project-note__text">{{ note.text|linebreaksbr }}</div>{% else %}<p class="muted">Empty.</p>{% endif %}
+      </div>
+    {% endif %}
+  {% elif note.text %}
+    <div class="project-note__text">{{ note.text|linebreaksbr }}</div>
+  {% else %}
+    <p class="muted">No notes yet.</p>
+  {% endif %}
+</section>

@@ -1,0 +1,136 @@
+{# Import step two, swapped into #import-preview inside the import form. #}
+{% if form.errors %}
+  <div class="import__problem" role="alert">
+    {% for field in form %}{% for error in field.errors %}<p>{{ field.label }}: {{ error }}</p>{% endfor %}{% endfor %}
+    {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+  </div>
+{% elif error and not preview %}
+  <div class="import__problem" role="alert"><p>{{ error }}</p></div>
+{% elif preview %}
+  <div class="import-preview--ready">
+    <input type="hidden" name="previewed" value="1">
+    <input type="hidden" name="fingerprint" value="{{ fingerprint }}">
+    <input type="hidden" name="numbers_key" value="{{ numbers_key }}">
+    {% if notice %}<p class="import__notice" role="alert">{{ notice }}</p>{% endif %}
+    {% if error %}<p class="import__problem" role="alert">{{ error }}</p>{% endif %}
+
+    <p class="import__summary">
+      {{ preview.source }}:
+      <strong>{{ counts.new }} new</strong>, <strong>{{ counts.update }} to update</strong>{% if counts.skip %}, {{ counts.skip }} unchanged{% endif %}.
+      Updates change only IN, OUT and Seq. start{% if form.cleaned_data.update_titles %}, and titles{% endif %}.
+    </p>
+
+    {% if preview.warnings %}
+      <details class="import__details">
+        <summary>{{ preview.warnings|length }} warning{{ preview.warnings|length|pluralize }}</summary>
+        <ul>{% for warning in preview.warnings %}<li>{{ warning }}</li>{% endfor %}</ul>
+      </details>
+    {% endif %}
+    {% if preview.excluded %}
+      <details class="import__details">
+        <summary>{{ preview.excluded|length }} row{{ preview.excluded|length|pluralize }} left out: the cue # doesn't fit Valid Cue Numbers</summary>
+        <ul>{% for row in preview.excluded %}<li>Line {{ row.line }}: {{ row.label|default:"(no name)" }}</li>{% endfor %}</ul>
+      </details>
+    {% endif %}
+    {% if columns %}
+      <details class="import__details">
+        <summary>Columns</summary>
+        <div class="import__columns">
+          {% for column, name in columns %}
+            <label class="field">
+              <span class="field__label">“{{ column.header|default:"(blank)" }}”</span>
+              <select name="{{ name }}"
+                      hx-post="{% url 'cues:import_preview' project.pk %}" hx-trigger="change"
+                      hx-target="#import-preview" hx-swap="innerHTML">
+                <option value="">Ignore</option>
+                {% for value, label in fields %}
+                  <option value="{{ value }}"{% if column.field == value %} selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </label>
+          {% endfor %}
+        </div>
+      </details>
+    {% endif %}
+
+    {% if rows %}
+      <div class="table-scroll import__table-wrap">
+        <table class="table import-table">
+          <thead>
+            <tr>
+              <th scope="col"><span class="visually-hidden">Import</span></th>
+              <th scope="col">Cue #</th>
+              <th scope="col">
+                <label class="import-table__title">
+                  <input type="checkbox" name="update_titles"{% if form.cleaned_data.update_titles %} checked{% endif %}
+                         hx-post="{% url 'cues:import_preview' project.pk %}" hx-trigger="change"
+                         hx-target="#import-preview" hx-swap="innerHTML">
+                  Title <span class="muted">(update)</span>
+                </label>
+              </th>
+              <th scope="col">IN</th>
+              <th scope="col">OUT</th>
+              <th scope="col">DUR</th>
+              {% if counts.new %}<th scope="col">{{ project.reel_word }}</th>{% endif %}
+              <th scope="col"><span class="visually-hidden">Change</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr class="import-table__row import-table__row--{{ row.change.action }}">
+                <td>
+                  <input type="checkbox" name="include" value="{{ row.index }}"
+                         aria-label="Import {{ row.change.row.number }}"
+                         {% if row.included %}checked{% endif %}{% if row.change.action == "skip" %} disabled{% endif %}>
+                </td>
+                <td class="tc">{{ row.change.row.number }}</td>
+                <td>
+                  {% if row.old_title %}<del>{{ row.old_title }}</del> {% endif %}{{ row.title }}
+                  {% if row.change.reason %}<span class="import-table__reason">{{ row.change.reason }}</span>{% endif %}
+                </td>
+                <td class="tc">{% if row.old_in %}<del>{{ row.old_in }}</del><br>{% endif %}{{ row.tc_in }}</td>
+                <td class="tc">{% if row.old_out %}<del>{{ row.old_out }}</del><br>{% endif %}{{ row.tc_out }}</td>
+                <td class="tc">{{ row.duration }}</td>
+                {% if counts.new %}<td>{{ row.reel }}</td>{% endif %}
+                <td>
+                  <span class="badge badge--{{ row.change.action }}">{% if row.change.action == "new" %}New{% elif row.change.action == "update" %}Update{% else %}Same{% endif %}</span>
+                  {% if row.moves_to %}<span class="import-table__conform">moves to {{ row.moves_to }}</span>{% endif %}
+                  {% if row.offset %}<span class="import-table__conform" title="Written to older picture">offset {{ row.offset }}{% if row.difference %}, length {{ row.difference }}{% endif %}</span>{% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="empty">No cues found in the file.</p>
+    {% endif %}
+
+    {% if missing %}
+      <fieldset class="import__missing">
+        <legend>{{ missing|length }} cue{{ missing|length|pluralize }} in the project {{ missing|length|pluralize:"isn't,aren't" }} in the file</legend>
+        <div class="segmented">
+          {% for value, label in missing_choices %}
+            <label class="segmented__choice"><input type="radio" name="missing" value="{{ value }}"{% if value == missing_choice %} checked{% endif %}> {{ label }}</label>
+          {% endfor %}
+        </div>
+        <div class="import__missing-list">
+          {% for cue, on in missing %}
+            <label class="menu__choice"><input type="checkbox" name="missing_ids" value="{{ cue.cue_id }}"{% if on %} checked{% endif %}> {{ cue.number }} {{ cue.title }}</label>
+          {% endfor %}
+        </div>
+      </fieldset>
+    {% endif %}
+
+    <footer class="form-actions">
+      <button class="button" type="button"
+              hx-post="{% url 'cues:import_apply' project.pk %}"
+              hx-target="#import-preview" hx-swap="innerHTML"
+              hx-disabled-elt="this">Import</button>
+      <button class="button button--quiet" type="button"
+              hx-get="{% url 'cues:import_preview' project.pk %}"
+              hx-target="#import-preview" hx-swap="innerHTML">Back</button>
+      <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+    </footer>
+  </div>
+{% endif %}

@@ -1,0 +1,31 @@
+{# A cue tool's dialog, loaded into #app-dialog by htmx. #}
+<form class="dialog__form tool-form" method="post" novalidate
+      hx-post="{{ action }}" hx-target="#app-dialog" hx-swap="innerHTML">
+  {% csrf_token %}
+  <input type="hidden" name="cues" value="{{ cue_ids }}">
+  <header class="dialog__head">
+    <h2 id="dialog-title">{{ form.heading }}</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  {% if selection_error %}
+    <p class="tool-form__problem">{{ selection_error }}</p>
+    <footer class="form-actions">
+      <button class="button button--quiet" type="button" data-dialog-close>Close</button>
+    </footer>
+  {% else %}
+    {% block intro %}{% endblock %}
+    {{ form.non_field_errors }}
+    {% block fields %}{% endblock %}
+    {# Redrawn by the server whenever a field changes. The first draw (opening) says nothing about fields not yet filled in. #}
+    <section class="tool-preview" id="tool-preview" aria-label="Preview" aria-live="polite"
+             hx-post="{{ action }}" hx-vals='{"preview": "1"}' hx-target="this" hx-swap="innerHTML"
+             hx-trigger="change from:closest form, keyup changed delay:400ms from:closest form">
+    </section>
+    <div hidden hx-post="{{ action }}" hx-vals='{"preview": "1", "opening": "1"}'
+         hx-target="#tool-preview" hx-swap="innerHTML" hx-trigger="load"></div>
+    <footer class="form-actions">
+      <button class="button{% if name == 'delete' %} button--danger{% endif %}" type="submit">{{ form.apply_label }}</button>
+      <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+    </footer>
+  {% endif %}
+</form>

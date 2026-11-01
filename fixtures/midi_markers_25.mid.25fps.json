@@ -1,0 +1,42 @@
+{
+  "source": "MIDI file markers",
+  "frame_rate": null,
+  "drop_frame": null,
+  "warnings": [
+    "Marker 1: 'FFOA' isn't a cue; skipped.",
+    "Marker 4: 1m02 has no OUT; it ends at the next marker ('1m03 Night IN').",
+    "Marker 7: 2m01 OUT has no IN; ignored."
+  ],
+  "rows": [
+    {
+      "line": 2,
+      "label": "1m01 Main Title IN",
+      "number": "1m01",
+      "title": "Main Title",
+      "in": "01:00:10:00",
+      "out": "01:00:24:00",
+      "in_frames": 90250,
+      "out_frames": 90600
+    },
+    {
+      "line": 4,
+      "label": "1m02",
+      "number": "1m02",
+      "title": "",
+      "in": "01:00:30:00",
+      "out": "01:00:40:00",
+      "in_frames": 90750,
+      "out_frames": 91000
+    },
+    {
+      "line": 5,
+      "label": "1m03 Night IN",
+      "number": "1m03",
+      "title": "Night",
+      "in": "01:00:40:00",
+      "out": "01:00:50:00",
+      "in_frames": 91000,
+      "out_frames": 91250
+    }
+  ]
+}

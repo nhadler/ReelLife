@@ -1,0 +1,78 @@
+{% extends "app.html" %}
+{% load timecodes %}
+
+{% block title %}Conform · {{ project.title }} · ReelLife{% endblock %}
+
+{% block subheader %}
+  <div class="project-band">{% include "cues/includes/project_header.html" %}</div>
+{% endblock %}
+
+{% block content %}
+  <div class="page-head"><h1>Conform</h1>{% include "cues/includes/help_link.html" with slug="conform" %}</div>
+
+  <section class="form-section" aria-labelledby="moved-title">
+    <h2 id="moved-title">{{ project.reels_word }} That Moved{% if turnover %} in {{ turnover }}{% endif %}</h2>
+    {% if moves %}
+      <form method="post" action="{% url 'cues:conform_shift' project.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="turnover" value="{{ turnover.pk }}">
+        <ul class="conform-moves">
+          {% for move, offset in moves %}
+            {% if move.cues %}
+              <li class="field field--check">
+                <input type="checkbox" name="reel" value="{{ move.picture.pk }}" id="reel-{{ move.picture.pk }}" checked{% if not can_edit %} disabled{% endif %}>
+                <label for="reel-{{ move.picture.pk }}">Shift {{ move.picture.title }}'s {{ move.cues }} cue{{ move.cues|pluralize }} by {{ offset }}</label>
+              </li>
+            {% else %}
+              <li class="conform-moves__done">{{ move.picture.title }} moved by {{ offset }}; its cues are already shifted.</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+        {% if can_edit and to_shift %}<div class="form-actions"><button class="button button--quiet" type="submit">Shift Cues</button></div>{% endif %}
+      </form>
+    {% else %}
+      <p class="muted">{% if turnover %}No reel's IN moved in {{ turnover }}.{% else %}No turnovers yet.{% endif %}</p>
+    {% endif %}
+  </section>
+
+  <section class="form-section" aria-labelledby="stale-title">
+    <h2 id="stale-title">On Older Picture</h2>
+    {% if stale %}
+      <form method="post" action="{% url 'cues:conform_mark' project.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="turnover" value="{{ turnover.pk }}">
+        <table class="table conform-table">
+          <thead>
+            <tr>
+              <th scope="col">{% if can_edit %}<input type="checkbox" data-select-all="cue" aria-label="Select all cues on older picture">{% else %}<span class="visually-hidden">Mark</span>{% endif %}</th>
+              <th scope="col">Cue #</th><th scope="col">Title</th><th scope="col">Written To</th>
+              <th scope="col">Start Offset</th><th scope="col">Dur. Diff.</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in stale %}
+              <tr>
+                <td><input type="checkbox" name="cue" value="{{ item.cue.pk }}" id="cue-{{ item.cue.pk }}" aria-label="Mark {{ item.cue.number }} conformed"{% if not can_edit %} disabled{% endif %}></td>
+                <td><a href="{% url 'cues:cue' item.cue.pk %}">{{ item.cue.number }}</a></td>
+                <td>{{ item.cue.title }}</td>
+                <td>{{ item.written_to }}</td>
+                <td class="tc">{{ item.start_offset }}</td>
+                <td class="tc">{{ item.duration_difference }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% if can_edit %}
+          <fieldset class="segmented">
+            <legend>Mark Conformed By</legend>
+            <label class="segmented__choice"><input type="radio" name="how" value="update" checked> Moving the Current Version to the New Picture</label>
+            <label class="segmented__choice"><input type="radio" name="how" value="new"> Adding a New Version on the New Picture</label>
+          </fieldset>
+          <div class="form-actions"><button class="button" type="submit">Mark Conformed</button></div>
+        {% endif %}
+      </form>
+    {% else %}
+      <p class="muted">Every cue is on its current picture.</p>
+    {% endif %}
+  </section>
+{% endblock %}

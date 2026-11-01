@@ -1,0 +1,4 @@
+{# Opens one kind of project notes in the dialog. Needs project, kind. #}
+<button type="button" class="details-group__notes"
+        hx-get="{% url 'cues:project_notes_panel' project.pk %}?kind={{ kind }}"
+        hx-target="#app-dialog" hx-swap="innerHTML">Project Notes</button>

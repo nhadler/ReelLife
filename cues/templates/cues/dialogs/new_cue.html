@@ -1,0 +1,70 @@
+{# The new cue dialog in four columns. Loaded into #app-dialog by htmx. #}
+{% load text %}
+<form class="dialog__form" method="post" novalidate
+      hx-post="{% url 'cues:new_cue' project.pk %}"
+      hx-target="#app-dialog" hx-swap="innerHTML">
+  {% csrf_token %}
+  <header class="dialog__head">
+    <h2 id="dialog-title">New Cue <span class="dialog__sub">{{ project.title }}</span></h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  {% if added %}<p class="dialog__note" role="status">Added {{ added }}.</p>{% endif %}
+  {% include "cues/includes/form_errors.html" %}
+
+  <div class="cue-form">
+    <div id="number-field">{% include "cues/includes/field.html" with field=form.number %}</div>
+    <div class="span-2">{% include "cues/includes/field.html" with field=form.title %}</div>
+    {% include "cues/includes/field.html" with field=form.cue_type %}
+
+    {% include "cues/includes/field.html" with field=form.status %}
+    {% include "cues/includes/field.html" with field=form.difficulty %}
+    {% include "cues/includes/field.html" with field=form.priority %}
+    {% include "cues/includes/field.html" with field=form.sub_status %}
+
+    <div class="span-4">{% include "cues/includes/field.html" with field=form.scene_description %}</div>
+    <div class="span-2">{% include "cues/includes/field.html" with field=form.scene %}</div>
+    <div class="span-2 cue-form__checks">
+      {% include "cues/includes/field.html" with field=form.plays_as_source %}
+      {% include "cues/includes/field.html" with field=form.interrupted_use %}
+    </div>
+    <div class="span-2">{% include "cues/includes/field.html" with field=form.usage_theme %}</div>
+    <div class="span-2">{% include "cues/includes/field.html" with field=form.usage %}</div>
+
+    <hr class="span-4 cue-form__rule">
+
+    <div class="field">
+      <label for="{{ form.picture.id_for_label }}">{{ form.picture.label|title_case }}</label>
+      <select name="{{ form.picture.html_name }}" id="{{ form.picture.id_for_label }}"
+              hx-get="{% url 'cues:suggest_number' project.pk %}"
+              hx-trigger="change" hx-target="#number-field" hx-swap="innerHTML">
+        {% for value, label in form.picture.field.choices %}
+          {% if value %}<option value="{{ value }}"{% if value|stringformat:"s" == form.picture.value|stringformat:"s" %} selected{% endif %}>{{ label }}</option>{% endif %}
+        {% endfor %}
+      </select>
+      {{ form.picture.errors }}
+    </div>
+    <div class="span-3"></div>
+
+    {% include "cues/includes/field.html" with field=form.tc_in %}
+    {% include "cues/includes/field.html" with field=form.tc_out %}
+    {% include "cues/includes/field.html" with field=form.duration %}
+    {% include "cues/includes/field.html" with field=form.seq_start %}
+    <div class="span-2">{% include "cues/includes/field.html" with field=form.in_note %}</div>
+    <div class="span-2">{% include "cues/includes/field.html" with field=form.out_note %}</div>
+
+    <div class="span-4">{% include "cues/includes/field.html" with field=form.spotting_notes %}</div>
+    <div class="span-4">{% include "cues/includes/field.html" with field=form.temp %}</div>
+    <div class="span-4">{% include "cues/includes/field.html" with field=form.notes %}</div>
+    {% include "cues/includes/field.html" with field=form.key %}
+    {% include "cues/includes/field.html" with field=form.bpm %}
+    {% include "cues/includes/field.html" with field=form.meter %}
+    {% include "cues/includes/field.html" with field=form.artist %}
+    {% include "cues/includes/field.html" with field=form.cue_sheet_title %}
+  </div>
+
+  <footer class="form-actions">
+    <button class="button" type="submit">Save Cue</button>
+    <button class="button button--quiet" type="submit" name="and_new" value="1">Save and Add Another</button>
+    <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+  </footer>
+</form>

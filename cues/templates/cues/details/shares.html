@@ -1,0 +1,27 @@
+{# A cue's writers and publishers, for its cue sheet line. Saved as a whole; redrawn in place. #}
+<section class="details-group" id="shares-group" aria-labelledby="group-shares">
+  <h2 class="details-group__title" id="group-shares">Credits</h2>
+  {% if shares_saved %}<p class="form-saved" role="status">Saved.</p>{% endif %}
+  {% if shares_conflict is not None %}
+    <div class="errorlist" role="alert">
+      <p>Someone else changed these credits, so yours weren't saved. Here are theirs; make your changes again.</p>
+      {% if shares_conflict %}<p>You had: {{ shares_conflict|join:"; " }}.</p>{% endif %}
+    </div>
+  {% endif %}
+  {% if share_problems and not share_set.non_form_errors %}
+    <ul class="share-problems">{% for problem in share_problems %}<li>{{ problem }}</li>{% endfor %}</ul>
+  {% endif %}
+  {% if can_edit %}
+    <form hx-post="{% url 'cues:cue_shares' cue.pk %}" hx-target="#shares-group" hx-swap="outerHTML" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="shares_seen" value="{{ shares_seen }}">
+      {% include "cues/includes/inline_table.html" with fs=share_set add="Add Share" %}
+      <p class="muted">Writer shares add up to 100%, and publisher shares too when there are any. People and companies come from <a href="{% url 'cues:credits' %}">Credits</a>.</p>
+      <div class="form-actions"><button class="button button--small" type="submit">Save Shares</button></div>
+    </form>
+  {% else %}
+    <ul class="share-list">
+      {% for share in cue.shares.all %}<li>{{ share }}</li>{% empty %}<li class="muted">No writers or publishers yet.</li>{% endfor %}
+    </ul>
+  {% endif %}
+</section>

@@ -1,0 +1,73 @@
+{# Import step one: source, options and file. The preview is swapped into #import-preview; the file stays chosen, and goes with every step. #}
+{% load text %}
+<form class="dialog__form import" method="post" novalidate
+      hx-post="{% url 'cues:import_preview' project.pk %}"
+      hx-encoding="multipart/form-data"
+      hx-target="#import-preview" hx-swap="innerHTML">
+  {% csrf_token %}
+  <header class="dialog__head">
+    <h2 id="dialog-title">Import Cues</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+
+  <div class="import__options">
+    <fieldset class="segmented segmented--chips">
+      <legend>{{ form.kind.label|title_case }}</legend>
+      {% for choice in form.kind %}
+        <label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>
+      {% endfor %}
+    </fieldset>
+
+    <div class="fields">
+      {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a Pro Tools, Cubase, MIDI or spreadsheet file" %}
+    </div>
+
+    <fieldset class="import__source import__source--protools">
+      <legend>Pro Tools</legend>
+      <p class="muted">File › Export › Session Info as Text, with Time Format set to Timecode and "Include Track EDLs" or "Include Markers" ticked.</p>
+      <div class="fields">
+        <div class="field">
+          <span class="field__label">{{ form.method.label|title_case }}</span>
+          {% for choice in form.method %}<label class="menu__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+        </div>
+        {% include "cues/includes/field.html" with field=form.prefixes %}
+      </div>
+    </fieldset>
+
+    <fieldset class="import__source import__source--cubase">
+      <legend>Cubase or Nuendo</legend>
+      <p class="muted">Cycle markers on a marker track in Linear time, exported with File › Export › Selected Tracks.</p>
+    </fieldset>
+
+    <fieldset class="import__source import__source--midi">
+      <legend>MIDI File</legend>
+      <p class="muted">A MIDI file export with markers included. MIDI files keep only where each marker starts, so name them in IN and OUT pairs (1m01 Main Title IN, 1m01 OUT), or a bare cue # that ends at the next marker.</p>
+    </fieldset>
+
+    <fieldset class="import__source import__source--start">
+      <legend>Start</legend>
+      <div class="fields">
+        {% include "cues/includes/field.html" with field=form.start %}
+      </div>
+    </fieldset>
+
+    <fieldset class="import__source import__source--daw">
+      <legend>Names</legend>
+      <div class="fields">
+        {% include "cues/includes/field.html" with field=form.mapping %}
+        {% include "cues/includes/field.html" with field=form.start_number %}
+      </div>
+    </fieldset>
+
+    <div class="fields">
+      {% include "cues/includes/field.html" with field=form.picture %}
+    </div>
+
+    <footer class="form-actions">
+      <button class="button" type="submit">Preview</button>
+      <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+    </footer>
+  </div>
+
+  <div id="import-preview" aria-live="polite"></div>
+</form>

@@ -1,0 +1,3 @@
+{# A PDF's title and facts. Needs project, what, today. #}
+<h1>{% if project.production_number %}{{ project.production_number }} {% endif %}{{ project.title }}</h1>
+<p class="meta">{{ what }} · {{ project.rate.label }} · {{ today|date:date_format }}</p>

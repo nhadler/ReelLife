@@ -1,0 +1,17 @@
+{% extends "app.html" %}
+{# The composer's own days off, for every project (profile menu, Nick Nov 1). #}
+
+{% block title %}Your Days Off · ReelLife{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+  <div class="page-head"><h1>Your Days Off</h1>{% include "cues/includes/help_link.html" with slug="progress-and-deadlines" %}</div>
+  <form class="days-off-page" method="post" novalidate>
+    {% csrf_token %}
+    {# A disabled fieldset disables every control in it, for viewers. #}
+    <fieldset class="settings__fields"{% if not can_edit %} disabled{% endif %}>
+      {% include "cues/includes/days_off.html" with fs=days_off %}
+      {% if can_edit %}<div class="form-actions"><button class="button" type="submit">Save</button></div>{% endif %}
+    </fieldset>
+  </form>
+{% endblock %}

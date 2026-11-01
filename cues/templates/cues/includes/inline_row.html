@@ -1,0 +1,31 @@
+{# One row of inline_table.html: `form`, and `number` for its labels. #}
+{% if form.non_field_errors %}
+  <tr><td colspan="99">{{ form.non_field_errors }}</td></tr>
+{% endif %}
+<tr data-inline-row>
+  {% if "order" in form.fields %}
+    <td class="inline-table__handle">
+      <button class="drag-handle" type="button" data-drag-handle hidden
+              aria-label="Move row {{ number }}" title="Drag to reorder, or Alt+↑ and Alt+↓">⠿</button>
+      {{ form.order.as_hidden }}
+    </td>
+  {% endif %}
+  {% for field in form.visible_fields %}
+    {% if field.name != "DELETE" and field.name != "order" %}
+      <td>
+        <label class="visually-hidden" for="{{ field.id_for_label }}">{{ field.label }} {{ number }}</label>
+        {{ field }}{{ field.errors }}
+      </td>
+    {% endif %}
+  {% endfor %}
+  <td class="inline-table__remove">
+    {% for hidden in form.hidden_fields %}{% if hidden.name != "order" %}{{ hidden }}{{ hidden.errors }}{% endif %}{% endfor %}
+    {% if form.instance.pk %}
+      <span data-delete-box>
+        <label class="visually-hidden" for="{{ form.DELETE.id_for_label }}">Remove row {{ number }}</label>
+        {{ form.DELETE }}
+      </span>
+    {% endif %}
+    <button class="inline-table__x" type="button" data-row-remove hidden aria-label="Remove row {{ number }}" title="Remove">×</button>
+  </td>
+</tr>

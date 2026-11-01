@@ -1,0 +1,74 @@
+{
+  "source": "Spreadsheet",
+  "frame_rate": null,
+  "drop_frame": null,
+  "warnings": [],
+  "rows": [
+    {
+      "line": 2,
+      "label": "1m01 Main Title",
+      "number": "1m01",
+      "title": "Main Title",
+      "in": "01:00:10:00",
+      "out": "01:01:30:12",
+      "in_frames": 86640,
+      "out_frames": 88572,
+      "fields": {
+        "status": "Composed",
+        "spotting_notes": "Big opening",
+        "version": "v2"
+      }
+    },
+    {
+      "line": 3,
+      "label": "1m02 The Chase",
+      "number": "1m02",
+      "title": "The Chase",
+      "in": "01:03:00:00",
+      "out": "01:05:12:08",
+      "in_frames": 90720,
+      "out_frames": 93896,
+      "fields": {
+        "status": "In Progress",
+        "spotting_notes": "Drive hard from the first cut",
+        "version": "v1"
+      }
+    },
+    {
+      "line": 4,
+      "label": "1m03 Aftermath",
+      "number": "1m03",
+      "title": "Aftermath",
+      "in": "01:06:01:15",
+      "out": "01:07:44:00",
+      "in_frames": 95079,
+      "out_frames": 97536,
+      "fields": {
+        "status": "To Write"
+      }
+    },
+    {
+      "line": 5,
+      "label": "bad row Not a cue",
+      "number": "bad row",
+      "title": "Not a cue",
+      "in": "01:20:00:00",
+      "out": "01:21:00:00",
+      "in_frames": 115200,
+      "out_frames": 116640
+    },
+    {
+      "line": 6,
+      "label": "2m04 Diner",
+      "number": "2m04",
+      "title": "Diner",
+      "in": "01:20:05:10",
+      "out": "01:22:00:00",
+      "in_frames": 115330,
+      "out_frames": 118080,
+      "fields": {
+        "status": "To Write"
+      }
+    }
+  ]
+}

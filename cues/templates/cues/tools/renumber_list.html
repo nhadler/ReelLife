@@ -1,0 +1,17 @@
+{# Renumber mode: each number editable; −/+ move it and every one after. #}
+  <ol class="renumber-list" id="renumber-list" aria-label="New numbers">
+    {% for cue, field in form.rows %}
+      <li class="renumber-list__row">
+        <span class="renumber-list__old">{{ cue.number }}</span>
+        <span aria-hidden="true">→</span>
+        <input type="text" name="{{ field.html_name }}" id="{{ field.auto_id }}" value="{{ field.value|default_if_none:'' }}"
+               maxlength="20" aria-label="{{ field.label }}">
+        <button class="button button--quiet button--small" type="button" name="bump" value="{{ forloop.counter0 }}:-1"
+                hx-post="{{ action }}" hx-target="#renumber-list" hx-swap="outerHTML"
+                title="One lower, with every number after it" aria-label="{{ cue.number }} and after: one lower">−</button>
+        <button class="button button--quiet button--small" type="button" name="bump" value="{{ forloop.counter0 }}:1"
+                hx-post="{{ action }}" hx-target="#renumber-list" hx-swap="outerHTML"
+                title="One higher, with every number after it" aria-label="{{ cue.number }} and after: one higher">+</button>
+      </li>
+    {% endfor %}
+  </ol>

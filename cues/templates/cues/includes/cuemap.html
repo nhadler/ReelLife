@@ -1,0 +1,20 @@
+{# The cue map: reels end to end, each cue a block coloured by status. #}
+{% if map.empty %}
+  <p class="muted">Log a turnover with IN and OUT to see the cue map.</p>
+{% else %}
+  <svg class="cuemap" viewBox="0 0 1000 24" preserveAspectRatio="none"
+       role="img" aria-label="{{ label }}">
+    {% for reel in map.reels %}
+      <rect class="cuemap__lane" x="{{ reel.x|floatformat:'2u' }}" y="0"
+            width="{{ reel.width|floatformat:'2u' }}" height="24"><title>{{ reel.label }}</title></rect>
+    {% endfor %}
+    {% for cue in map.cues %}
+      <rect{% if cue.todo %} class="cuemap__todo"{% endif %} x="{{ cue.x|floatformat:'2u' }}" y="5" width="{{ cue.width|floatformat:'2u' }}"
+            height="14" fill="{{ cue.color }}"><title>{{ cue.label }}</title></rect>
+    {% endfor %}
+    {% for reel in map.reels %}{% if not forloop.first %}
+      <line class="cuemap__reel" x1="{{ reel.x|floatformat:'2u' }}" x2="{{ reel.x|floatformat:'2u' }}"
+            y1="0" y2="24" vector-effect="non-scaling-stroke"/>
+    {% endif %}{% endfor %}
+  </svg>
+{% endif %}

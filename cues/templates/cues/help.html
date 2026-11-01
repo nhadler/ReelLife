@@ -1,0 +1,23 @@
+{% extends "app.html" %}
+{# The user guide, a topic a page (cues/guide/*.md). body is rendered from those files, which are ours, so it's marked safe. #}
+
+{% block title %}{{ topic.title }} · Help · ReelLife{% endblock %}
+
+{% block content %}
+  <div class="settings help">
+    <nav class="settings__nav" aria-label="Help topics">
+      <ul>
+        {% for t in topics %}
+          <li><a href="{% url 'cues:help_topic' t.slug %}"{% if t.slug == topic.slug %} aria-current="page"{% endif %}>{{ t.title }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+    <article class="settings__body help__body">
+      <h1 class="settings__title">{{ topic.title }}</h1>
+      {{ body|safe }}
+      <footer class="help__about">
+        <p>ReelLife {{ version }} · Free software under the GNU AGPL v3 · <a href="{{ source_url }}">Source Code</a></p>
+      </footer>
+    </article>
+  </div>
+{% endblock %}

@@ -1,0 +1,46 @@
+<header class="topbar">
+  <a class="wordmark" href="{% url 'cues:overview' %}"><span class="wordmark__reel">Reel</span>Life</a>
+  <nav class="topbar__nav" aria-label="Main">
+    <a href="{% url 'cues:overview' %}" data-palette="Overview"{% if nav == "overview" %} aria-current="page"{% endif %}>Overview</a>
+    <a href="{% url 'cues:dashboard' %}" data-palette="Projects"{% if nav == "projects" %} aria-current="page"{% endif %}>Projects</a>
+    <a href="{% url 'cues:schedule' %}" data-palette="Schedule"{% if nav == "schedule" %} aria-current="page"{% endif %}>Schedule</a>
+    {% if request.user.role != "viewer" %}
+      <a href="{% url 'cues:credits' %}" data-palette="Credits"{% if nav == "credits" %} aria-current="page"{% endif %}>Credits</a>
+      <a href="{% url 'cues:app_settings' %}" data-palette="App Settings"{% if nav == "settings" %} aria-current="page"{% endif %}>Settings</a>
+    {% endif %}
+    {% if request.user.role == "admin" %}
+      <a href="{% url 'cues:backup' %}" data-palette="Backup"{% if nav == "backup" %} aria-current="page"{% endif %}>Backup</a>
+      <a href="{% url 'admin:index' %}" data-palette="Admin">Admin</a>
+    {% endif %}
+  </nav>
+  <button class="topbar__search" type="button" data-palette-open aria-keyshortcuts="Control+K Meta+K" title="Search projects and cues (Ctrl+K)">
+    {% include "cues/includes/icon.html" with name="search" %}<span>Search</span><kbd>Ctrl+K</kbd>
+  </button>
+  {% with user=request.user %}
+    <details class="menu profile">
+      <summary class="profile__button" aria-label="Account: {{ user }}" title="{{ user }}">
+        {% include "includes/avatar.html" %}
+      </summary>
+      <div class="menu__panel profile__panel">
+        <div class="profile__who">
+          {% include "includes/avatar.html" with large=True %}
+          <div class="profile__names">
+            <strong>{{ user }}</strong>
+            {% if user.email %}<span class="profile__email">{{ user.email }}</span>{% endif %}
+            <span class="profile__role">{{ user.get_role_display }}</span>
+          </div>
+        </div>
+        <hr class="menu__rule">
+        <a class="menu__item" href="{% url 'cues:days_off' %}" data-palette="Your Days Off">Your Days Off</a>
+        <a class="menu__item" href="{% url 'cues:help' %}" data-palette="Help">Help</a>
+        {% if account_url %}
+          <a class="menu__item" href="{{ account_url }}" target="_blank" rel="noopener noreferrer">Manage Account</a>
+        {% endif %}
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button class="menu__item" type="submit">Sign Out</button>
+        </form>
+      </div>
+    </details>
+  {% endwith %}
+</header>

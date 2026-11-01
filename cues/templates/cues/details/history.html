@@ -1,0 +1,43 @@
+{# Every change to the cue and its versions, newest first, with Revert. #}
+{% load text %}
+<h2 class="cue-history__title" id="history-title">History</h2>
+{% if error %}<p class="history__error" role="alert">{{ error }}</p>{% endif %}
+<ol class="history" aria-labelledby="history-title">
+  {% for entry in entries %}
+    <li class="history__entry{% if entry.undone %} history__entry--undone{% endif %}">
+      <p class="history__label">
+        {{ entry.label }}
+        {% if entry.undone %}<span class="chip">Undone</span>{% endif %}
+      </p>
+      <p class="history__meta">
+        {% if entry.user %}{{ entry.user }} · {% endif %}<time datetime="{{ entry.when|date:'c' }}">{{ entry.when|stamp:short_format }}</time>
+      </p>
+      {% if entry.changes %}
+        <ul class="history__changes">
+          {% for change in entry.changes %}
+            <li>
+              {% if change.kind == "created" %}
+                {% if change.subject == "Cue" %}Cue created{% else %}{{ change.subject }} added{% endif %}
+              {% elif change.kind == "deleted" %}
+                {% if change.subject == "Cue" %}Cue deleted{% else %}{{ change.subject }} deleted{% endif %}
+              {% else %}
+                <span class="history__field">{% if change.subject != "Cue" %}{{ change.subject }} {% endif %}{{ change.field }}</span>
+                <del>{{ change.old }}</del> <span aria-hidden="true">→</span><span class="visually-hidden">changed to</span> <ins>{{ change.new }}</ins>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      {% if can_edit and entry.can_revert %}
+        <button class="button button--quiet button--small" type="button"
+                hx-post="{% url 'cues:cue_revert' cue.pk entry.change_set.pk %}"
+                hx-target="closest .cue-history" hx-swap="innerHTML"
+                {% if entry.other_cues %}hx-confirm="The same action changed {{ entry.other_cues }} other cue{{ entry.other_cues|pluralize }}. Reverting undoes all of it. Go ahead?"{% endif %}>
+          Revert{% if entry.other_cues %} all {{ entry.other_cues|add:1 }} cues{% endif %}
+        </button>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li class="muted">No changes yet.</li>
+  {% endfor %}
+</ol>

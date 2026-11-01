@@ -1,0 +1,27 @@
+{# The chosen day's work, beside the calendar. #}
+<section class="side-card" aria-labelledby="schedule-day-title">
+  <h2 class="side-card__title" id="schedule-day-title">
+    {{ day.date|date:day_format }}{% if day.today %} <span class="side-card__tag">Today</span>{% endif %}
+  </h2>
+  {% if day.music %}<p class="day-total"><strong>{{ day.music }}</strong> of music to write</p>{% endif %}
+  {% for note in day.off %}<p class="day-off">{{ note }}</p>{% endfor %}
+  {% if day.parts %}
+    <ol class="day-cues">
+      {% for p in day.parts %}
+        <li>
+          <a class="day-cue tone-{{ p.project.tone }}" href="{{ p.cue.url }}">
+            <span class="day-cue__top"><span class="day-cue__number">{{ p.cue.number }}</span><span class="day-cue__music">{{ p.music }}</span></span>
+            {% if p.cue.title %}<span class="day-cue__title">{{ p.cue.title }}</span>{% endif %}
+            <span class="day-cue__meta">
+              {% if p.cue.status %}<svg class="swatch" viewBox="0 0 1 1" aria-hidden="true"><rect width="1" height="1" fill="{{ p.cue.color|default:'#6b7280' }}"/></svg> {{ p.cue.status }} · {% endif %}{{ p.project.title }}{% if p.cue.difficulty %} · {{ p.cue.difficulty }}{% endif %}{% if p.cue.revise %} · Revision{% endif %}
+            </span>
+          </a>
+        </li>
+      {% endfor %}
+    </ol>
+  {% elif day.past %}
+    <p class="muted">Past days aren't planned.</p>
+  {% elif not day.off %}
+    <p class="muted">Nothing planned.</p>
+  {% endif %}
+</section>

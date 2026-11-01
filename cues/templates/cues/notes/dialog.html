@@ -1,0 +1,7 @@
+{# One kind of project notes in the page's dialog. Needs project, notes (one), can_edit. #}
+<header class="dialog__head">
+  <h2 id="dialog-title">Project Notes</h2>
+  <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+</header>
+{% for note in notes %}{% include "cues/notes/note.html" %}{% endfor %}
+<p class="muted"><a href="{% url 'cues:project_notes' project.pk %}">All Project Notes</a></p>

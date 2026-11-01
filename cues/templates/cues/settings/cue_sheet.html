@@ -1,0 +1,63 @@
+{% extends "cues/settings/base.html" %}
+
+{% block settings %}
+  <form class="project-form" method="post" novalidate>
+    {% csrf_token %}
+    {% include "cues/includes/form_errors.html" %}
+    <fieldset class="form-section">
+      <legend>The Program</legend>
+      <div class="fields">
+        {% include "cues/includes/field.html" with field=form.aka %}
+        {% include "cues/includes/field.html" with field=form.episode_title %}
+        {% include "cues/includes/field.html" with field=form.cue_sheet_category %}
+        {% include "cues/includes/field.html" with field=form.cue_sheet_version %}
+        {% include "cues/includes/field.html" with field=form.network %}
+        {% include "cues/includes/field.html" with field=form.release_date %}
+        {% include "cues/includes/field.html" with field=form.country %}
+      </div>
+    </fieldset>
+    <fieldset class="form-section">
+      <legend>Production</legend>
+      <div class="fields">
+        {% include "cues/includes/field.html" with field=form.production_company %}
+        {% include "cues/includes/field.html" with field=form.distributor %}
+        {% include "cues/includes/field.html" with field=form.company_address wide=True %}
+        {% include "cues/includes/field.html" with field=form.preparer %}
+        {% include "cues/includes/field.html" with field=form.preparer_email %}
+      </div>
+    </fieldset>
+    <fieldset class="form-section">
+      <legend>Cue Numbers</legend>
+      <div class="fields">{% include "cues/includes/numbering.html" %}</div>
+    </fieldset>
+    <section class="form-section">
+      <h2>Default Shares</h2>
+      {% include "cues/includes/inline_table.html" with fs=defaults add="Add Share" %}
+    </section>
+    {% if series_defaults %}
+      <section class="form-section">
+        <h2>Series Default Shares <span class="muted">{{ project.series }}</span></h2>
+        {% include "cues/includes/inline_table.html" with fs=series_defaults add="Add Share" %}
+      </section>
+    {% endif %}
+    <div class="form-actions">
+      <button class="button" type="submit">Save</button>
+    </div>
+  </form>
+  {% if project.default_shares.exists or project.series.default_shares.exists %}
+    <section class="form-section">
+      <h2>Apply to Existing Cues</h2>
+      <form method="post" action="{% url 'cues:apply_default_shares' project.pk %}">
+        {% csrf_token %}
+        <div class="fields">
+          <div class="field field--check field--wide">
+            <input type="checkbox" name="replace" id="apply-replace">
+            <label for="apply-replace">Replace Shares Compositions Already Have</label>
+            <span class="helptext">Off: only compositions with no writers or publishers get the defaults. Undo reverts either.</span>
+          </div>
+        </div>
+        <div class="form-actions"><button class="button button--quiet" type="submit">Apply Default Shares</button></div>
+      </form>
+    </section>
+  {% endif %}
+{% endblock %}

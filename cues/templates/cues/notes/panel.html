@@ -1,0 +1,9 @@
+{# The project notes side panel beside the grid. Needs project, notes, can_edit. #}
+<div class="side-panel__head">
+  <h2 class="side-panel__title">Project Notes</h2>
+  <a class="side-panel__link" href="{% url 'cues:project_notes' project.pk %}">Open Page</a>
+  <button class="dialog__close" type="button" data-side-panel-close aria-label="Close project notes">×</button>
+</div>
+<div class="side-panel__body">
+  {% for note in notes %}{% include "cues/notes/note.html" %}{% endfor %}
+</div>

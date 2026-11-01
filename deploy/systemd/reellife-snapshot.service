@@ -1,0 +1,48 @@
+# Nightly snapshot and housekeeping; started by
+# reellife-snapshot.timer. Runs as the same dynamic user as the web
+# service so it can read and write the same state directory.
+[Unit]
+Description=ReelLife nightly snapshot and housekeeping
+Documentation=file:///opt/reellife/deploy/README.md
+
+[Service]
+Type=oneshot
+User=reellife
+DynamicUser=yes
+StateDirectory=reellife
+StateDirectoryMode=0700
+WorkingDirectory=/opt/reellife
+EnvironmentFile=/etc/reellife/reellife.env
+Environment=DJANGO_SETTINGS_MODULE=reellife.settings.prod
+Environment=REELLIFE_DATA_DIR=%S/reellife
+Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+LoadCredential=secret_key:/etc/reellife/secret_key
+LoadCredential=oidc_client_secret:/etc/reellife/oidc_client_secret
+Environment=REELLIFE_SECRET_KEY_FILE=%d/secret_key
+Environment=OIDC_CLIENT_SECRET_FILE=%d/oidc_client_secret
+ExecStart=/opt/reellife/.venv/bin/reellife nightly
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+PrivateNetwork=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+ProtectProc=invisible
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+SystemCallArchitectures=native
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077

@@ -1,0 +1,74 @@
+{# The export dialog. A plain GET form: the browser downloads the file and the page stays as it is. CSS hides what the chosen report doesn't use. #}
+{% load text %}
+<form class="dialog__form export" method="get" action="{% url 'cues:export_download' project.pk %}">
+  <header class="dialog__head">
+    <h2 id="dialog-title">Export Cues</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  {{ form.ids }}
+
+  <fieldset class="segmented">
+    <legend>{{ form.report.label|title_case }}</legend>
+    {% for choice in form.report %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  </fieldset>
+
+  <fieldset class="segmented export__log">
+    <legend>{{ form.format.label|title_case }}</legend>
+    {% for choice in form.format %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  </fieldset>
+
+  {% if shown %}
+    <fieldset class="segmented">
+      <legend>Cues</legend>
+      {% for value, label in form.fields.scope.choices %}
+        <label class="segmented__choice">
+          <input type="radio" name="scope" value="{{ value }}"{% if form.scope.value == value %} checked{% endif %}>
+          {% if value == "shown" %}The {{ shown }} shown in the grid{% else %}All {{ total }}{% endif %}
+        </label>
+      {% endfor %}
+    </fieldset>
+  {% endif %}
+
+  <fieldset class="segmented segmented--chips export__log">
+    <legend>{{ form.preset.label|title_case }}</legend>
+    {% for choice in form.preset %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  </fieldset>
+  <fieldset class="export__columns export__log">
+    <legend>{{ form.columns.label|title_case }}</legend>
+    {% for choice in form.columns %}<label class="menu__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+  </fieldset>
+
+  <fieldset class="export__options export__log">
+    <legend>Options</legend>
+    {% include "cues/includes/field.html" with field=form.exclude_empty %}
+    <div class="export__totals">
+      {% include "cues/includes/field.html" with field=form.totals %}
+      {% include "cues/includes/field.html" with field=form.progress %}
+    </div>
+  </fieldset>
+  {% if not project.long_play %}
+    {# Long Play Time: its choices show once it is ticked. #}
+    <div class="export__options export__log export__long-play">
+      {% include "cues/includes/field.html" with field=form.long_play %}
+      <fieldset class="segmented export__long-play-choice">
+        <legend>{{ form.start_hour.label|title_case }}</legend>
+        {% for choice in form.start_hour %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
+      </fieldset>
+      <div class="export__long-play-choice">
+        {% include "cues/includes/field.html" with field=form.leader %}
+      </div>
+      <p class="muted export__long-play-choice">{{ project.reels_word }} end to end, each as long as its current picture; positions move, durations don't. Cues not yet on a {{ project.reel_word|lower }} with an IN and OUT are left blank.</p>
+    </div>
+  {% endif %}
+  <fieldset class="export__options export__notes">
+    <legend>Options</legend>
+    {% include "cues/includes/field.html" with field=form.all_versions %}
+  </fieldset>
+
+  <p class="muted export__chart">A card per cue, five across. PDF.</p>
+  <p class="muted export__notes">Each cue's notes, current version or all. PDF.</p>
+  <footer class="form-actions">
+    <button class="button" type="submit">Export</button>
+    <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+  </footer>
+</form>

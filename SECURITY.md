@@ -1,0 +1,37 @@
+# Security policy
+
+ReelLife holds a composer's unreleased work and their collaborators'
+details, and is built to be reachable from the internet. Security
+reports are welcome and taken seriously.
+
+## Reporting a vulnerability
+
+Please **don't open a public issue**. Report it privately through
+GitHub: the repository's **Security** tab → **Report a vulnerability**.
+Include what you found, how to reproduce it, and what an attacker could
+do with it.
+
+You'll get an answer within a week. Once a fix is released, the
+advisory is published with credit to you, unless you'd rather not be
+named.
+
+## Supported versions
+
+Only the latest release gets security fixes. Run a tagged image
+(`ghcr.io/nhadler/reellife:<version>`) and update when a release notes a
+security fix.
+
+## What's in scope
+
+Anything that lets someone read or change data they shouldn't, run
+code, or get around sign-in or roles: the web app, the MCP endpoint at
+`/mcp`, the Docker image and the systemd install.
+
+How ReelLife defends itself: OIDC sign-in with PKCE and roles enforced on the server, a strict
+Content Security Policy with no inline script, rate limits on writes,
+`defusedxml` for XML imports, formula escaping in CSV and Excel exports,
+a read-only container running as an unprivileged user, and weekly
+dependency and vulnerability checks in CI.
+
+Out of scope: the OIDC provider itself, the reverse proxy in front of
+ReelLife, and attacks that need an admin account.

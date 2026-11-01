@@ -1,0 +1,6 @@
+{# A colour square; an SVG fill, since the CSP allows no inline styles. #}
+{% if row.color or row.css %}
+  <svg class="stats__swatch{% if row.css %} stats__swatch--{{ row.css }}{% endif %}" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><rect width="10" height="10" rx="2"{% if row.color %} fill="{{ row.color }}"{% endif %}/></svg>
+{% else %}
+  <svg class="stats__swatch stats__swatch--none" viewBox="0 0 10 10" aria-hidden="true" focusable="false"><rect width="10" height="10" rx="2"/></svg>
+{% endif %}

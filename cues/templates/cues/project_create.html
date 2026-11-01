@@ -1,0 +1,115 @@
+{% extends "app.html" %}
+
+{% block title %}New Project · ReelLife{% endblock %}
+
+{% block content %}
+  <div class="page-head">
+    <h1>New Project</h1>
+    {% include "cues/includes/help_link.html" with slug="getting-started" %}
+  </div>
+  <form class="project-form" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% include "cues/includes/form_errors.html" %}
+
+    <section class="band" aria-labelledby="band-general">
+      <div class="band__intro">
+        <h2 id="band-general">General Information</h2>
+      </div>
+      <div class="band__body">
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.title wide=True %}
+          {% include "cues/includes/field.html" with field=form.production_number %}
+          {% include "cues/includes/field.html" with field=form.kind %}
+          <div class="episode-only field--wide fields">
+            {% include "cues/includes/field.html" with field=form.series %}
+            {% include "cues/includes/field.html" with field=form.season %}
+            {% include "cues/includes/field.html" with field=form.episode_number %}
+          </div>
+          {% include "cues/includes/field.html" with field=form.picture_type %}
+          {% include "cues/includes/field.html" with field=form.frame_rate %}
+          {% include "cues/includes/field.html" with field=form.lanes %}
+          {% include "cues/includes/field.html" with field=form.drop_frame %}
+          {% include "cues/includes/dropzone.html" with field=form.thumbnail_upload prompt="Drop a still from the film" %}
+          {% include "cues/includes/field.html" with field=form.cue_thumbnail_fallback wide=True %}
+        </div>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="band-picture">
+      <div class="band__intro">
+        <h2 id="band-picture">Picture</h2>
+      </div>
+      <div class="band__body">
+        {# Folded away until wanted (Nick, Nov 1); open when it has errors. #}
+        <details class="fold"{% if first.errors or reels.total_error_count %} open{% endif %}>
+          <summary>First Turnover</summary>
+          {{ first.non_field_errors }}
+          <div class="fields">
+            {% include "cues/includes/field.html" with field=first.label %}
+            {% include "cues/includes/field.html" with field=first.received_date %}
+          </div>
+          <div class="inline-table first-reels" data-inline-table>
+            {{ reels.management_form }}
+            <table class="table table--edit">
+              <thead><tr><th scope="col" class="reel-row__name">Name</th><th scope="col">IN</th><th scope="col">OUT</th></tr></thead>
+              <tbody>
+                {% for row in reels %}
+                  {% include "cues/includes/reel_row.html" with number=forloop.counter %}
+                {% endfor %}
+              </tbody>
+            </table>
+            <template data-row-template>
+              {% include "cues/includes/reel_row.html" with row=reels.empty_form number="new" %}
+            </template>
+            <button class="button button--quiet button--small" type="button" data-add-row>Add Row</button>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="band-deadlines">
+      <div class="band__intro">
+        <h2 id="band-deadlines">Deadlines</h2>
+      </div>
+      <div class="band__body deadlines">
+        {% include "cues/includes/deadline_pair.html" with name="Composition" start=deadlines.composition_start end=deadlines.composition_end %}
+        {% include "cues/includes/deadline_pair.html" with name="Orchestration" start=deadlines.orchestration_start end=deadlines.orchestration_end %}
+        {% include "cues/includes/deadline_pair.html" with name="Mix" start=deadlines.mix_start end=deadlines.mix_end %}
+        <fieldset class="deadline">
+          <legend>Delivery</legend>
+          <div class="deadline__dates">
+            <label class="visually-hidden" for="{{ deadlines.delivery.id_for_label }}">Delivery Date</label>
+            {{ deadlines.delivery }}
+          </div>
+          {{ deadlines.delivery.errors }}
+        </fieldset>
+        {# Shared by every project; folded away until wanted. #}
+        <details class="days-off"{% if days_off.total_error_count %} open{% endif %}>
+          <summary>Your Days Off</summary>
+          {% include "cues/includes/days_off.html" with fs=days_off %}
+        </details>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="band-sheet">
+      <div class="band__intro">
+        <h2 id="band-sheet">Cue Sheet and Numbering</h2>
+      </div>
+      <div class="band__body">
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.sub_title %}
+          {% include "cues/includes/field.html" with field=form.production_company %}
+          {% include "cues/includes/field.html" with field=form.distributor %}
+          {% include "cues/includes/field.html" with field=form.release_date %}
+          {% include "cues/includes/field.html" with field=form.country %}
+          {% include "cues/includes/numbering.html" %}
+        </div>
+      </div>
+    </section>
+
+    <div class="form-actions">
+      <button class="button" type="submit">Create Project</button>
+      <a class="button button--quiet" href="{% url 'cues:dashboard' %}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}
