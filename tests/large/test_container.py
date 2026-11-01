@@ -303,22 +303,28 @@ def test_compose_up_from_a_clean_checkout(
         assert result.returncode == 0, result.stderr
         return result
 
+    def wait_for_web() -> None:
+        # Only web has a healthcheck: some Compose versions refuse --wait
+        # for a service (the scheduler) that has none.
+        compose_run("up", "-d", "--wait", "--wait-timeout", "120", "web")
+
     try:
-        compose_run("up", "-d", "--wait", "--wait-timeout", "120")
+        wait_for_web()
+        compose_run("up", "-d", "scheduler")
         status, _, body = _get(port, "/auth/login/")
         assert status == 200
         assert "Sign In with PocketID" in body
 
         # A restart with nothing to migrate takes no snapshot ...
         compose_run("restart", "web")
-        compose_run("up", "-d", "--wait", "--wait-timeout", "120")
+        wait_for_web()
         data = compose_run("exec", "web", "ls", "/data").stdout.split()
         assert "snapshots" not in data
         # ... but one with migrations pending (unapplying one stands in
         # for an upgrade that adds it) snapshots the database first.
         compose_run("exec", "web", "reellife", "migrate", "sessions", "zero")
         compose_run("restart", "web")
-        compose_run("up", "-d", "--wait", "--wait-timeout", "120")
+        wait_for_web()
         listing = compose_run("exec", "web", "ls", "/data/snapshots").stdout
         assert listing.startswith("before-migrate-")
 
