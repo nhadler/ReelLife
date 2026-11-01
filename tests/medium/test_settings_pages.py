@@ -672,6 +672,8 @@ def test_delete_is_for_admins_with_the_title(
     admin = role_client(Role.ADMIN)
     page = unescape(admin.post(url, {"confirm": "the voyage"}).content.decode())
     assert "That isn't the project's title." in page
+    # The page keeps Delete disabled until the title is typed (confirm.js).
+    assert 'data-confirm-text="The Voyage"' in page
     response = admin.post(url, {"confirm": "The Voyage"})
     assert response["Location"] == reverse("cues:dashboard")
     assert not models.Project.objects.filter(pk=project.pk).exists()

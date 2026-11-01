@@ -106,9 +106,14 @@ class DeleteForm(forms.Form):
     def __init__(
         self, *args: Any, project: models.Project, **kwargs: Any
     ) -> None:
-        """Remembers the title to compare."""
+        """Remembers the title to compare.
+
+        The page keeps Delete disabled until the title is typed
+        (confirm.js, data-confirm-text); the server checks it too.
+        """
         super().__init__(*args, **kwargs)
         self.project = project
+        self.fields["confirm"].widget.attrs["data-confirm-text"] = project.title
 
     def clean_confirm(self) -> str:
         """Must match the title exactly."""

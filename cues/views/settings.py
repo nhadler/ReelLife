@@ -137,9 +137,10 @@ def _project_page(
     if section == "picture" and frame_rate_locked(project):
         for name in ("frame_rate", "drop_frame"):
             form.fields[name].disabled = True
-            form.fields[
-                name
-            ].help_text = "Locked: the project has timecodes in this rate."
+        # Said once, under the rate: it covers drop frame too.
+        form.fields[
+            "frame_rate"
+        ].help_text = "Locked: the project has timecodes in this rate."
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             form.save()

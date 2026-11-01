@@ -73,7 +73,8 @@
   --slate: #5d6573;
   --accent: #2a7d46;
   --accent-ink: #ffffff;
-  --amber: #a86a00;
+  /* Dark enough for small text on white (5.4:1). */
+  --amber: #8f5a00;
   --danger: #b3382a;
   --danger-ink: #ffffff;
   --grade-low: #7c8491;
@@ -565,8 +566,10 @@ kbd.palette__detail {
 
 .sign-in > .messages,
 .sign-in__copy {
-  width: min(32rem, 100% - 2rem);
+  /* Its margins come out of the width too, so a phone never scrolls. */
+  width: min(32rem, 100% - clamp(1rem, 11vw, 10rem) - 1rem);
   margin-inline: clamp(1rem, 11vw, 10rem) 1rem;
+  overflow-wrap: anywhere;
 }
 
 .sign-in__mark {
@@ -1000,6 +1003,14 @@ input[type='checkbox'] {
 
 /* Projects list and the cue map */
 
+/* A control you can't change looks it, wherever it is. */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
@@ -1375,6 +1386,13 @@ body:has(.overview) > .page {
 .project-menu__button--current {
   background: var(--panel-raised);
   color: var(--ink);
+}
+
+/* A side panel's toggle while its panel is open: on, but not the page
+   you're on, so it never reads as a second current tab. */
+.project-bar__link[aria-expanded='true'] {
+  background: none;
+  color: var(--accent);
 }
 
 .icon {
@@ -2159,6 +2177,9 @@ body:has(.overview) > .page {
   border-radius: var(--radius);
   background: var(--panel-raised);
   box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
+  /* The room below it in the window (menus.js), so it never runs off. */
+  max-height: var(--panel-room, none);
+  overflow-y: auto;
 }
 
 .menu__item {
@@ -2416,7 +2437,7 @@ input[type='search'].grid-search {
 
 .filter-panel {
   width: min(30rem, calc(100vw - 2rem));
-  max-height: 70vh;
+  max-height: min(70vh, var(--panel-room, 70vh));
   overflow: auto;
 }
 
@@ -4998,7 +5019,8 @@ body:has(> .page--fill) {
 }
 
 .cal-cue__music {
-  color: var(--slate);
+  /* Slate fails contrast on the tinted chip in the light theme. */
+  color: color-mix(in srgb, var(--ink) 65%, var(--slate));
   font-family: var(--mono);
 }
 
@@ -6408,4 +6430,12 @@ form:has(input[name='confirm']:valid) .backup__restore {
 
 .feed-actions form {
   display: contents;
+}
+
+/* On a phone the grid's toolbar wraps rather than widen the page. */
+@media (max-width: 40rem) {
+  .toolbar,
+  .toolbar__menus {
+    flex-wrap: wrap;
+  }
 }

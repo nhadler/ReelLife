@@ -6,7 +6,8 @@
  * to its button). Items that act (buttons and links) close it too, but
  * controls inside a panel (checkboxes, inputs) leave it open. In a panel
  * of .menu__item entries, ↑ and ↓ move between them, as in the grid's
- * context menu.
+ * context menu. An open panel never runs past the bottom of the window:
+ * it gets the height left below it and scrolls inside.
  */
 
 /**
@@ -62,3 +63,25 @@ document.addEventListener('keydown', (event) => {
   const to = at === -1 ? (step === 1 ? 0 : items.length - 1) : at + step;
   items[(to + items.length) % items.length].focus();
 });
+
+// Room below the panel, less a margin; never squeezed below this.
+const EDGE = 16;
+const LEAST = 192;
+
+// toggle doesn't bubble, so listen while it travels down.
+document.addEventListener(
+  'toggle',
+  (event) => {
+    const menu = event.target;
+    if (!(menu instanceof HTMLDetailsElement) || !menu.open) {
+      return;
+    }
+    const panel = menu.querySelector(':scope > .menu__panel');
+    if (!panel) {
+      return;
+    }
+    const room = window.innerHeight - panel.getBoundingClientRect().top - EDGE;
+    panel.style.setProperty('--panel-room', `${Math.max(room, LEAST)}px`);
+  },
+  true,
+);
