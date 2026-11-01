@@ -10,6 +10,7 @@ from accounts.models import Role
 from cues import models
 from cues.services import agenda as agenda_service
 from cues.services import pins
+from cues.services import writing
 from cues.services.summaries import clock
 from cues.views import schedule as schedule_view
 from mcp_server import common
@@ -94,5 +95,30 @@ def pin_cue(cue_id: int, date: str = "") -> dict[str, Any]:
     return {"cue": cue.number, "pinned_to": day.isoformat()}
 
 
+def log_written(cue_id: int, amount: str, date: str = "") -> dict[str, Any]:
+    """Logs how much of a cue was written on a day (today by default).
+
+    amount is m:ss ("1:20") or minutes ("1.5"); "0" or "" removes that
+    day's log. The schedule counts logged work as done. Undoable.
+    """
+    user = common.user(Role.EDITOR)
+    cue = common.cue(cue_id)
+    day = _date(date, "date") if date else timezone.localdate()
+    if day > timezone.localdate():
+        raise ToolError("Pick today or an earlier day.")
+    if amount.strip() in ("", "0"):
+        return {"cue": cue.number, "removed": writing.remove(cue, day, user)}
+    try:
+        seconds = writing.parse_amount(amount)
+    except writing.AmountError as exc:
+        raise ToolError(str(exc)) from exc
+    writing.log(cue, day, seconds, user)
+    return {
+        "cue": cue.number,
+        "date": day.isoformat(),
+        "written": clock(seconds),
+    }
+
+
 READ_TOOLS = (schedule,)
-TOOLS = (pin_cue,)
+TOOLS = (pin_cue, log_written)

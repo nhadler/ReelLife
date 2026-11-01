@@ -980,6 +980,7 @@ from cues.schedule import DayOff as DayOff  # noqa: E402
 from cues.schedule import Deadline as Deadline  # noqa: E402
 from cues.schedule import ScheduleEntry as ScheduleEntry  # noqa: E402
 from cues.schedule import SchedulePin as SchedulePin  # noqa: E402
+from cues.schedule import WritingLog as WritingLog  # noqa: E402
 from cues.shares import CueShare as CueShare  # noqa: E402
 from cues.shares import DefaultShare as DefaultShare  # noqa: E402
 from cues.shares import Party as Party  # noqa: E402

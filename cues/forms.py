@@ -1,11 +1,9 @@
 """Forms that edit timecodes as text in the project's frame rate."""
 
-import datetime
 from typing import Any, ClassVar, cast
 
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils import timezone
 
 from cues import defaults
 from cues import models
@@ -981,18 +979,3 @@ class VersionDetailsForm(NewVersionForm):
             _save_on_change(self, url_for)
         else:
             _read_only(self)
-
-
-class ScheduleOnForm(forms.Form):
-    """Pins a cue to a day of the schedule ("Schedule On…")."""
-
-    date = forms.DateField(
-        label="Day", widget=forms.DateInput(attrs={"type": "date"})
-    )
-
-    def clean_date(self) -> datetime.date:
-        """Today or later: the past holds no work."""
-        date: datetime.date = self.cleaned_data["date"]
-        if date < timezone.localdate():
-            raise forms.ValidationError("Pick today or a later day.")
-        return date

@@ -47,7 +47,9 @@ and a `confirm` code: show the user the preview, and only call again
 with the code once they agree. Exports come back as files.
 
 `schedule` answers "what should I write today?" (or for a range of
-days), and `pin_cue` fixes a cue to a day, the rest flowing around it.
+days), `pin_cue` fixes a cue to a day, the rest flowing around it, and
+`log_written` records how much of a cue was written, which the
+schedule counts as done.
 
 When someone asks how to do something in ReelLife, read `user_guide`
 (the topic list first, then the topic) and answer in the app's own words

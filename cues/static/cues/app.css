@@ -4368,6 +4368,7 @@ button.stats__name:hover,
 
 /* Batch edit's question (overview/batch.js). */
 .dialog:has(.schedule-on),
+.dialog:has(.log-written),
 .dialog:has(.batch-edit) {
   width: min(var(--dialog-md), calc(100vw - 2rem));
 }
@@ -6359,8 +6360,16 @@ form:has(input[name='confirm']:valid) .backup__restore {
   gap: 0.25rem;
 }
 
-.day-cue__pin {
-  justify-self: end;
+.day-cue__actions {
+  display: flex;
+  gap: var(--space);
+  justify-content: flex-end;
+}
+
+.day-cue__written {
+  display: block;
+  color: var(--accent);
+  font-size: var(--step--1);
 }
 
 /* Calendar Feed: the new link, then when it was made and last read. */

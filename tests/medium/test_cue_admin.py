@@ -66,6 +66,7 @@ def test_every_cues_model_is_registered() -> None:
         "Project",
         "ScheduleEntry",
         "SchedulePin",
+        "WritingLog",
         "Series",
         "SeriesShare",
         "StatusOption",

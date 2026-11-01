@@ -2501,11 +2501,12 @@ async function copyCells(withHeaders) {
 }
 
 /**
- * Opens the Schedule On dialog for a cue (htmx loads the form).
+ * Opens a cue's dialog from the grid's config (htmx loads the form).
+ * @param {string} url The dialog's address for cue 0.
  * @param {number} cueId
  */
-function openScheduleOn(cueId) {
-  window.htmx.ajax('GET', config.scheduleOnUrl.replace('/0/', `/${cueId}/`), {
+function openCueDialog(url, cueId) {
+  window.htmx.ajax('GET', url.replace('/0/', `/${cueId}/`), {
     target: '#app-dialog',
     swap: 'innerHTML',
   });
@@ -2523,7 +2524,12 @@ function cellMenu(params) {
     null,
     {
       label: 'Schedule On…',
-      action: () => openScheduleOn(cueId),
+      action: () => openCueDialog(config.scheduleOnUrl, cueId),
+      disabled: !config.canEdit || !cueId,
+    },
+    {
+      label: 'Log Written…',
+      action: () => openCueDialog(config.logWrittenUrl, cueId),
       disabled: !config.canEdit || !cueId,
     },
     null,

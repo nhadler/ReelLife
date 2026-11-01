@@ -129,6 +129,11 @@ urlpatterns = [
         name="schedule_on",
     ),
     path(
+        "cues/<int:cue_id>/log-written/",
+        dialogs.log_written,
+        name="log_written",
+    ),
+    path(
         "projects/<int:project_id>/thumbnail/<str:name>",
         projects.thumbnail,
         name="thumbnail",

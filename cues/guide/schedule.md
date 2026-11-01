@@ -54,11 +54,23 @@ The plan starts again from today every time you open it. Finish a cue
 early and the next ones move up; leave one unfinished and it simply
 moves into the coming days with the rest. Nothing is ever marked late.
 
-Each day's plan is kept from the first time anyone looks (or overnight).
-While a long cue is **In Progress**, the shares planned for it on past
-days count as written, so the days ahead only plan what's left; at
-least one Smallest Share stays until you mark it composed. Past days on
-the calendar show what was planned then, faded.
+## Log Written
+
+To tell the schedule how far you got, use **Log Written…** beside a cue
+in today's or a past day's list (or in the cue page's ⋯ menu, or the
+grid's right-click menu): the day, and how much music you wrote, as
+m:ss or minutes. It starts filled in with what was planned. The days
+ahead then plan only what's left, though at least one Smallest Share
+stays until you mark the cue composed. Logging the same cue and day
+again replaces it; **Remove** takes it back, and so does **Undo**.
+
+Only logged work counts: a planned day you didn't log just leaves the
+work in the queue. Writing and revising are logged apart, so a cue sent
+back for revisions starts its revision work from nothing.
+
+Each day's plan is kept from the first time anyone looks (or
+overnight), so a past day's list shows what was planned beside what you
+logged, faded on the calendar.
 
 The line above the calendar starts **On track** when every deadline is
 met; with a **Most Work a Day** too low, it says which deadline slips

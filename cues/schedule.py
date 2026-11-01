@@ -104,13 +104,46 @@ class SchedulePin(Timestamped):
         return f"{self.cue} on {self.date.isoformat()}"
 
 
+class WritingLog(Timestamped):
+    """How much of a cue the composer wrote on a day ("Log Written…").
+
+    The schedule counts only logged work as done: a cue's logs of its
+    current kind of work (writing, or revising) come off what's left.
+    One per cue and day; logging again replaces it. Tracked by history,
+    so it undoes.
+    """
+
+    cue = models.ForeignKey(
+        "cues.Cue", on_delete=models.CASCADE, related_name="writing_logs"
+    )
+    date = models.DateField()
+    # Seconds of the cue's music written that day.
+    seconds = models.PositiveIntegerField()
+    # Revision work is logged apart from writing.
+    revise = models.BooleanField(default=False)
+
+    history = _history()
+
+    class Meta:
+        verbose_name = "writing log"
+        ordering = ["date", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["cue", "date"], name="writing_log_once_a_day"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        """Returns the cue, the day and how much."""
+        return f"{self.cue} on {self.date.isoformat()}: {self.seconds} s"
+
+
 class ScheduleEntry(models.Model):
     """One cue's share of a day's plan, saved on that day.
 
     The first look at the schedule each day (or the nightly job) saves
-    that day's plan, so the parts planned on past days count as written
-    while a split cue is in progress. A log, not undoable; pruned after
-    a year.
+    that day's plan, so past days show what was planned beside what was
+    written (WritingLog). A record, not undoable; pruned after a year.
     """
 
     date = models.DateField()

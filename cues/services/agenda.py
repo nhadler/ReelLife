@@ -89,7 +89,9 @@ class Agenda:
         days_off: Each day off from today: its notes, and the project
             for a project's own (None for the composer's).
         past: What each past day planned (the saved plans), recent
-            first days only (PAST_DAYS).
+            days only (PAST_DAYS).
+        written: Seconds logged as written each recent day, by cue, to
+            today.
     """
 
     today: datetime.date
@@ -99,6 +101,9 @@ class Agenda:
     unschedulable: list[CueInfo]
     days_off: DaysOff
     past: dict[datetime.date, list[PastPart]] = dataclasses.field(
+        default_factory=dict
+    )
+    written: dict[datetime.date, dict[int, int]] = dataclasses.field(
         default_factory=dict
     )
 
@@ -160,8 +165,8 @@ class _Facts:
 
     due: datetime.date | None
     pinned: datetime.date | None = None
-    # Weighted seconds planned for it on past days while it's in progress.
-    credit: scheduler.Fraction = scheduler.Fraction(0)
+    # Seconds of music logged as written, for its current kind of work.
+    written: int = 0
 
 
 def _info(row: dict[str, Any]) -> CueInfo:
@@ -187,8 +192,8 @@ def _work(
 ) -> scheduler.Work:
     """A cue row with an IN and OUT as the scheduler's work.
 
-    An in-progress cue's parts planned on past days count as written,
-    leaving at least a minimum part until it's composed.
+    What's logged as written comes off, leaving at least a minimum part
+    until the cue is marked composed.
     """
     by_difficulty, revise_factor = _factors(settings)
     factor = scheduler.Fraction(by_difficulty[row["difficulty"]])
@@ -196,10 +201,10 @@ def _work(
     if kind in summaries.REVISE_KINDS:
         factor *= scheduler.Fraction(revise_factor)
     music = timecode.seconds(row["tc_out"] - row["tc_in"], project.rate)
-    if facts.credit:
+    if facts.written:
         effort = music * factor
         least = min(scheduler.Fraction(settings.schedule_min_part), effort)
-        music = max(effort - facts.credit, least) / factor
+        music = max(effort - facts.written * factor, least) / factor
     return scheduler.Work(
         key=row["id"],
         project=project.pk,
@@ -241,42 +246,39 @@ def _calendar(
     return calendar, dict(notes)
 
 
-def _credits(
-    today: datetime.date, started: Iterable[int]
-) -> dict[int, scheduler.Fraction]:
-    """Weighted seconds planned on past days for each in-progress cue."""
-    credit: dict[int, scheduler.Fraction] = defaultdict(scheduler.Fraction)
-    for cue, effort in models.ScheduleEntry.objects.filter(
-        cue__in=list(started), date__lt=today, revise=False
-    ).values_list("cue", "effort"):
-        credit[cue] += scheduler.Fraction(effort)
-    return credit
+def _written(rows: Iterable[dict[str, Any]]) -> dict[int, int]:
+    """Seconds logged for each cue, for the kind of work it has now.
+
+    Writing logs don't count toward revisions, nor the other way round.
+    """
+    revising = {
+        row["id"]: row["status__kind"] in summaries.REVISE_KINDS for row in rows
+    }
+    written: dict[int, int] = defaultdict(int)
+    for cue, revise, seconds in models.WritingLog.objects.filter(
+        cue__in=list(revising)
+    ).values_list("cue", "revise", "seconds"):
+        if revise == revising[cue]:
+            written[cue] += seconds
+    return written
 
 
 def _facts(
     rows: list[dict[str, Any]],
-    today: datetime.date,
     infos: dict[int, ProjectInfo],
 ) -> dict[int, _Facts]:
-    """Each cue's due date, pin and credit for past days' work."""
+    """Each cue's due date, pin and what's logged as written."""
     pins = dict(
         models.SchedulePin.objects.filter(
             cue__in=[row["id"] for row in rows]
         ).values_list("cue", "date")
     )
-    credit = _credits(
-        today,
-        [
-            row["id"]
-            for row in rows
-            if row["status__kind"] == models.StatusKind.IN_PROGRESS
-        ],
-    )
+    written = _written(rows)
     return {
         row["id"]: _Facts(
             due=infos[row["project_id"]].due,
             pinned=pins.get(row["id"]),
-            credit=credit.get(row["id"], scheduler.Fraction(0)),
+            written=written.get(row["id"], 0),
         )
         for row in rows
     }
@@ -303,6 +305,18 @@ def _past(
 def _decimal(value: scheduler.Fraction) -> Decimal:
     """Seconds to three places, as ScheduleEntry stores them."""
     return round(Decimal(value.numerator) / value.denominator, 3)
+
+
+def _logged(
+    today: datetime.date,
+) -> dict[datetime.date, dict[int, int]]:
+    """What was logged as written each recent day, by cue."""
+    logged: dict[datetime.date, dict[int, int]] = defaultdict(dict)
+    for date, cue, seconds in models.WritingLog.objects.filter(
+        date__lte=today, date__gte=today - datetime.timedelta(days=PAST_DAYS)
+    ).values_list("date", "cue", "seconds"):
+        logged[date][cue] = seconds
+    return dict(logged)
 
 
 def record(agenda: Agenda) -> None:
@@ -348,7 +362,7 @@ def build(today: datetime.date, *, save: bool = True) -> Agenda:
         )
         .values(*_FIELDS)
     )
-    facts = _facts(rows, today, infos)
+    facts = _facts(rows, infos)
     works: list[scheduler.Work] = []
     cues: dict[int, CueInfo] = {}
     unschedulable: list[CueInfo] = []
@@ -377,6 +391,8 @@ def build(today: datetime.date, *, save: bool = True) -> Agenda:
         ),
     )
     past, past_cues = _past(today)
+    logged = _logged(today)
+    past_cues |= {cue for day in logged.values() for cue in day}
     _add_past_cues(cues, past_cues - set(cues))
     agenda = Agenda(
         today=today,
@@ -394,6 +410,10 @@ def build(today: datetime.date, *, save: bool = True) -> Agenda:
         past={
             day: [part for part in parts if part.key in cues]
             for day, parts in past.items()
+        },
+        written={
+            day: {cue: n for cue, n in by_cue.items() if cue in cues}
+            for day, by_cue in logged.items()
         },
     )
     if save:

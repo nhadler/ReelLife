@@ -133,3 +133,24 @@ def test_the_tools_are_served() -> None:
     tools = asyncio.run(server.build().list_tools())
     names = {tool.name for tool in tools}
     assert {"schedule", "pin_cue"} <= names
+
+
+def test_log_written(editor: User, cue: models.Cue) -> None:
+    del editor
+    assert schedule.log_written(cue.pk, "1:20") == {
+        "cue": "1m01",
+        "date": "2026-11-02",
+        "written": "1:20",
+    }
+    assert models.WritingLog.objects.get().seconds == 80
+    schedule.log_written(cue.pk, "0.5", "2026-11-01")
+    assert models.WritingLog.objects.count() == 2
+    with pytest.raises(ToolError, match="today or an earlier"):
+        schedule.log_written(cue.pk, "1:00", "2026-11-03")
+    with pytest.raises(ToolError, match="Enter an amount"):
+        schedule.log_written(cue.pk, "a bit")
+    assert schedule.log_written(cue.pk, "0") == {
+        "cue": "1m01",
+        "removed": True,
+    }
+    assert models.WritingLog.objects.count() == 1

@@ -319,6 +319,14 @@ class SchedulePinAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("cue", "date")
 
 
+@admin.register(models.WritingLog)
+class WritingLogAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    """How much of each cue was written on a day."""
+
+    list_display = ("date", "cue", "seconds", "revise")
+    list_filter = ("date",)
+
+
 @admin.register(models.ScheduleEntry)
 class ScheduleEntryAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     """Saved daily plans: a log, read only."""

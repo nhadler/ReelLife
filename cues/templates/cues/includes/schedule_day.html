@@ -3,22 +3,36 @@
   <h2 class="side-card__title" id="schedule-day-title">
     {{ day.date|date:day_format }}{% if day.today %} <span class="side-card__tag">Today</span>{% endif %}
   </h2>
-  {% if day.music %}<p class="day-total"><strong>{{ day.music }}</strong> of music {% if day.past %}planned{% else %}to write{% endif %}</p>{% endif %}
+  {% if day.music or day.written %}
+    <p class="day-total">
+      {% if day.music %}<strong>{{ day.music }}</strong> of music {% if day.past %}planned{% else %}to write{% endif %}{% endif %}{% if day.music and day.written %} · {% endif %}{% if day.written %}<strong>{{ day.written }}</strong> written{% endif %}
+    </p>
+  {% endif %}
   {% for note in day.off %}<p class="day-off">{{ note }}</p>{% endfor %}
   {% if day.parts %}
     <ol class="day-cues">
       {% for p in day.parts %}
         <li class="day-cues__item">
           <a class="day-cue tone-{{ p.project.tone }}" href="{{ p.cue.url }}">
-            <span class="day-cue__top"><span class="day-cue__number">{{ p.cue.number }}{% if p.part.pinned %} {% include "cues/includes/icon.html" with name="pin" %}<span class="visually-hidden">, scheduled on this day</span>{% endif %}</span><span class="day-cue__music">{{ p.music }}</span></span>
+            <span class="day-cue__top"><span class="day-cue__number">{{ p.cue.number }}{% if p.part.pinned %} {% include "cues/includes/icon.html" with name="pin" %}<span class="visually-hidden">, scheduled on this day</span>{% endif %}</span><span class="day-cue__music">{% if p.planned %}{{ p.music }}{% endif %}</span></span>
             {% if p.cue.title %}<span class="day-cue__title">{{ p.cue.title }}</span>{% endif %}
             <span class="day-cue__meta">
+              {% if p.written %}<span class="day-cue__written">Written {{ p.written_music }}</span>{% endif %}
               {% if p.cue.status %}<svg class="swatch" viewBox="0 0 1 1" aria-hidden="true"><rect width="1" height="1" fill="{{ p.cue.color|default:'#6b7280' }}"/></svg> {{ p.cue.status }} · {% endif %}{{ p.project.title }}{% if p.cue.difficulty %} · {{ p.cue.difficulty }}{% endif %}{% if p.cue.revise %} · Revision{% endif %}
             </span>
           </a>
-          {% if can_edit and not day.past %}
-            <button class="button button--quiet button--small day-cue__pin" type="button"
-                    hx-get="{% url 'cues:schedule_on' p.cue.id %}" hx-target="#app-dialog" hx-swap="innerHTML">Schedule On…<span class="visually-hidden"> for {{ p.cue.number }}</span></button>
+          {% if can_edit %}
+            <span class="day-cue__actions">
+              {% if day.past or day.today %}
+                <button class="button button--quiet button--small" type="button"
+                        hx-get="{% url 'cues:log_written' p.cue.id %}?date={{ day.date|date:'Y-m-d' }}{% if p.planned %}&amp;amount={{ p.share }}{% endif %}"
+                        hx-target="#app-dialog" hx-swap="innerHTML">Log Written…<span class="visually-hidden"> for {{ p.cue.number }}</span></button>
+              {% endif %}
+              {% if not day.past %}
+                <button class="button button--quiet button--small" type="button"
+                        hx-get="{% url 'cues:schedule_on' p.cue.id %}" hx-target="#app-dialog" hx-swap="innerHTML">Schedule On…<span class="visually-hidden"> for {{ p.cue.number }}</span></button>
+              {% endif %}
+            </span>
           {% endif %}
         </li>
       {% endfor %}

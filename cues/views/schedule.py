@@ -32,6 +32,18 @@ class PartView:
     cue: agenda_service.CueInfo
     project: agenda_service.ProjectInfo
     part: scheduler.Part
+    # Seconds logged as written for it that day.
+    written: int = 0
+
+    @property
+    def planned(self) -> bool:
+        """The day planned some of it (it may only have been logged)."""
+        return bool(self.part.music)
+
+    @property
+    def written_music(self) -> str:
+        """What was logged that day, e.g. '0:45'."""
+        return clock(self.written)
 
     @property
     def music(self) -> str:
@@ -43,7 +55,12 @@ class PartView:
 
     @property
     def share(self) -> str:
-        """Just this day's music, for the calendar: '1:20'."""
+        """Just this day's music, for the calendar: '1:20'.
+
+        For a cue only logged that day, what was written.
+        """
+        if not self.planned:
+            return clock(self.written)
         return clock(round(self.part.music))
 
 
@@ -64,6 +81,12 @@ class DayView:
     def music(self) -> str:
         """The day's music, as m:ss, or '' with none."""
         total = sum(round(p.part.music) for p in self.parts)
+        return clock(total) if total else ""
+
+    @property
+    def written(self) -> str:
+        """What was logged as written that day, as m:ss, or ''."""
+        total = sum(p.written for p in self.parts)
         return clock(total) if total else ""
 
 
@@ -96,15 +119,31 @@ def _visible(shown: Collection[int] | None, project: int) -> bool:
 def _parts_on(
     agenda: agenda_service.Agenda, date: datetime.date
 ) -> tuple[scheduler.Part, ...]:
-    """What a day plans: the plan from today, the saved plan before."""
+    """What a day plans, and any cue only logged as written that day.
+
+    The plan from today; the saved plan before.
+    """
     if date < agenda.today:
-        return tuple(
+        parts = tuple(
             scheduler.Part(p.key, p.effort, p.music, p.music)
             for p in agenda.past.get(date, [])
-            if agenda.cues[p.key].project in agenda.projects
         )
-    planned = agenda.plan.day(date)
-    return planned.parts if planned else ()
+    else:
+        planned = agenda.plan.day(date)
+        parts = planned.parts if planned else ()
+    # Cues logged as written that day without being planned for it.
+    keys = {part.key for part in parts}
+    nothing = scheduler.Fraction(0)
+    extra = tuple(
+        scheduler.Part(key, nothing, nothing, nothing)
+        for key in agenda.written.get(date, {})
+        if key not in keys
+    )
+    return tuple(
+        part
+        for part in parts + extra
+        if agenda.cues[part.key].project in agenda.projects
+    )
 
 
 def days_view(
@@ -133,11 +172,13 @@ def days_view(
     days = []
     date = first
     while date <= last:
+        written = agenda.written.get(date, {})
         parts = [
             PartView(
                 agenda.cues[part.key],
                 agenda.projects[agenda.cues[part.key].project],
                 part,
+                written.get(part.key, 0),
             )
             for part in _parts_on(agenda, date)
             if _visible(shown, agenda.cues[part.key].project)

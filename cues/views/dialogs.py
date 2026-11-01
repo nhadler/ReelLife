@@ -6,6 +6,7 @@ grid, refresh the header and close the dialog. "Save and add another"
 answers with a fresh form instead, keeping the dialog open.
 """
 
+import datetime
 import json
 
 from django.core.exceptions import ValidationError
@@ -24,10 +25,13 @@ from accounts.models import Role
 from accounts.models import User
 from cues import forms
 from cues import models
+from cues import schedule_forms
 from cues import timecode
 from cues.services import authoring
 from cues.services import pins
 from cues.services import projects as project_service
+from cues.services import writing
+from cues.services.summaries import clock
 
 # Events the page listens for (grid.js, the header's hx-trigger, dialog.js).
 CHANGED = {"cues:reload": True, "cues:changed": True}
@@ -226,7 +230,7 @@ def schedule_on(request: HttpRequest, cue_id: int) -> HttpResponse:
         return redirect("cues:cue", cue.pk)
     pin = models.SchedulePin.objects.filter(cue=cue).first()
     initial = {"date": pin.date if pin else timezone.localdate()}
-    form = forms.ScheduleOnForm(
+    form = schedule_forms.ScheduleOnForm(
         request.POST if request.method == "POST" else None, initial=initial
     )
     if request.method == "POST" and "unpin" in request.POST:
@@ -239,4 +243,49 @@ def schedule_on(request: HttpRequest, cue_id: int) -> HttpResponse:
         request,
         "cues/dialogs/schedule_on.html",
         {"cue": cue, "form": form, "pin": pin},
+    )
+
+
+def _day(text: str) -> datetime.date:
+    """A YYYY-MM-DD day, else today."""
+    try:
+        return datetime.date.fromisoformat(text)
+    except ValueError:
+        return timezone.localdate()
+
+
+@role_required(Role.EDITOR)
+@require_http_methods(["GET", "POST"])
+def log_written(request: HttpRequest, cue_id: int) -> HttpResponse:
+    """Logs how much of a cue was written on a day, or removes the log."""
+    cue = get_object_or_404(
+        models.Cue.objects.select_related("project", "status"), pk=cue_id
+    )
+    if _typed_in(request):
+        return redirect("cues:cue", cue.pk)
+    data = request.POST if request.method == "POST" else request.GET
+    date = _day(data.get("date", ""))
+    found = models.WritingLog.objects.filter(cue=cue, date=date).first()
+    if request.method == "POST":
+        form = schedule_forms.LogWrittenForm(request.POST)
+        if "remove" in request.POST:
+            writing.remove(cue, date, _user(request))
+            return _rescheduled()
+        if form.is_valid():
+            writing.log(
+                cue,
+                form.cleaned_data["date"],
+                form.cleaned_data["amount"],
+                _user(request),
+            )
+            return _rescheduled()
+    else:
+        amount = clock(found.seconds) if found else data.get("amount", "")
+        form = schedule_forms.LogWrittenForm(
+            initial={"date": date, "amount": amount}
+        )
+    return render(
+        request,
+        "cues/dialogs/log_written.html",
+        {"cue": cue, "form": form, "logged": found is not None},
     )

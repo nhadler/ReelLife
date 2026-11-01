@@ -160,30 +160,34 @@ def test_the_first_look_each_day_saves_its_plan(film: models.Project) -> None:
     assert models.ScheduleEntry.objects.count() == 1
 
 
-def test_a_cue_in_progress_is_credited_with_past_days(
-    film: models.Project,
-) -> None:
+def test_logged_work_comes_off_what_is_left(film: models.Project) -> None:
     cue = _cue(film, "1m01", 20, models.StatusKind.IN_PROGRESS)
-    for offset, minutes in ((2, 6), (1, 3)):
-        models.ScheduleEntry.objects.create(
-            date=MON - offset * _DAY,
-            cue=cue,
-            music=Decimal(minutes * 60),
-            effort=Decimal(minutes * 60),
-        )
-    found = agenda.build(MON, save=False)
-    parts = [p for d in found.plan.days for p in d.parts if p.key == cue.pk]
-    # 20 minutes, 9 planned on past days: 11 left.
-    assert sum(p.music for p in parts) == 11 * 60
-    # Past days show what they planned.
-    assert [p.key for p in found.past[MON - _DAY]] == [cue.pk]
-
-
-def test_credit_always_leaves_a_minimum_part(film: models.Project) -> None:
-    cue = _cue(film, "1m01", 5, models.StatusKind.IN_PROGRESS)
+    models.WritingLog.objects.create(cue=cue, date=MON - 2 * _DAY, seconds=360)
+    models.WritingLog.objects.create(cue=cue, date=MON, seconds=180)
+    # Planned on a past day but not logged: that counts for nothing.
     models.ScheduleEntry.objects.create(
         date=MON - _DAY, cue=cue, music=Decimal(600), effort=Decimal(600)
     )
+    found = agenda.build(MON, save=False)
+    parts = [p for d in found.plan.days for p in d.parts if p.key == cue.pk]
+    # 20 minutes, 9 logged: 11 left.
+    assert sum(p.music for p in parts) == 11 * 60
+    assert found.written == {MON - 2 * _DAY: {cue.pk: 360}, MON: {cue.pk: 180}}
+
+
+def test_writing_logs_dont_count_toward_revisions(
+    film: models.Project,
+) -> None:
+    cue = _cue(film, "1m01", 20, models.StatusKind.REDO)
+    models.WritingLog.objects.create(cue=cue, date=MON - _DAY, seconds=600)
+    found = agenda.build(MON, save=False)
+    left = sum(p.music for d in found.plan.days for p in d.parts)
+    assert left == 20 * 60
+
+
+def test_logging_always_leaves_a_minimum_part(film: models.Project) -> None:
+    cue = _cue(film, "1m01", 5, models.StatusKind.IN_PROGRESS)
+    models.WritingLog.objects.create(cue=cue, date=MON - _DAY, seconds=600)
     found = agenda.build(MON, save=False)
     left = sum(p.music for d in found.plan.days for p in d.parts)
     assert left == 300  # the whole 5:00 is under the 10:00 minimum part
@@ -227,6 +231,92 @@ def test_the_records_read_as_text(
     feed = models.CalendarFeed.objects.create(
         user=User.objects.get(), token_hash="x" * 64
     )
+    log = models.WritingLog.objects.create(cue=cue, date=MON, seconds=80)
+    assert str(log) == f"{cue} on 2026-11-02: 80 s"
     assert str(pin) == f"{cue} on 2026-11-02"
     assert str(entry) == f"2026-11-02 cue {cue.pk}"
     assert str(feed).startswith("Calendar feed for ")
+
+
+# Logging what was written
+
+
+def test_log_written_logs_replaces_removes_and_undoes(
+    editor: Client, film: models.Project
+) -> None:
+    cue = _cue(film, "1m01", 10, models.StatusKind.IN_PROGRESS)
+    url = reverse("cues:log_written", args=[cue.pk])
+    form = editor.get(
+        url, {"date": "2026-11-01", "amount": "2:30"}, headers=HX
+    ).content.decode()
+    assert 'value="2026-11-01"' in form and 'value="2:30"' in form
+    assert "Remove" not in form
+    editor.post(url, {"date": "2026-11-01", "amount": "2:30"}, headers=HX)
+    log = models.WritingLog.objects.get()
+    assert (log.date, log.seconds, log.revise) == (MON - _DAY, 150, False)
+    latest = models.ChangeSet.objects.filter(project=film).latest("pk")
+    assert latest.label == "Log 2:30 of 1m01 on Nov 1"
+    # The dialog then shows that day's log, and logging again replaces it.
+    again = editor.get(url, {"date": "2026-11-01"}, headers=HX)
+    assert 'value="2:30"' in again.content.decode()
+    assert "Remove" in again.content.decode()
+    editor.post(url, {"date": "2026-11-01", "amount": "1.5"}, headers=HX)
+    assert models.WritingLog.objects.get().seconds == 90
+    history.undo(models.ChangeSet.objects.filter(project=film).latest("pk"))
+    assert models.WritingLog.objects.get().seconds == 150
+    editor.post(
+        url, {"date": "2026-11-01", "amount": "", "remove": "1"}, headers=HX
+    )
+    assert not models.WritingLog.objects.exists()
+    # Removing a log that isn't there does nothing.
+    count = models.ChangeSet.objects.count()
+    editor.post(url, {"date": "2026-11-01", "remove": "1"}, headers=HX)
+    assert models.ChangeSet.objects.count() == count
+
+
+@pytest.mark.parametrize(
+    ("data", "error"),
+    [
+        ({"date": "2026-11-03", "amount": "1:00"}, "today or an earlier day"),
+        ({"date": "2026-11-02", "amount": "lots"}, "Enter an amount"),
+        ({"date": "2026-11-02", "amount": "1:75"}, "under 60"),
+    ],
+)
+def test_log_written_refuses(
+    editor: Client, film: models.Project, data: dict[str, str], error: str
+) -> None:
+    cue = _cue(film, "1m01", 10)
+    url = reverse("cues:log_written", args=[cue.pk])
+    page = editor.post(url, data, headers=HX).content.decode()
+    assert error in page
+    assert not models.WritingLog.objects.exists()
+
+
+def test_log_written_defaults_to_today(
+    editor: Client, film: models.Project
+) -> None:
+    cue = _cue(film, "1m01", 10)
+    url = reverse("cues:log_written", args=[cue.pk])
+    form = editor.get(url, {"date": "x"}, headers=HX).content.decode()
+    assert 'value="2026-11-02"' in form
+    assert editor.get(url)["Location"] == reverse("cues:cue", args=[cue.pk])
+
+
+def test_the_day_list_shows_what_was_written(
+    editor: Client, film: models.Project
+) -> None:
+    planned = _cue(film, "1m01", 2)
+    extra = _cue(film, "1m02", 2)
+    models.ScheduleEntry.objects.create(
+        date=MON - _DAY, cue=planned, music=Decimal(120), effort=Decimal(120)
+    )
+    models.WritingLog.objects.create(cue=planned, date=MON - _DAY, seconds=60)
+    models.WritingLog.objects.create(cue=extra, date=MON - _DAY, seconds=45)
+    page = editor.get(
+        reverse("cues:schedule"), {"day": "2026-11-01"}
+    ).content.decode()
+    assert "<strong>2:00</strong> of music planned" in page
+    assert "<strong>1:45</strong> written" in page
+    assert "Written 1:00" in page and "Written 0:45" in page
+    assert "Log Written…" in page
+    assert reverse("cues:log_written", args=[planned.pk]) in page
