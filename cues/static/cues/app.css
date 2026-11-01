@@ -4149,6 +4149,80 @@ button.stats__name:hover,
   align-items: start;
 }
 
+/* App Settings as a sheet: each section is one row, its name in a left
+   column as wide as the project settings' sidebar, its controls on four
+   columns every row shares, so the whole page fits without scrolling. */
+.settings-sheet .form-section {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  column-gap: calc(var(--space) * 4);
+  margin: 0;
+  padding: calc(var(--space) * 2) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.settings-sheet .form-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Floated, a legend is laid out like any grid item; level with the
+   controls, below their labels. */
+.settings-sheet .form-section > legend {
+  float: left;
+  margin: 0;
+  padding-top: calc(var(--step--1) * 1.45 + 0.3rem);
+  color: var(--ink);
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: var(--control-h);
+}
+
+.settings-sheet .fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--space) * 1.5) calc(var(--space) * 3);
+}
+
+.settings-sheet .fields > .field--check > label {
+  white-space: nowrap;
+}
+
+.settings-sheet .form-actions {
+  margin: 0;
+  padding: calc(var(--space) * 2) 0 0 calc(12rem + var(--space) * 4);
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 48rem) {
+  .settings-sheet .form-section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settings-sheet .form-section > legend {
+    margin-bottom: var(--space);
+    padding-top: 0;
+    line-height: 1.4;
+  }
+
+  .settings-sheet .fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-sheet .fields > .field--check {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+
+  .settings-sheet .fields > .field--check > label {
+    min-height: 0;
+    white-space: normal;
+  }
+
+  .settings-sheet .form-actions {
+    padding-left: 0;
+  }
+}
+
 .settings__nav ul {
   position: sticky;
   top: var(--space);

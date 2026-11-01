@@ -6,6 +6,23 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Projects at Once** (Settings, Schedule): work every project each
+  day, each at its own pace to its own deadlines (In parallel, the
+  default), or one at a time, earliest deadline first. With a daily
+  maximum, projects asking for less than an even share keep all of it.
+
+### Changed
+
+- App Settings is one sheet: each section a row, its controls lined up
+  on shared columns, so the page fits a laptop screen without
+  scrolling. Viewers see it read-only.
+
+### Fixed
+
+- A project card's ⋯ menu was cut off at the card's edge.
+
 ## [0.4.0] - 2026-11-01
 
 The first public release.

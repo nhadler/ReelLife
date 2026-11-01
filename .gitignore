@@ -35,3 +35,6 @@ fixtures/real/*
 /private/
 /CLAUDE.md
 /.claude/
+/AGENTS.md
+/.codex/
+/.Codex/

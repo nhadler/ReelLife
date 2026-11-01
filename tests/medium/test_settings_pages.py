@@ -688,6 +688,9 @@ def test_app_settings(
     html = editor.get(url).content.decode()
     assert "Leading Zero (01:00:10:00)" in html
     assert f'href="{url}"' in html  # the top bar's link
+    assert '<fieldset class="settings__fields">' in html  # editable
+    assert "Most Work a Day (Min)" in html
+    assert 'placeholder="As Deadlines Need"' in html
     data = {
         "theme": "light",
         "date_format": "Y-m-d",
@@ -701,6 +704,7 @@ def test_app_settings(
         "schedule_hard": "4",
         "schedule_revise": "0.25",
         "schedule_unrated": "Moderate",
+        "schedule_projects": "one",
         "daily_max": "12.5",
         "min_part": "5",
     }
@@ -714,6 +718,7 @@ def test_app_settings(
     # The schedule's minutes are kept as weighted seconds.
     assert saved.schedule_hard == Decimal(4)
     assert saved.schedule_unrated == "Moderate"
+    assert saved.schedule_projects == models.AppSettings.ProjectsAtOnce.ONE
     assert (saved.schedule_daily_max, saved.schedule_min_part) == (750, 300)
     html = editor.get(url).content.decode()
     assert 'name="daily_max" value="12.5"' in html
@@ -729,6 +734,10 @@ def test_app_settings(
         not in viewer.get(reverse("cues:dashboard")).content.decode()
     )
     assert viewer.post(url, data).status_code == 403
+    # A viewer reads the settings: every control disabled, Save hidden.
+    seen = viewer.get(url).content.decode()
+    assert '<fieldset class="settings__fields" disabled>' in seen
+    assert "View only." in seen
 
 
 def test_more_edges(editor: Client, project: models.Project) -> None:

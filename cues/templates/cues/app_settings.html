@@ -4,49 +4,54 @@
 
 {% block content %}
   <div class="page-head"><h1>Settings</h1>{% include "cues/includes/help_link.html" with slug="settings-and-roles" %}</div>
-  <form class="project-form" method="post" novalidate>
+  {% if read_only %}<div class="callout" role="note">{% include "cues/includes/icon.html" with name="eye" %}<p class="callout__title">View only. Changing settings needs the editor role.</p></div>{% endif %}
+  {# A sheet: each section one row, its name on the left, its controls on four columns every row shares. For viewers the fieldset is disabled, which disables every control in it. #}
+  <form class="project-form settings-sheet" method="post" novalidate>
     {% csrf_token %}
     {% include "cues/includes/form_errors.html" %}
-    <fieldset class="form-section">
-      <legend>Look</legend>
-      <div class="fields">
-        {% include "cues/includes/field.html" with field=form.theme %}
-        {% include "cues/includes/field.html" with field=form.date_format %}
-      </div>
+    <fieldset class="settings__fields"{% if read_only %} disabled{% endif %}>
+      <fieldset class="form-section">
+        <legend>Look</legend>
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.theme %}
+          {% include "cues/includes/field.html" with field=form.date_format %}
+        </div>
+      </fieldset>
+      <fieldset class="form-section">
+        <legend>Timecodes</legend>
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.leading_zero %}
+          {% include "cues/includes/field.html" with field=form.subframes %}
+        </div>
+      </fieldset>
+      <fieldset class="form-section">
+        <legend>Grid</legend>
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.single_click_edit %}
+          {% include "cues/includes/field.html" with field=form.enter_behaviour %}
+        </div>
+      </fieldset>
+      <fieldset class="form-section">
+        <legend>Versions and Progress</legend>
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.version_increment %}
+          {% include "cues/includes/field.html" with field=form.music_totals %}
+        </div>
+      </fieldset>
+      <fieldset class="form-section">
+        <legend>Schedule</legend>
+        <div class="fields">
+          {% include "cues/includes/field.html" with field=form.schedule_easy %}
+          {% include "cues/includes/field.html" with field=form.schedule_moderate %}
+          {% include "cues/includes/field.html" with field=form.schedule_hard %}
+          {% include "cues/includes/field.html" with field=form.schedule_revise %}
+          {% include "cues/includes/field.html" with field=form.schedule_projects %}
+          {% include "cues/includes/field.html" with field=form.schedule_unrated %}
+          {% include "cues/includes/field.html" with field=form.daily_max %}
+          {% include "cues/includes/field.html" with field=form.min_part %}
+        </div>
+      </fieldset>
+      <div class="form-actions"><button class="button" type="submit">Save</button></div>
     </fieldset>
-    <fieldset class="form-section">
-      <legend>Timecodes</legend>
-      <div class="fields">
-        {% include "cues/includes/field.html" with field=form.leading_zero wide=True %}
-        {% include "cues/includes/field.html" with field=form.subframes wide=True %}
-      </div>
-    </fieldset>
-    <fieldset class="form-section">
-      <legend>Grid</legend>
-      <div class="fields">
-        {% include "cues/includes/field.html" with field=form.single_click_edit wide=True %}
-        {% include "cues/includes/field.html" with field=form.enter_behaviour %}
-      </div>
-    </fieldset>
-    <fieldset class="form-section">
-      <legend>Versions and Progress</legend>
-      <div class="fields">
-        {% include "cues/includes/field.html" with field=form.version_increment %}
-        {% include "cues/includes/field.html" with field=form.music_totals %}
-      </div>
-    </fieldset>
-    <fieldset class="form-section">
-      <legend>Schedule</legend>
-      <div class="fields">
-        {% include "cues/includes/field.html" with field=form.schedule_easy %}
-        {% include "cues/includes/field.html" with field=form.schedule_moderate %}
-        {% include "cues/includes/field.html" with field=form.schedule_hard %}
-        {% include "cues/includes/field.html" with field=form.schedule_revise %}
-        {% include "cues/includes/field.html" with field=form.schedule_unrated %}
-        {% include "cues/includes/field.html" with field=form.daily_max %}
-        {% include "cues/includes/field.html" with field=form.min_part %}
-      </div>
-    </fieldset>
-    <div class="form-actions"><button class="button" type="submit">Save</button></div>
   </form>
 {% endblock %}

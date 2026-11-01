@@ -15,20 +15,20 @@ class AppSettingsForm(forms.ModelForm):  # type: ignore[type-arg]
     weighted seconds and edited in minutes of Easy music.
     """
 
+    # Minutes of Easy music; Help explains both.
     daily_max = forms.DecimalField(
-        label="Most work a day",
+        label="Most work a day (Min)",
         required=False,
         min_value=Decimal("0.5"),
         max_value=Decimal(1440),
         decimal_places=1,
-        help_text="Minutes of Easy music. Blank: what the deadlines need.",
+        widget=forms.NumberInput(attrs={"placeholder": "As Deadlines Need"}),
     )
     min_part = forms.DecimalField(
-        label="Smallest share",
+        label="Smallest share (Min)",
         min_value=Decimal("0.5"),
         max_value=Decimal(240),
         decimal_places=1,
-        help_text="Minutes of Easy music.",
     )
 
     class Meta:
@@ -47,6 +47,7 @@ class AppSettingsForm(forms.ModelForm):  # type: ignore[type-arg]
             "schedule_hard",
             "schedule_revise",
             "schedule_unrated",
+            "schedule_projects",
         ]
         labels = {
             "leading_zero": "Leading zero (01:00:10:00)",

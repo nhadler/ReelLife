@@ -252,6 +252,11 @@ def app_settings(request: HttpRequest) -> HttpResponse:
         form.save()
         messages.success(request, "Saved the app settings.")
         return HttpResponseRedirect(reverse("cues:app_settings"))
+    read_only = not roles.at_least(
+        getattr(request.user, "role", ""), Role.EDITOR
+    )
     return render(
-        request, "cues/app_settings.html", {"nav": "settings", "form": form}
+        request,
+        "cues/app_settings.html",
+        {"nav": "settings", "form": form, "read_only": read_only},
     )
