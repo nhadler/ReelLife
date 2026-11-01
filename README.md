@@ -65,7 +65,7 @@ The development server uses a mock identity provider, so you don't need to confi
 
 ### Stack
 
-ReelLife uses Django 5.2 with server-rendered templates, HTMX, Alpine.js (CSP build), and AG Grid Community for the cue grid. SQLite handles storage.
+ReelLife uses Django 6.1 with server-rendered templates, HTMX, Alpine.js (CSP build), and AG Grid Community for the cue grid. SQLite handles storage.
 
 The backend is split into three Django apps:
 

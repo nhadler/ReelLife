@@ -602,11 +602,13 @@ def test_keyboard_path_through_grid_and_dialogs(
     page.keyboard.press("Escape")
     expect(dialog).to_be_hidden()
 
-    # Ctrl+Enter opens the cue; Escape comes back.
+    # Ctrl+Enter opens the cue; Escape comes back. The heading can show
+    # before the page's scripts run, so wait for them first.
     page.keyboard.press("Control+Enter")
     expect(
         page.get_by_role("heading", name=re.compile("1m01 Typed In"))
     ).to_be_visible()
+    page.wait_for_load_state("load")
     page.keyboard.press("Escape")
     expect(page.get_by_role("heading", name="Keys Only")).to_be_visible()
 

@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = "==3.12.*"
 
 [[package]]
@@ -1577,7 +1577,7 @@ dev = [
 requires-dist = [
     { name = "argon2-cffi", specifier = ">=25.1.0" },
     { name = "defusedxml", specifier = ">=0.7.1" },
-    { name = "django", specifier = ">=5.2,<6.2" },
+    { name = "django", specifier = ">=6.1,<6.2" },
     { name = "django-csp", specifier = ">=4.0" },
     { name = "django-otp", specifier = ">=1.7.5" },
     { name = "django-ratelimit", specifier = ">=4.1.0" },
