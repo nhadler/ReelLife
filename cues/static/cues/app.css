@@ -4801,6 +4801,86 @@ a.toggle__option:hover {
   min-height: 7.5rem;
 }
 
+/* The Schedule's month fills the window under the top bar: the page is a
+   column the calendar takes the rest of, its weeks share that height,
+   and each day clips what doesn't fit (schedule.js says how much). */
+body:has(> .page--fill) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.page--fill {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  padding-bottom: calc(var(--space) * 3);
+}
+
+.page--fill .schedule {
+  flex: 1;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.page--fill .schedule__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page--fill .schedule__side {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.page--fill .cal--month {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page--fill .cal--month .cal__days {
+  flex: 1;
+  grid-auto-rows: minmax(0, 1fr);
+  /* Shorter than this, the page scrolls rather than squeeze the days
+     below a cue each. */
+  min-height: 26rem;
+}
+
+.page--fill .cal--month .cal-day__link {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.page--fill .cal--month .cal-cue {
+  flex: none;
+}
+
+.page--fill .cal--month .cal-cue__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 64rem) {
+  body:has(> .page--fill) {
+    display: block;
+    height: auto;
+  }
+
+  .page--fill .cal--month .cal__days {
+    min-height: 0;
+  }
+
+  .page--fill .cal--month .cal-day__link {
+    overflow: visible;
+  }
+}
+
 .cal--week .cal-day__link {
   min-height: 18rem;
 }

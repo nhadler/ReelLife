@@ -26,6 +26,10 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- The Schedule's month fills the window instead of scrolling: weeks
+  share the height, each day shows the cues that fit (titles on one
+  line) and says how many more. Choosing a day swaps its list in
+  without reloading the page.
 - Runs on Django 6.1.
 - Empty pages (Projects, Overview, Picture, Activity, Trash) show an
   icon, a short title and, where there's something to do, the button

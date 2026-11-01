@@ -4,6 +4,8 @@
 {% block title %}Schedule · ReelLife{% endblock %}
 
 {% block scripts %}<script src="{% static 'cues/schedule.js' %}" type="module"></script>{% endblock %}
+{# The month fills the window below the top bar (app.css .page--fill). #}
+{% block page_class %}{% if not week %}page--fill{% endif %}{% endblock %}
 
 {% block content %}
   <div class="page-head">
@@ -36,9 +38,9 @@
         </div>
       </div>
       {% if week %}
-        {% include "cues/includes/calendar.html" with size="week" %}
+        {% include "cues/includes/calendar.html" with size="week" swap=True %}
       {% else %}
-        {% include "cues/includes/calendar.html" with size="month" %}
+        {% include "cues/includes/calendar.html" with size="month" swap=True %}
       {% endif %}
     </div>
     <aside class="schedule__side" aria-label="Projects and the chosen day">

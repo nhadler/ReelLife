@@ -1,5 +1,5 @@
 {# The chosen day's work, beside the calendar. #}
-<section class="side-card" aria-labelledby="schedule-day-title">
+<section class="side-card" id="schedule-day" aria-labelledby="schedule-day-title">
   <h2 class="side-card__title" id="schedule-day-title">
     {{ day.date|date:day_format }}{% if day.today %} <span class="side-card__tag">Today</span>{% endif %}
   </h2>
