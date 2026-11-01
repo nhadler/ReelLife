@@ -248,7 +248,7 @@ def test_choosing_a_day_lists_its_work(
     assert "Thu Nov 5" in thursday
     assert 'class="day-total"' in thursday  # it has work
     assert "Holiday" in _page(viewer, day="2026-11-03")  # a day off
-    assert "Past days aren't planned." in _page(viewer, day="2026-11-01")
+    assert "Nothing was planned." in _page(viewer, day="2026-11-01")
     assert "Nothing planned." in _page(viewer, day="2026-11-20")
     # A day outside the month shown falls back to today.
     assert "Mon Nov 2" in _page(viewer, month="2026-11", day="2027-01-01")

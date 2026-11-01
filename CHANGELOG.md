@@ -8,6 +8,17 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Schedule On…** (the cue page's ⋯ menu, the grid's right-click menu,
+  or a day's list on the Schedule): pin a cue to a day and the rest of
+  the plan flows around it; a pin marks it on the calendar. Undoable.
+- **Calendar Feed** (profile menu): a private link your calendar app
+  subscribes to, one event a day listing its cues, the last 30 days and
+  the next 90; revoke or replace it any time, or download an .ics once.
+- The Schedule keeps each day's plan: while a long cue is In Progress,
+  the shares planned on past days count as written, and past days show
+  what was planned, faded. The summary starts "On track" when every
+  deadline is met.
+- MCP tools `schedule` ("what should I write today?") and `pin_cue`.
 - **Projects at Once** (Settings, Schedule): work every project each
   day, each at its own pace to its own deadlines (In parallel, the
   default), or one at a time, earliest deadline first. With a daily

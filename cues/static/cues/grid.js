@@ -2501,13 +2501,31 @@ async function copyCells(withHeaders) {
 }
 
 /**
+ * Opens the Schedule On dialog for a cue (htmx loads the form).
+ * @param {number} cueId
+ */
+function openScheduleOn(cueId) {
+  window.htmx.ajax('GET', config.scheduleOnUrl.replace('/0/', `/${cueId}/`), {
+    target: '#app-dialog',
+    swap: 'innerHTML',
+  });
+}
+
+/**
  * The right-click menu on a cue's cell.
  * @param {!Object} params AG Grid cell context menu event.
  */
 function cellMenu(params) {
+  const cueId = params.node?.data?.id;
   showMenu(params.event.clientX, params.event.clientY, [
     {label: 'Copy', shortcut: 'Ctrl+C', action: () => copyCells(false)},
     {label: 'Copy with Headers', action: () => copyCells(true)},
+    null,
+    {
+      label: 'Schedule On…',
+      action: () => openScheduleOn(cueId),
+      disabled: !config.canEdit || !cueId,
+    },
     null,
     {label: 'Autosize All Columns', action: () => api.autoSizeAllColumns()},
     null,

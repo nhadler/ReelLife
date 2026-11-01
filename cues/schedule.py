@@ -1,9 +1,14 @@
-"""Deadlines and days off. Re-exported from cues.models."""
+"""Deadlines, days off and the schedule's own records.
 
+Re-exported from cues.models.
+"""
+
+from django.conf import settings
 from django.db import models
 from django.db.models import Q
 
 from cues.model_base import Timestamped
+from cues.model_base import _history
 
 
 class Deadline(Timestamped):
@@ -74,3 +79,80 @@ class DayOff(models.Model):
     def __str__(self) -> str:
         """Returns the date."""
         return self.date.isoformat()
+
+
+class SchedulePin(Timestamped):
+    """A cue the composer fixed to a day ("Schedule On…").
+
+    The rest of the plan flows around it. Once the day has passed, an
+    unfinished pinned cue just rejoins the flow. Tracked by history, so
+    pinning undoes.
+    """
+
+    cue = models.OneToOneField(
+        "cues.Cue", on_delete=models.CASCADE, related_name="pin"
+    )
+    date = models.DateField()
+
+    history = _history()
+
+    class Meta:
+        verbose_name = "schedule pin"
+
+    def __str__(self) -> str:
+        """Returns the cue and the day."""
+        return f"{self.cue} on {self.date.isoformat()}"
+
+
+class ScheduleEntry(models.Model):
+    """One cue's share of a day's plan, saved on that day.
+
+    The first look at the schedule each day (or the nightly job) saves
+    that day's plan, so the parts planned on past days count as written
+    while a split cue is in progress. A log, not undoable; pruned after
+    a year.
+    """
+
+    date = models.DateField()
+    cue = models.ForeignKey(
+        "cues.Cue", on_delete=models.CASCADE, related_name="schedule_entries"
+    )
+    # Revision work is planned and credited apart from writing.
+    revise = models.BooleanField(default=False)
+    music = models.DecimalField(max_digits=10, decimal_places=3)
+    effort = models.DecimalField(max_digits=10, decimal_places=3)
+
+    class Meta:
+        verbose_name = "schedule entry"
+        verbose_name_plural = "schedule entries"
+        ordering = ["date", "id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["date", "cue"], name="schedule_entry_once_a_day"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        """Returns the day and the cue's id."""
+        return f"{self.date.isoformat()} cue {self.cue_id}"
+
+
+class CalendarFeed(models.Model):
+    """A user's calendar subscription: the schedule as an .ics feed.
+
+    Only the SHA-256 of its token is kept; the link is shown once, when
+    it's made. Making a new one revokes the old.
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="calendar_feed",
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        """Returns whose feed it is."""
+        return f"Calendar feed for {self.user}"

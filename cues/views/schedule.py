@@ -14,6 +14,8 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from django.views.decorators.http import require_GET
 
+from accounts import roles
+from accounts.models import Role
 from cues import dates
 from cues import models
 from cues.services import agenda as agenda_service
@@ -91,6 +93,20 @@ def _visible(shown: Collection[int] | None, project: int) -> bool:
     return shown is None or project in shown
 
 
+def _parts_on(
+    agenda: agenda_service.Agenda, date: datetime.date
+) -> tuple[scheduler.Part, ...]:
+    """What a day plans: the plan from today, the saved plan before."""
+    if date < agenda.today:
+        return tuple(
+            scheduler.Part(p.key, p.effort, p.music, p.music)
+            for p in agenda.past.get(date, [])
+            if agenda.cues[p.key].project in agenda.projects
+        )
+    planned = agenda.plan.day(date)
+    return planned.parts if planned else ()
+
+
 def days_view(
     agenda: agenda_service.Agenda,
     first: datetime.date,
@@ -117,14 +133,13 @@ def days_view(
     days = []
     date = first
     while date <= last:
-        planned = agenda.plan.day(date)
         parts = [
             PartView(
                 agenda.cues[part.key],
                 agenda.projects[agenda.cues[part.key].project],
                 part,
             )
-            for part in (planned.parts if planned else ())
+            for part in _parts_on(agenda, date)
             if _visible(shown, agenda.cues[part.key].project)
         ]
         off = [
@@ -198,7 +213,8 @@ def summary(
     cues = len({part.key for _, part in parts})
     noun = "cue" if cues == 1 else "cues"
     line = (
-        f"{cues} {noun}, {clock(music)} of music, done by "
+        ("" if risks else "On track: ")
+        + f"{cues} {noun}, {clock(music)} of music, done by "
         f"{dateformat.format(finish, formats['day_format'])}: about "
         f"{clock(round(music / working))} a working day."
     )
@@ -346,5 +362,8 @@ def schedule(request: HttpRequest) -> HttpResponse:
             "risks": risks,
             "unschedulable": listed(c.id for c in agenda.unschedulable),
             "unplaced": listed(agenda.plan.unplaced),
+            "can_edit": roles.at_least(
+                getattr(request.user, "role", ""), Role.EDITOR
+            ),
         },
     )

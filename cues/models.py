@@ -975,8 +975,11 @@ from cues.lists import ThemeOption as ThemeOption  # noqa: E402
 from cues.lists import VersionTheme as VersionTheme  # noqa: E402
 from cues.notes import NoteKind as NoteKind  # noqa: E402
 from cues.notes import ProjectNote as ProjectNote  # noqa: E402
+from cues.schedule import CalendarFeed as CalendarFeed  # noqa: E402
 from cues.schedule import DayOff as DayOff  # noqa: E402
 from cues.schedule import Deadline as Deadline  # noqa: E402
+from cues.schedule import ScheduleEntry as ScheduleEntry  # noqa: E402
+from cues.schedule import SchedulePin as SchedulePin  # noqa: E402
 from cues.shares import CueShare as CueShare  # noqa: E402
 from cues.shares import DefaultShare as DefaultShare  # noqa: E402
 from cues.shares import Party as Party  # noqa: E402

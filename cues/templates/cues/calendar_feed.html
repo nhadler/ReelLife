@@ -1,0 +1,50 @@
+{% extends "app.html" %}
+{% load text %}
+{# Your link to the schedule for a calendar app (profile menu). The token is shown once, right after it's made. #}
+
+{% block title %}Calendar Feed · ReelLife{% endblock %}
+{% block page_class %}page--narrow{% endblock %}
+
+{% block content %}
+  <div class="page-head"><h1>Calendar Feed</h1>{% include "cues/includes/help_link.html" with slug="schedule" %}</div>
+  {% if link %}
+    <div class="callout" role="status">
+      {% include "cues/includes/icon.html" with name="calendar" %}
+      <div class="feed-link">
+        <p class="callout__title">Copy this link now: it isn't shown again.</p>
+        <label class="visually-hidden" for="feed-link">Calendar link</label>
+        <input id="feed-link" type="text" readonly value="{{ link }}">
+        <a class="button" href="{{ webcal }}">Subscribe in Calendar</a>
+      </div>
+    </div>
+  {% endif %}
+  {% if feed %}
+    <dl class="feed-facts">
+      <div><dt>Link Made</dt><dd>{{ feed.created_at|stamp:short_format }}</dd></div>
+      <div><dt>Last Read</dt><dd>{% if feed.last_used_at %}{{ feed.last_used_at|stamp:short_format }}{% else %}Not yet{% endif %}</dd></div>
+    </dl>
+    <div class="form-actions feed-actions">
+      <form method="post">
+        {% csrf_token %}
+        <button class="button button--quiet" type="submit" name="action" value="create"
+                data-confirm="Make a new link? The old one stops working.">Make a New Link</button>
+      </form>
+      <form method="post">
+        {% csrf_token %}
+        <button class="button button--quiet" type="submit" name="action" value="revoke"
+                data-confirm="Revoke the link? Calendars using it stop updating.">Revoke Link</button>
+      </form>
+      <a class="button button--quiet" href="{% url 'cues:calendar_download' %}">Download .ics</a>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-state__icon">{% include "cues/includes/icon.html" with name="calendar" %}</span>
+      <p class="empty-state__title">No Calendar Link</p>
+      <form method="post">
+        {% csrf_token %}
+        <button class="button" type="submit" name="action" value="create">Make a Link</button>
+      </form>
+      <a class="button button--quiet" href="{% url 'cues:calendar_download' %}">Download .ics</a>
+    </div>
+  {% endif %}
+{% endblock %}

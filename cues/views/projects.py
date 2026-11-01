@@ -165,6 +165,7 @@ def project_detail(request: HttpRequest, project_id: int) -> HttpResponse:
         "notesPanelUrl": reverse("cues:project_notes_panel", args=[project.pk]),
         "viewUrl": reverse("cues:api_view", args=[project.pk, 0]),
         "newVersionUrl": reverse("cues:new_version", args=[0]),
+        "scheduleOnUrl": reverse("cues:schedule_on", args=[0]),
         "detailUrl": reverse("cues:cue", args=[0]),
         "exportUrl": reverse("cues:export", args=[project.pk]),
         "toolUrl": reverse("cues:tool", args=[project.pk, "tool"]),

@@ -312,6 +312,43 @@ class DayOffAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_filter = ("project",)
 
 
+@admin.register(models.SchedulePin)
+class SchedulePinAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    """Cues fixed to a day of the schedule."""
+
+    list_display = ("cue", "date")
+
+
+@admin.register(models.ScheduleEntry)
+class ScheduleEntryAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    """Saved daily plans: a log, read only."""
+
+    list_display = ("date", "cue", "music", "effort", "revise")
+    list_filter = ("date",)
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Only the schedule writes them."""
+        return False
+
+    def has_change_permission(
+        self, request: HttpRequest, obj: models.ScheduleEntry | None = None
+    ) -> bool:
+        """What was planned isn't edited after the fact."""
+        return False
+
+
+@admin.register(models.CalendarFeed)
+class CalendarFeedAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    """Calendar links; delete one to revoke it."""
+
+    list_display = ("user", "created_at", "last_used_at")
+    readonly_fields = ("user", "token_hash", "created_at", "last_used_at")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Links are made by their user, on the Calendar Feed page."""
+        return False
+
+
 @admin.register(models.AppSettings)
 class AppSettingsAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     """The single settings row."""

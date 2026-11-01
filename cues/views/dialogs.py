@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_http_methods
 
@@ -25,6 +26,7 @@ from cues import forms
 from cues import models
 from cues import timecode
 from cues.services import authoring
+from cues.services import pins
 from cues.services import projects as project_service
 
 # Events the page listens for (grid.js, the header's hx-trigger, dialog.js).
@@ -201,4 +203,40 @@ def new_version(request: HttpRequest, cue_id: int) -> HttpResponse:
         request,
         "cues/dialogs/new_version.html",
         {"cue": cue, "project": cue.project, "form": form},
+    )
+
+
+def _rescheduled() -> HttpResponse:
+    """Closes the dialog and tells the Schedule to redraw (schedule.js)."""
+    response = HttpResponse(status=204)
+    response["HX-Trigger"] = json.dumps(
+        {"dialog:close": True, "schedule:changed": True}
+    )
+    return response
+
+
+@role_required(Role.EDITOR)
+@require_http_methods(["GET", "POST"])
+def schedule_on(request: HttpRequest, cue_id: int) -> HttpResponse:
+    """Pins a cue to a day, or unpins it; one undoable change."""
+    cue = get_object_or_404(
+        models.Cue.objects.select_related("project"), pk=cue_id
+    )
+    if _typed_in(request):
+        return redirect("cues:cue", cue.pk)
+    pin = models.SchedulePin.objects.filter(cue=cue).first()
+    initial = {"date": pin.date if pin else timezone.localdate()}
+    form = forms.ScheduleOnForm(
+        request.POST if request.method == "POST" else None, initial=initial
+    )
+    if request.method == "POST" and "unpin" in request.POST:
+        pins.unpin(cue, _user(request))
+        return _rescheduled()
+    if request.method == "POST" and form.is_valid():
+        pins.pin(cue, form.cleaned_data["date"], _user(request))
+        return _rescheduled()
+    return render(
+        request,
+        "cues/dialogs/schedule_on.html",
+        {"cue": cue, "form": form, "pin": pin},
     )

@@ -5,6 +5,7 @@ from django.urls import path
 from cues.api import views as api
 from cues.views import activity
 from cues.views import backup
+from cues.views import calendar_feed
 from cues.views import conform
 from cues.views import cue_details as details
 from cues.views import cue_sheets
@@ -121,6 +122,11 @@ urlpatterns = [
         "cues/<int:cue_id>/versions/new/",
         dialogs.new_version,
         name="new_version",
+    ),
+    path(
+        "cues/<int:cue_id>/schedule-on/",
+        dialogs.schedule_on,
+        name="schedule_on",
     ),
     path(
         "projects/<int:project_id>/thumbnail/<str:name>",
@@ -305,6 +311,17 @@ urlpatterns = [
     path("settings/", project_settings.app_settings, name="app_settings"),
     path("days-off/", project_settings.your_days_off, name="days_off"),
     path("schedule/", schedule.schedule, name="schedule"),
+    path("calendar-feed/", calendar_feed.feed_page, name="calendar_feed"),
+    path(
+        "calendar-feed/schedule.ics",
+        calendar_feed.download,
+        name="calendar_download",
+    ),
+    path(
+        "calendar/<str:token>.ics",
+        calendar_feed.feed,
+        name="calendar",
+    ),
     path("credits/", shares.credits_page, name="credits"),
     path("credits/undo/", shares.credits_undo, name="credits_undo"),
     path(

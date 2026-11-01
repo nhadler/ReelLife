@@ -54,6 +54,40 @@ The plan starts again from today every time you open it. Finish a cue
 early and the next ones move up; leave one unfinished and it simply
 moves into the coming days with the rest. Nothing is ever marked late.
 
+Each day's plan is kept from the first time anyone looks (or overnight).
+While a long cue is **In Progress**, the shares planned for it on past
+days count as written, so the days ahead only plan what's left; at
+least one Smallest Share stays until you mark it composed. Past days on
+the calendar show what was planned then, faded.
+
+The line above the calendar starts **On track** when every deadline is
+met; with a **Most Work a Day** too low, it says which deadline slips
+instead.
+
+## Schedule On
+
+To work on a cue on a particular day, pin it: **Schedule On…** in the
+cue page's ⋯ menu, the grid's right-click menu, or beside the cue in a
+day's list on the Schedule. Pick the day; the rest of the plan flows
+around it, and a pin marks it on the calendar. **Unpin** in the same
+dialog lets it flow again. Pinning is one change, so **Undo** and
+Activity take it back. Once its day has passed, a pinned cue that isn't
+finished rejoins the flow.
+
+## In your calendar app
+
+**Calendar Feed** in the profile menu makes a link your calendar app can
+subscribe to: one all-day event per day with work, listing its cues,
+the last 30 days as planned and the next 90. The link is shown once;
+copy it, or click **Subscribe in Calendar**. Anyone with the link can
+read your schedule, so **Revoke Link** if it gets out, and **Make a New
+Link** to replace it. **Download .ics** gives a one-off copy instead.
+
+Calendar apps on your own devices reach ReelLife wherever you can.
+Google Calendar and iCloud's server-side refresh fetch the feed from
+their own servers, so they only work once ReelLife is reachable from
+the internet.
+
 ## Month and week
 
 Both show a calendar, the week as a single row. Each project has its own

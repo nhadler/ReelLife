@@ -15,7 +15,7 @@
           {% for p in day.parts %}
             {% if size != "month" or forloop.counter <= 3 %}
               <span class="cal-cue tone-{{ p.project.tone }}">
-                <span class="cal-cue__top"><span class="cal-cue__number">{{ p.cue.number }}</span><span class="cal-cue__music">{{ p.share }}</span></span>
+                <span class="cal-cue__top"><span class="cal-cue__number">{{ p.cue.number }}{% if p.part.pinned %} {% include "cues/includes/icon.html" with name="pin" %}<span class="visually-hidden">, scheduled on this day</span>{% endif %}</span><span class="cal-cue__music">{{ p.share }}</span></span>
                 {% if p.cue.title %}<span class="cal-cue__title">{{ p.cue.title }}</span>{% endif %}
               </span>
             {% endif %}

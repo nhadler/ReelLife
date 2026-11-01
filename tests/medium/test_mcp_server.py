@@ -25,6 +25,7 @@ from mcp_server import auth
 from mcp_server import common
 from mcp_server import cue_tools
 from mcp_server import prompts
+from mcp_server import schedule
 from mcp_server import server
 from mcp_server import setup
 from mcp_server import transfers
@@ -187,6 +188,8 @@ def test_over_http(monkeypatch: pytest.MonkeyPatch) -> None:
         *cue_tools.READ_TOOLS,
         *transfers.TOOLS,
         *transfers.READ_TOOLS,
+        *schedule.TOOLS,
+        *schedule.READ_TOOLS,
     ]
     assert names == {fn.__name__ for fn in every}
     tools = {t["name"]: t for t in listed.json()["result"]["tools"]}

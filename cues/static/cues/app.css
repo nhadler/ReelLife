@@ -4367,6 +4367,7 @@ button.stats__name:hover,
 }
 
 /* Batch edit's question (overview/batch.js). */
+.dialog:has(.schedule-on),
 .dialog:has(.batch-edit) {
   width: min(var(--dialog-md), calc(100vw - 2rem));
 }
@@ -6263,4 +6264,53 @@ form:has(input[name='confirm']:valid) .backup__restore {
   border-top: 1px solid var(--rule);
   color: var(--slate);
   font-size: var(--step--1);
+}
+
+/* A cue pinned to its day ("Schedule On…"): a small pin by its number. */
+.cal-cue__number .icon,
+.day-cue__number .icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  vertical-align: -0.1rem;
+}
+
+.day-cues__item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.day-cue__pin {
+  justify-self: end;
+}
+
+/* Calendar Feed: the new link, then when it was made and last read. */
+.feed-link {
+  display: grid;
+  flex: 1;
+  gap: var(--space);
+  justify-items: start;
+}
+
+.feed-link input {
+  font-family: var(--mono);
+  font-size: var(--step--1);
+}
+
+.feed-facts {
+  display: flex;
+  gap: calc(var(--space) * 6);
+  margin: 0 0 calc(var(--space) * 2);
+}
+
+.feed-facts dt {
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.feed-facts dd {
+  margin: 0;
+}
+
+.feed-actions form {
+  display: contents;
 }

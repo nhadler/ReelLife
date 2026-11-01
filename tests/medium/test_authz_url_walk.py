@@ -29,7 +29,12 @@ PUBLIC = {
     "accounts:logout",
     "accounts:local_login",
     "admin:login",
+    # The calendar feed: a calendar app can't sign in, so the link's
+    # secret token stands for its user (cues.services.feed).
+    "cues:calendar",
 }
+# Pages a viewer may POST to: their own calendar link.
+VIEWER_POSTS = {"cues:calendar_feed"}
 
 _ROUTE_PARAM = re.compile(r"<(?:(?P<converter>\w+):)?\w+>")
 # Named or unnamed regex groups, e.g. (?P<app_label>a|b) or ([^/]+).
@@ -121,11 +126,17 @@ def test_user_without_role_is_refused(
     assert role_client(Role.NONE).get(route.url).status_code == 403
 
 
-@pytest.mark.parametrize("route", PROTECTED, ids=_ids)
+@pytest.mark.parametrize(
+    "route", [r for r in PROTECTED if r.name not in VIEWER_POSTS], ids=_ids
+)
 def test_viewer_cannot_write(
     role_client: Callable[[Role], Client], route: Route
 ) -> None:
     assert role_client(Role.VIEWER).post(route.url).status_code == 403
+
+
+def test_viewer_posts_are_only_their_own_calendar_link() -> None:
+    assert VIEWER_POSTS <= {route.name for route in PROTECTED}
 
 
 @pytest.mark.parametrize("route", ADMIN, ids=_ids)

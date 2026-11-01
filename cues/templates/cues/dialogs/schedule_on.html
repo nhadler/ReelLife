@@ -1,0 +1,19 @@
+{# Pins a cue to a day of the schedule; the rest of the plan flows around it. Loaded into #app-dialog by htmx. #}
+<form class="dialog__form schedule-on" method="post" novalidate
+      hx-post="{% url 'cues:schedule_on' cue.pk %}"
+      hx-target="#app-dialog" hx-swap="innerHTML">
+  {% csrf_token %}
+  <header class="dialog__head">
+    <h2 id="dialog-title">Schedule {{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %} On</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  {% include "cues/includes/form_errors.html" %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.date %}
+  </div>
+  <footer class="form-actions">
+    <button class="button" type="submit">Schedule</button>
+    {% if pin %}<button class="button button--quiet" type="submit" name="unpin" value="1">Unpin</button>{% endif %}
+    <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+  </footer>
+</form>

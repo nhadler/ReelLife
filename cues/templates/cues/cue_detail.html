@@ -60,6 +60,8 @@
         <details class="menu">
           <summary class="button button--quiet button--icon" title="More" aria-label="More for {{ cue.number }}">⋯</summary>
           <div class="menu__panel menu__panel--right">
+            <button class="menu__item" type="button"
+                    hx-get="{% url 'cues:schedule_on' cue.pk %}" hx-target="#app-dialog" hx-swap="innerHTML">Schedule On…</button>
             {% if selected and selected.pk != cue.current_version_id %}
               <button class="menu__item" type="button"
                       hx-post="{% url 'cues:version_make_current' selected.pk %}">Make {{ selected.label }} Current</button>

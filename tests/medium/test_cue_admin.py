@@ -51,6 +51,7 @@ def test_every_cues_model_is_registered() -> None:
     names = {model.__name__ for model in CUE_MODELS}
     assert names == {
         "AppSettings",
+        "CalendarFeed",
         "ChangeSet",
         "Cue",
         "CueShare",
@@ -63,6 +64,8 @@ def test_every_cues_model_is_registered() -> None:
         "Picture",
         "PictureVersion",
         "Project",
+        "ScheduleEntry",
+        "SchedulePin",
         "Series",
         "SeriesShare",
         "StatusOption",
