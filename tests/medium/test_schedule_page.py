@@ -103,6 +103,30 @@ def test_build_plans_what_is_left_to_write(film: models.Project) -> None:
     assert found.cues[easy.pk].url == f"/cues/{easy.pk}/"
 
 
+def test_projects_at_once_follows_the_setting() -> None:
+    near = factories.ProjectFactory.create(frame_rate="24")
+    far = factories.ProjectFactory.create(frame_rate="24")
+    factories.DeadlineFactory.create(project=near, end_date=MON + 4 * _DAY)
+    factories.DeadlineFactory.create(project=far, end_date=MON + 30 * _DAY)
+    for n in range(1, 4):
+        _cue(near, f"1m0{n}", minutes=2)
+        _cue(far, f"1m0{n}", minutes=2)
+
+    def projects_on_monday() -> set[int]:
+        found = agenda.build(MON)
+        day = found.plan.day(MON)
+        assert day is not None
+        return {found.cues[part.key].project for part in day.parts}
+
+    # In parallel (the default) both are written on the first day.
+    assert projects_on_monday() == {near.pk, far.pk}
+    settings = models.AppSettings.load()
+    settings.schedule_projects = models.AppSettings.ProjectsAtOnce.ONE
+    settings.save()
+    # One at a time, the nearer deadline has the day to itself.
+    assert projects_on_monday() == {near.pk}
+
+
 @pytest.fixture(name="viewer")
 def fixture_viewer(role_client: Callable[[Role], Client]) -> Client:
     return role_client(Role.VIEWER)

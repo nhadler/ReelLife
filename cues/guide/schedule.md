@@ -16,18 +16,29 @@ revisions half of that. A cue with no difficulty counts as Easy.
 
 Change these under **Settings, Schedule** (admins and editors): the
 factor for each difficulty and for revisions, what a cue with no
-difficulty counts as, **Most Work a Day** (a cap, in minutes of Easy
-music; blank plans whatever the deadlines need) and **Smallest Share**
-(the least a long cue is split into).
+difficulty counts as, **Projects at Once** (below), **Most Work a Day**
+(a cap, in minutes of Easy music; blank plans whatever the deadlines
+need) and **Smallest Share** (the least a long cue is split into).
 
 ## How the days are filled
 
-- Earlier deadlines go first. Within a deadline, cues already in
-  progress come first, then by priority (High, Medium, Low), project,
-  reel and IN.
-- Each day gets the same amount of weighted work: the least that still
-  meets the deadline ahead. Once a deadline is met, the pace eases to
-  what the later ones need.
+**Projects at Once** decides how projects share your days:
+
+- **In parallel** (the default): every project is worked every day, each
+  at its own pace: the least even amount that meets its own deadlines.
+  A day's work is the projects' paces added up. If that's more than
+  **Most Work a Day**, a project asking for less than an even share
+  keeps all of it and the rest is shared by the others, so the cap comes
+  out of the busiest projects.
+- **One at a time**: earlier deadlines go first, and one pace covers
+  everything: each day gets the least even amount that meets every
+  deadline ahead. Once a deadline is met, the pace eases to what the
+  later ones need.
+
+Either way:
+
+- Within a project's deadline, cues already in progress come first, then
+  by priority (High, Medium, Low), project, reel and IN.
 - Long cues split across days, each day showing its share of the music
   to write, e.g. **1:20 of 4:00**. No share is smaller than a quarter of
   a day.

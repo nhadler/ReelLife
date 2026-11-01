@@ -229,6 +229,10 @@ def build(today: datetime.date) -> Agenda:
         calendar,
         daily_max=settings.schedule_daily_max,
         min_part=settings.schedule_min_part,
+        parallel=(
+            settings.schedule_projects
+            == models.AppSettings.ProjectsAtOnce.PARALLEL
+        ),
     )
     return Agenda(
         today=today,

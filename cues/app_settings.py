@@ -95,6 +95,19 @@ class AppSettings(models.Model):
     schedule_daily_max = models.PositiveIntegerField(null=True, blank=True)
     schedule_min_part = models.PositiveIntegerField(default=600)
 
+    class ProjectsAtOnce(models.TextChoices):
+        PARALLEL = "parallel", "In parallel"
+        ONE = "one", "One at a time"
+
+    # Whether the Schedule works every project each day, each at its own
+    # pace, or one at a time, earliest deadline first (Nick, Nov 1).
+    schedule_projects = models.CharField(
+        "projects at once",
+        max_length=8,
+        choices=ProjectsAtOnce.choices,
+        default=ProjectsAtOnce.PARALLEL,
+    )
+
     class Meta:
         verbose_name = "settings"
         verbose_name_plural = "settings"
