@@ -5,101 +5,94 @@
 [![Image](https://img.shields.io/badge/image-ghcr.io%2Fnhadler%2Freellife-blue)](https://github.com/nhadler/reellife/pkgs/container/reellife)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue)](LICENSE)
 
-**Self-hosted music cue tracking for film and TV composers**
+Self-hosted cue tracking and project management for film and TV composers.
 
-![The cue grid: reels on a timeline, every cue with its status, timecodes and picture](docs/images/cue-grid.png)
+![Cue grid](docs/images/cue-grid.png)
 
-## What it does
+## Features
 
-- **Cues in an editable grid.** Reels on a timeline, statuses in colour,
-  timecodes at any frame rate (drop-frame included), views for spotting,
-  conform, orchestration, recording, mixing and the cue sheet. Undo for
-  every change.
-- **Versions.** A cue is a moment in the picture; each version is one
-  delivery, with its own notes, themes and the picture it was written to.
-- **Imports** from Pro Tools (Session Info as Text, clips or markers),
-  Cubase and Nuendo, MIDI markers, and Excel or CSV, with a preview of
-  every new, changed and untouched cue.
-- **Conform** to a new cut: see which cues are on older picture and shift
-  them by reel.
-- **Exports:** cue logs (Excel, CSV), PDF reports, and RapidCue cue
-  sheets with writers, publishers and shares.
-- **Schedule.** What to write each day across every project, weighted by
-  difficulty and spread evenly to each deadline.
-- **AI assistants** can read and edit through an
-  [MCP](https://modelcontextprotocol.io) server at `/mcp`, with the
-  same roles as people.
-- **Built to be exposed to the internet:** OIDC sign-in with PKCE, roles
-  from your identity provider's groups, a strict Content Security Policy,
-  a read-only container running as an unprivileged user.
+- **Cue tracking:** Manage cues across reels in an editable grid, with statuses, timecodes, picture versions, and undo support. Includes separate views for spotting, conforming, orchestration, recording, mixing, and cue sheets. Supports arbitrary frame rates, including drop-frame.
+- **Cue versions:** Keep multiple versions of a cue, each with its own notes, themes, and associated picture.
+- **Import:** Bring in cues from Pro Tools (Session Info as Text, clips, or markers), Cubase, Nuendo, MIDI markers, Excel, or CSV. Review additions and changes before importing.
+- **Conform:** Track cues against picture revisions and shift timecodes by reel when a new cut arrives.
+- **Export:** Generate Excel and CSV cue logs, PDF reports, and RapidCue cue sheets with writer and publisher splits.
+- **Scheduling:** Plan writing across projects based on cue difficulty and deadlines.
+- **MCP:** An [MCP](https://modelcontextprotocol.io) endpoint at `/mcp` allows AI assistants to access and edit project data using the same permissions as regular users.
+- **Authentication:** OIDC login with PKCE and group-based roles. Includes a restrictive Content Security Policy and runs in a read-only container as a non-root user.
 
 | Overview | Schedule |
 |---|---|
-| ![This week and the active projects](docs/images/overview.png) | ![A month of writing, by project](docs/images/schedule.png) |
+| ![Overview](docs/images/overview.png) | ![Schedule](docs/images/schedule.png) |
 
-## Run it
+## Installation
 
-You need Docker and an OIDC identity provider. ReelLife is tested with
-[PocketID](https://pocket-id.org); any provider that sends a `groups`
-claim should work.
+ReelLife runs with Docker Compose and requires an OIDC identity provider. It's tested with [PocketID](https://pocket-id.org), but other providers that include a `groups` claim should work.
 
 ```bash
 mkdir reellife && cd reellife
 curl -fsSLO https://raw.githubusercontent.com/nhadler/reellife/main/deploy/docker-compose.yml
 curl -fsSL https://raw.githubusercontent.com/nhadler/reellife/main/deploy/.env.example -o .env
-# Fill in .env: the secret key, your hostname and the OIDC client.
+
+# Configure .env with your secret key, hostname, and OIDC settings
 docker compose up -d
 ```
 
-It listens on `127.0.0.1:8000`; put a TLS-terminating proxy in front
-(Caddy, Traefik, Tailscale Serve). Images are published for
-`linux/amd64` and `linux/arm64` at
-[`ghcr.io/nhadler/reellife`](https://github.com/nhadler/reellife/pkgs/container/reellife),
-tagged by version (`0.4.0`, `0.4`) and `latest`. Pin a release in `.env`
-with `REELLIFE_IMAGE=ghcr.io/nhadler/reellife:0.4.0`.
+By default, ReelLife listens on `127.0.0.1:8000`. You'll need a reverse proxy with TLS, such as Caddy, Traefik, or Tailscale Serve.
 
-[`deploy/README.md`](deploy/README.md) covers the identity provider
-setup, every setting, backups, upgrades, and running without Docker
-(systemd + uv).
+Container images are available for `linux/amd64` and `linux/arm64` at [ghcr.io/nhadler/reellife](https://github.com/nhadler/reellife/pkgs/container/reellife). Images are tagged with their release version (`0.4.0`, `0.4`) and `latest`.
 
-## Develop
+To pin a specific version, set the following in `.env`:
 
-You need [uv](https://docs.astral.sh/uv/), [just](https://just.systems/)
-and Node.js 22.
-
-```bash
-just setup    # tooling and git hooks
-just dev      # http://127.0.0.1:8000, with a fake sign-in provider
-just seed     # a demo project to click around in
-just lint     # every lint, type and security gate CI runs
-just cov      # tests, with 100% branch coverage
+```env
+REELLIFE_IMAGE=ghcr.io/nhadler/reellife:0.4.0
 ```
 
-Django 5.2 renders the pages; HTMX and Alpine.js (its CSP build) make
-them interactive without inline script, and AG Grid Community draws the
-cue grid. Data is SQLite. The Django apps are `cues` (the domain:
-projects, cues, versions, imports, exports, the schedule), `accounts`
-(OIDC sign-in and roles) and `mcp_server` (the MCP endpoint); `reellife`
-holds the settings. Timecodes are stored as integer frames at the
-project's nominal rate, never as strings. Read
-[CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
+See [deploy/README.md](deploy/README.md) for OIDC configuration, environment variables, backups, upgrades, and installation without Docker (systemd + uv).
 
-## Project status
+## Development
 
-ReelLife is in daily use by one composer and under active development;
-see the [changelog](CHANGELOG.md). Until 1.0, minor versions may change
-behaviour; upgrades migrate the database automatically and the changelog
-says when anything needs your attention.
+Requires [uv](https://docs.astral.sh/uv/), [just](https://just.systems/), and Node.js 22.
+
+```bash
+just setup    # Install dependencies and git hooks
+just dev      # Start the development server at localhost:8000
+just seed     # Populate a demo project
+just lint     # Run linting, type checks, and security checks
+just cov      # Run tests with branch coverage
+```
+
+The development server uses a mock identity provider, so you don't need to configure OIDC locally.
+
+### Stack
+
+ReelLife uses Django 5.2 with server-rendered templates, HTMX, Alpine.js (CSP build), and AG Grid Community for the cue grid. SQLite handles storage.
+
+The backend is split into three Django apps:
+
+- `cues`: Projects, cues, versions, imports, exports, and scheduling
+- `accounts`: OIDC authentication and user roles
+- `mcp_server`: MCP endpoint
+
+The `reellife` package contains the project settings.
+
+Timecodes are stored as integer frame counts at the project's nominal frame rate rather than as formatted strings.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
+
+## Status
+
+ReelLife is under active development.
+
+Releases and changes are documented in [CHANGELOG.md](CHANGELOG.md). Until 1.0, minor releases may include breaking changes. Database migrations run automatically during upgrades, with any required manual steps noted in the changelog.
 
 ## Security
 
-Please report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
+Please report vulnerabilities privately following [SECURITY.md](SECURITY.md).
 
 ## License
 
-ReelLife is free software: you can redistribute it and modify it under
-the terms of the [GNU Affero General Public License](LICENSE), version 3
-or later. If you run a modified copy for others, the AGPL asks you to
-offer them its source; set `REELLIFE_SOURCE_URL` to point Help's Source
-Code link at it. Third-party components and their licences are listed
-in [NOTICE.md](NOTICE.md).
+ReelLife is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
+
+If you run a modified version as a network service, the AGPL requires you to make the corresponding source code available to its users. Set `REELLIFE_SOURCE_URL` to link to your source from the application's Help page.
+
+Third-party licenses are listed in [NOTICE.md](NOTICE.md).
