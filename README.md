@@ -5,10 +5,7 @@
 [![Image](https://img.shields.io/badge/image-ghcr.io%2Fnhadler%2Freellife-blue)](https://github.com/nhadler/reellife/pkgs/container/reellife)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue)](LICENSE)
 
-**Self-hosted music cue tracking for film and TV composers**, from the
-spotting session to the PRO cue sheet. One composer (and the people they
-work with) on their own server, with their data in one SQLite file they
-can back up in a click.
+**Self-hosted music cue tracking for film and TV composers**
 
 ![The cue grid: reels on a timeline, every cue with its status, timecodes and picture](docs/images/cue-grid.png)
 
