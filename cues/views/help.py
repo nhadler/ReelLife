@@ -13,7 +13,7 @@ from cues.services import guide
 
 
 def version() -> str:
-    """ReelLife's installed version, e.g. '0.4.0'."""
+    """ReelLife's installed version, e.g. '1.0.0'."""
     try:
         # None when the installed metadata is damaged.
         return metadata.version("reellife") or "development"

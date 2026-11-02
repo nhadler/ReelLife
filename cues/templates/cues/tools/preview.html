@@ -5,8 +5,8 @@
     <table class="table tool-preview__table">
       <thead><tr>{% for column in preview.columns %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead>
       <tbody>
-        {% for row in preview.rows %}
-          <tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>
+        {% for row in preview.table %}
+          <tr>{% for value, mono in row %}<td{% if mono %} class="tc"{% endif %}>{{ value }}</td>{% endfor %}</tr>
         {% endfor %}
       </tbody>
     </table>

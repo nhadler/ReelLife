@@ -89,7 +89,7 @@ def test_schedule_on_pins_unpins_and_undoes(
     cue = _cue(film, "1m01", 2)
     url = reverse("cues:schedule_on", args=[cue.pk])
     form = editor.get(url, headers=HX).content.decode()
-    assert "Schedule 1m01" in form and 'type="date"' in form
+    assert "Schedule On: 1m01" in form and 'type="date"' in form
     assert "Unpin" not in form
     response = editor.post(url, {"date": "2026-11-05"}, headers=HX)
     assert response.status_code == 204

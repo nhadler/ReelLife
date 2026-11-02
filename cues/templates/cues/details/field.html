@@ -5,7 +5,7 @@
     {% if shown %}
       <div class="field field--readout{% if field.widget_type == 'textarea' %} field--wide{% endif %}" id="f-{{ field.auto_id }}">
         <span class="field__label">{{ field.label|title_case }}</span>
-        <p class="field__value">{{ shown|linebreaksbr }}</p>
+        <p class="field__value{% if field.field.widget.attrs.class == 'tc' %} tc{% endif %}">{{ shown|linebreaksbr }}</p>
       </div>
     {% endif %}
   {% endwith %}

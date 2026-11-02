@@ -104,6 +104,7 @@ def test_viewers_see_read_only_fields(
     assert 'name="title"' not in html
     assert '<span class="field__label">Cue #</span>' in html
     assert f'<p class="field__value">{cue.number}</p>' in html
+    assert '<p class="field__value tc">' in html  # timecodes in mono
     assert "Delete cue" not in html
     assert 'id="new-version"' not in html
 

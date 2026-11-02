@@ -2814,6 +2814,9 @@ async function start() {
     }
   });
   exportButton.addEventListener('click', openExport);
+  document
+    .getElementById('grid-export-open')
+    .addEventListener('click', openExport);
   openTool = setUpTools({
     api,
     url: config.toolUrl,

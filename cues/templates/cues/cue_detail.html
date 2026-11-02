@@ -50,10 +50,10 @@
       </details>
 
       {% if previous %}
-        <a class="button button--quiet" id="cue-previous" href="{% url 'cues:cue' previous.0 %}" title="Previous cue (Alt+↑)" aria-label="Previous cue, {{ previous.1 }}">‹ {{ previous.1 }}</a>
+        <a class="button button--quiet" id="cue-previous" href="{% url 'cues:cue' previous.0 %}" title="Previous cue (Alt+↑)" aria-label="Previous cue, {{ previous.1 }}">‹ <span class="tc">{{ previous.1 }}</span></a>
       {% endif %}
       {% if following %}
-        <a class="button button--quiet" id="cue-next" href="{% url 'cues:cue' following.0 %}" title="Next cue (Alt+↓)" aria-label="Next cue, {{ following.1 }}">{{ following.1 }} ›</a>
+        <a class="button button--quiet" id="cue-next" href="{% url 'cues:cue' following.0 %}" title="Next cue (Alt+↓)" aria-label="Next cue, {{ following.1 }}"><span class="tc">{{ following.1 }}</span> ›</a>
       {% endif %}
 
       {% if can_edit %}

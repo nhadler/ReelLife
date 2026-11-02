@@ -35,6 +35,11 @@ def test_the_menu_reaches_the_grid_from_any_page(
     dialog = page.locator("#app-dialog")
     expect(dialog.get_by_role("heading", name="Export Cues")).to_be_visible()
     page.keyboard.press("Escape")
+    expect(dialog.get_by_role("heading", name="Export Cues")).to_be_hidden()
+    # The toolbar's Export opens the same dialog.
+    page.locator("#grid-export-open").click()
+    expect(dialog.get_by_role("heading", name="Export Cues")).to_be_visible()
+    page.keyboard.press("Escape")
     # From the Picture page, Stats opens the grid with the panel up.
     page.goto(f"{app}/projects/{project.pk}/picture/")
     _open_menu(page).get_by_role("link", name="Stats").click()

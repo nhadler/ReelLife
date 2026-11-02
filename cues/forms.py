@@ -36,6 +36,7 @@ class TimecodeModelForm(forms.ModelForm):  # type: ignore[type-arg]
                 label=original.label,
                 required=False,
                 help_text=TIMECODE_HELP,
+                widget=forms.TextInput(attrs={"class": "tc"}),
             )
             frames = getattr(self.instance, name)
             if frames is not None and rate is not None:

@@ -991,6 +991,18 @@ input[type='checkbox'] {
   margin-top: var(--space);
 }
 
+.empty-state__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: start;
+  gap: var(--space);
+}
+
+.empty-state__actions form {
+  display: contents;
+}
+
 /* Settings tabs */
 
 .tabs {
@@ -1298,9 +1310,10 @@ body:has(.overview) > .page {
 
 .project-bar {
   display: flex;
-  /* In narrow windows the links and New cue drop below the figures. */
+  /* In narrow windows the links and New cue drop below the figures.
+     Top-aligned, so opening Breakdown doesn't move the links. */
   flex-wrap: wrap;
-  align-items: center;
+  align-items: start;
   gap: calc(var(--space) * 2);
   padding: calc(var(--space) * 1.5) calc(var(--space) * 3);
   background: var(--panel);
@@ -2902,9 +2915,6 @@ textarea.copy-json {
   white-space: nowrap;
 }
 
-/* Project form bands: what a section is for on the left, its fields on
-   the right. */
-
 /* New Project, laid out like App Settings: each section's name in a
    left column, its fields beside it, a rule between sections, and the
    actions under the fields. */
@@ -3178,7 +3188,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 
 .deadline legend {
   margin-bottom: 0.3rem;
-  font-weight: 600;
+  color: var(--slate);
+  font-size: var(--step--1);
+  font-weight: 500;
 }
 
 .deadline__dates {
@@ -3381,6 +3393,13 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   line-height: 1.6;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* On light rows a hairline keeps pale colours (To Write) visible. */
+[data-theme='light'] .status-pill:not(.status-pill--none) {
+  box-shadow:
+    inset 3px 0 0 var(--chip, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--ink) 14%, transparent);
 }
 
 /* An empty choice (no Sub Status, say) shows nothing, not a pill. */
@@ -6157,12 +6176,27 @@ td.party-table__ipi {
 
 @media (max-width: 40rem) {
   .project {
-    grid-template-columns: 4.5rem repeat(3, minmax(0, 1fr)) 2.25rem;
+    /* Six even columns: the three figures take two each. */
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     grid-template-areas:
-      'media id id id more'
-      'f1 f1 f2 f3 f3'
-      'map map map map map';
+      'media media id id id more'
+      'f1 f1 f2 f2 f3 f3'
+      'map map map map map map';
+    column-gap: calc(var(--space) * 1.5);
     row-gap: var(--space);
+  }
+
+  .project__small {
+    white-space: normal;
+  }
+
+  /* On its own line, so a wrapped line never starts with a '·'. */
+  .project__meta > .project__flag {
+    flex-basis: 100%;
+  }
+
+  .project__meta > .project__flag::before {
+    content: none;
   }
 
   .project .thumb {

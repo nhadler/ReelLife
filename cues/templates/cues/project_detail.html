@@ -96,6 +96,9 @@
               title="Import cues (Ctrl+I)">
         {% include "cues/includes/icon.html" with name="import" %}<span>Import</span></button>
     {% endif %}
+    {# The same as Tools › Export Cues. #}
+    <button class="toolbar__button" type="button" id="grid-export-open" title="Export cues (Ctrl+E)">
+      {% include "cues/includes/icon.html" with name="export" %}<span>Export</span></button>
     <button class="toolbar__button" type="button" id="grid-details"
             title="Open the cue's details (Ctrl+Enter, or double-click a row)">
       {% include "cues/includes/icon.html" with name="details" %}<span>Details</span></button>

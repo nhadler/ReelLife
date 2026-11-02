@@ -199,6 +199,8 @@ def test_split(editor: Client, cues: list[models.Cue]) -> None:
     data = {"at": "1:00:10:00", "number": "1m01a", "new_takes": "second"}
     preview = _text(_post(editor, cues[:1], "split", data, preview=True))
     assert "1m01a is new" in preview
+    assert '<td class="tc">1m01a</td>' in preview  # cue numbers in mono
+    assert '<td class="tc">1:00:10:00</td>' in preview
     data_first = {**data, "new_takes": "first"}
     preview = _text(_post(editor, cues[:1], "split", data_first, preview=True))
     assert preview.index("1m01a") < preview.index("1m01<")

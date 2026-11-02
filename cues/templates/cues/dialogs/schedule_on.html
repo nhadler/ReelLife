@@ -4,7 +4,7 @@
       hx-target="#app-dialog" hx-swap="innerHTML">
   {% csrf_token %}
   <header class="dialog__head">
-    <h2 id="dialog-title">Schedule {{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %} On</h2>
+    <h2 id="dialog-title">Schedule On: {{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %}</h2>
     <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
   </header>
   {% include "cues/includes/form_errors.html" %}

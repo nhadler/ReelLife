@@ -115,13 +115,13 @@ def test_rows_carry_timecodes_and_conform(
     stale = _row(data, "2m04")
     assert stale["_needs_conform"] is True
     assert stale["start_offset"]["display"] == "+00:00:02:12"
-    # Picture versions are named 'Reel 2 - c1030'.
-    assert stale["current_picture"] == "Reel 2 - c1030"
+    # Picture versions are named 'Reel 2 – c1030'.
+    assert stale["current_picture"] == "Reel 2 – c1030"
     options = data["written_to"][str(stale["_picture"]["id"])]
     assert "_written_to_options" not in stale  # sent once per reel
     assert [o["label"] for o in options] == [
-        "Reel 2 - c1030",
-        "Reel 2 - c0917",
+        "Reel 2 – c1030",
+        "Reel 2 – c0917",
     ]
     assert stale["_updated_by"] == ""  # built by the demo, not a person
     # Unwritten cues have v1 too (it holds their notes), on today's picture.

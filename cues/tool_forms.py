@@ -18,6 +18,11 @@ from cues import timecode
 from cues.services import projects as project_service
 from cues.services import tools
 
+# Preview columns of cue numbers and timecodes, set in mono.
+_MONO_COLUMNS = frozenset(
+    {"Cue #", "IN", "OUT", "DUR", "IN Now", "New IN", "New OUT"}
+)
+
 
 @dataclasses.dataclass(frozen=True)
 class Preview:
@@ -26,6 +31,12 @@ class Preview:
     columns: tuple[str, ...]
     rows: Sequence[tuple[str, ...]]
     summary: str = ""
+
+    @property
+    def table(self) -> list[list[tuple[str, bool]]]:
+        """The rows, each cell paired with whether it is set in mono."""
+        mono = [column in _MONO_COLUMNS for column in self.columns]
+        return [list(zip(row, mono, strict=False)) for row in self.rows]
 
 
 def _noun(count: int) -> str:
@@ -542,13 +553,19 @@ class ShiftForm(ToolForm):
     offset = forms.CharField(
         max_length=20,
         required=False,
+        widget=forms.TextInput(attrs={"class": "tc"}),
         help_text=(
             "48 is 48 frames, 2.5 is 2 s 5 fr, -1.10.12 moves back "
             "1 min 10 s 12 fr."
         ),
     )
     reference = forms.ChoiceField(label="Cue", required=False)
-    new_time = forms.CharField(label="Moves to", max_length=20, required=False)
+    new_time = forms.CharField(
+        label="Moves to",
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "tc"}),
+    )
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Lists the cues for the reference choice."""

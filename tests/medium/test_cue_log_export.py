@@ -92,7 +92,7 @@ def test_build_reads_like_the_grid(project: models.Project) -> None:
     row = next(r for r in log.reels[0].rows if r[0] == "1m03")
     assert row[2] == "Composed"
     assert row[3] == "Reuse"
-    assert row[6] == "Reel 1 - c0917"
+    assert row[6] == "Reel 1 – c0917"
     assert row[7] == "Background Instrumental"
     assert row[8] == "Yes"
     assert log.reels[0].cues == 14

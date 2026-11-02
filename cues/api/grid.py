@@ -50,8 +50,8 @@ COLORS: dict[str, dict[str, str]] = {
 
 
 def _picture_label(version: models.PictureVersion) -> str:
-    """A picture version's name: 'Reel 1 - c1023'."""
-    return f"Reel {version.picture.name} - {version.turnover.label}"
+    """A picture version's name: 'Reel 1 – c1023'."""
+    return f"Reel {version.picture.name} – {version.turnover.label}"
 
 
 @dataclasses.dataclass(frozen=True)

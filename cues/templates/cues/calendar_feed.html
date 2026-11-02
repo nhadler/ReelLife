@@ -40,11 +40,13 @@
     <div class="empty-state">
       <span class="empty-state__icon">{% include "cues/includes/icon.html" with name="calendar" %}</span>
       <p class="empty-state__title">No Calendar Link</p>
-      <form method="post">
-        {% csrf_token %}
-        <button class="button" type="submit" name="action" value="create">Make a Link</button>
-      </form>
-      <a class="button button--quiet" href="{% url 'cues:calendar_download' %}">Download .ics</a>
+      <div class="empty-state__actions">
+        <form method="post">
+          {% csrf_token %}
+          <button class="button" type="submit" name="action" value="create">Make a Link</button>
+        </form>
+        <a class="button button--quiet" href="{% url 'cues:calendar_download' %}">Download .ics</a>
+      </div>
     </div>
   {% endif %}
 {% endblock %}
