@@ -1218,6 +1218,11 @@ details.form-section summary {
   gap: 0.4rem;
 }
 
+/* New version: shown on the row you're on or pointing at, not all 40. */
+.ag-row:not(:hover, .ag-row-focus) .version-cell__add:not(:focus-visible) {
+  opacity: 0;
+}
+
 .version-cell__add {
   padding: 0 0.35rem;
   border: 1px solid var(--rule);
@@ -1583,6 +1588,17 @@ body:has(.overview) > .page {
   gap: 0.4rem;
   color: var(--slate);
   cursor: pointer;
+}
+
+.switch__label {
+  font-size: var(--step--1);
+}
+
+/* The active column's head says what its eyes are (its tooltip: Active). */
+.cue-grid .ag-header-cell[col-id='_active'] .ag-header-cell-label::after {
+  content: '◉' / '';
+  margin: auto;
+  color: var(--slate);
 }
 
 .switch input {
@@ -3305,8 +3321,10 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   white-space: nowrap;
 }
 
+/* An empty choice (no Sub Status, say) shows nothing, not a pill. */
 .status-pill--none {
-  color: var(--slate);
+  box-shadow: none;
+  background: none;
 }
 
 .status-editor {
@@ -3510,9 +3528,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   font-size: 0.7rem;
   line-height: 18px;
   text-align: left;
+  text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
-  opacity: 0.85;
   touch-action: none;
 }
 
@@ -3596,10 +3614,24 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   background: none;
 }
 
-/* Single-line cells sit in the middle of taller rows, level with pills. */
+/* Single-line cells sit level with the first line of wrapped ones, so a
+   row that grows reads top down as one block (second design review). */
 .cue-grid .ag-cell:not(.ag-cell-wrap-text, .ag-cell-inline-editing) {
   display: flex;
+  align-items: flex-start;
+  padding-top: var(--row-padding, 6.5px);
+  line-height: 1.35;
+}
+
+/* Pictures, ticks and the active eye stay in the middle. */
+.cue-grid
+  .ag-cell:is(
+    [col-id='thumbnail'],
+    [col-id='ag-Grid-SelectionColumn'],
+    [col-id='_active']
+  ):not(.ag-cell-inline-editing) {
   align-items: center;
+  padding-top: 0;
 }
 
 /* The bar's links and New cue keep to one line in narrow windows. */
@@ -3617,6 +3649,20 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   padding-bottom: var(--row-padding, 6.5px);
   line-height: 1.35;
   white-space: pre-line;
+}
+
+/* A row grows to at most six lines (Nick, Nov 1); longer text fades out
+   in its sixth (the cue page shows it all). The fade's stops are lengths,
+   so shorter text is never touched. */
+.cue-grid .ag-cell-wrap-text .ag-cell-value {
+  display: block;
+  max-height: calc(1.35em * 6);
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(1.35em * 5),
+    transparent calc(1.35em * 6)
+  );
 }
 
 /* Theme and Instrumentation: coloured chips. */

@@ -29,7 +29,7 @@ import {
 } from './overview/selection.js';
 import {StatusEditor} from './overview/status-editor.js';
 import {editView} from './overview/view-editor.js';
-import {drawTimeline} from './overview/timeline.js';
+import {drawTimeline, fitLabels} from './overview/timeline.js';
 import {setUpTools} from './overview/tools.js';
 import {askBatch} from './overview/batch.js';
 
@@ -400,7 +400,6 @@ function optionPill(meta) {
       pill.style.setProperty('--chip', option.color);
     } else {
       pill.classList.add('status-pill--none');
-      pill.textContent = '–';
     }
     return pill;
   };
@@ -1308,6 +1307,13 @@ function findInGrid(row) {
   api.setFocusedCell(node.rowIndex, 'number');
   api.flashCells({rowNodes: [node]});
 }
+
+let labelFrame = 0;
+// The timeline's blocks change width with the window; relabel them.
+window.addEventListener('resize', () => {
+  window.cancelAnimationFrame(labelFrame);
+  labelFrame = window.requestAnimationFrame(() => fitLabels(timelineElement));
+});
 
 /**
  * Draws the timeline from the shown cues (it follows the filters).

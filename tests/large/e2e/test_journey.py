@@ -120,7 +120,7 @@ def _groups_and_selection(page: Any) -> None:
     expect(_rows(page)).to_have_count(3)
     # The timeline: a block per cue; a click finds it in the grid.
     expect(page.locator(".timeline__cue")).to_have_count(3)
-    page.locator(".timeline__cue", has_text="1m02").click()
+    page.locator('.timeline__cue[data-number="1m02"]').click()
     expect(_row(page, "1m02").locator(".ag-cell-focus")).to_have_count(1)
     _row(page, "1m01").locator("[col-id=title]").click(button="right")
     menu = page.get_by_role("menu")

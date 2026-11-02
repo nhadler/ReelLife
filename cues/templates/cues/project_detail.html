@@ -117,10 +117,10 @@
              placeholder="Find a cue" aria-label="Find a cue by number, title, scene or notes"
              title="Number, title, scene or notes (Ctrl+F)">
     </div>
-    <label class="switch" title="Show inactive cues (H)">
+    <label class="switch switch--labelled" title="Show inactive cues (H)">
       <input type="checkbox" role="switch" id="grid-show-inactive" checked>
       <span class="switch__track" aria-hidden="true"><span class="switch__knob">{% include "cues/includes/icon.html" with name="eye" %}</span></span>
-      <span class="visually-hidden">Show Inactive Cues</span>
+      <span class="switch__label"><span class="visually-hidden">Show </span>Inactive<span class="visually-hidden"> Cues</span></span>
     </label>
   </div>
 

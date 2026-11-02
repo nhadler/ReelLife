@@ -11,6 +11,27 @@
 
 // A lane: an 18px block and a 4px gap.
 const LANE_PX = 22;
+// Narrower than these, a block shows no label, or just the cue number.
+const BARE_PX = 40;
+const NUMBER_PX = 90;
+
+/**
+ * Labels each block as its width allows: nothing, the cue number, or
+ * number and title (ending in … if it must), never a clipped glyph.
+ * @param {!Element} container The timeline.
+ */
+export function fitLabels(container) {
+  for (const block of container.querySelectorAll('.timeline__cue')) {
+    const width = block.getBoundingClientRect().width;
+    if (width < BARE_PX) {
+      block.textContent = '';
+    } else if (width < NUMBER_PX) {
+      block.textContent = block.dataset.number;
+    } else {
+      block.textContent = block.dataset.label;
+    }
+  }
+}
 
 /**
  * Places a reel's cues in lanes (0-based).
@@ -136,6 +157,7 @@ export function drawTimeline(container, input) {
     segment.append(label, ruler(reel, input.fps), track);
     container.append(segment);
   }
+  fitLabels(container);
 }
 
 /**
@@ -151,7 +173,11 @@ function block(cue, reel, lane, input) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'timeline__cue';
-  button.textContent = `${cue.number} ${cue.title || ''}`.trim();
+  button.dataset.number = cue.number;
+  button.dataset.label = `${cue.number} ${cue.title || ''}`.trim();
+  // Its name whatever the label shows (fitLabels may hide it).
+  button.setAttribute('aria-label', button.dataset.label);
+  button.textContent = button.dataset.label;
   button.title = `${cue.number} ${cue.title || ''}\n${cue.tc_in.display} – ${cue.tc_out.display} (${cue.duration?.display ?? ''})`;
   button.style.left = `${left}%`;
   button.style.width = `${width}%`;
