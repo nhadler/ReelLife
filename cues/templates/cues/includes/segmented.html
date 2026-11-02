@@ -1,0 +1,7 @@
+{# Two to four short, exclusive choices as joined segments, the chosen one filled (no radio dots). Pass field; wide=True spans the row. Five or more choices are a select instead. #}
+{% load text %}
+<fieldset class="segmented field{% if wide %} field--wide{% endif %}">
+  <legend>{{ field.label|title_case }}</legend>
+  {% for choice in field %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label|title_case }}</label>{% endfor %}
+  {{ field.errors }}
+</fieldset>

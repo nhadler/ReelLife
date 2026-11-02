@@ -68,7 +68,7 @@ def test_the_home_page_is_the_overview(
 
 def test_no_active_projects(role_client: Callable[[Role], Client]) -> None:
     page = role_client(Role.EDITOR).get("/").content.decode()
-    assert "No active projects. Create one to start spotting." in page
+    assert "No Active Projects" in page
     assert "Nothing left to write." in page
 
 

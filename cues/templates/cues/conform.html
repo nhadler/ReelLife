@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="page-head"><h1>Conform</h1>{% include "cues/includes/help_link.html" with slug="conform" %}</div>
+  <div class="page-head">{% include "cues/includes/page_title.html" with title="Conform" slug="conform" sub=True %}</div>
 
   <section class="form-section" aria-labelledby="moved-title">
     <h2 id="moved-title">{{ project.reels_word }} That Moved{% if turnover %} in {{ turnover }}{% endif %}</h2>

@@ -67,7 +67,7 @@ def test_dashboard_search_and_archived(editor: Client) -> None:
     assert re.search(
         r'<li class="project"[^>]*the lighthouse[^>]*" hidden', missed
     )
-    assert re.search(r"data-no-match>No projects match", missed)
+    assert re.search(r"data-no-match>.*No Projects Match", missed, re.S)
     assert (
         "Old Film" not in editor.get(reverse("cues:dashboard")).content.decode()
     )
@@ -76,13 +76,6 @@ def test_dashboard_search_and_archived(editor: Client) -> None:
     maps = {s.project.title: s.cue_map for s in shown.context["summaries"]}
     assert maps["Old Film"] is None  # archived: no cue map to draw
     assert maps["The Lighthouse"] is not None
-
-
-def test_empty_dashboard_invites_a_first_project(editor: Client) -> None:
-    assert (
-        "Create one to start spotting"
-        in editor.get(reverse("cues:dashboard")).content.decode()
-    )
 
 
 def test_viewers_dont_see_new_project(
@@ -485,7 +478,7 @@ def test_picture_page_without_turnovers(editor: Client) -> None:
     html = editor.get(
         reverse("cues:picture", args=[project.pk])
     ).content.decode()
-    assert "No turnovers yet" in html
+    assert "No Turnovers Yet" in html
 
 
 def _turnover_data(**overrides: str) -> dict[str, str]:

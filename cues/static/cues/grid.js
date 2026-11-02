@@ -29,7 +29,7 @@ import {
 } from './overview/selection.js';
 import {StatusEditor} from './overview/status-editor.js';
 import {editView} from './overview/view-editor.js';
-import {drawTimeline} from './overview/timeline.js';
+import {drawTimeline, fitLabels} from './overview/timeline.js';
 import {setUpTools} from './overview/tools.js';
 import {askBatch} from './overview/batch.js';
 
@@ -400,7 +400,6 @@ function optionPill(meta) {
       pill.style.setProperty('--chip', option.color);
     } else {
       pill.classList.add('status-pill--none');
-      pill.textContent = '–';
     }
     return pill;
   };
@@ -453,8 +452,11 @@ function gradingRenderer(meta) {
  */
 function thumbnailRenderer(params) {
   if (!params.value) {
+    // The project's initials, as its own thumbnail shows them.
     const frame = document.createElement('span');
     frame.className = 'cue-thumb cue-thumb--empty';
+    frame.textContent = gridElement?.dataset.initials ?? '';
+    frame.setAttribute('aria-hidden', 'true');
     return frame;
   }
   const image = document.createElement('img');
@@ -1304,6 +1306,13 @@ function findInGrid(row) {
   api.flashCells({rowNodes: [node]});
 }
 
+let labelFrame = 0;
+// The timeline's blocks change width with the window; relabel them.
+window.addEventListener('resize', () => {
+  window.cancelAnimationFrame(labelFrame);
+  labelFrame = window.requestAnimationFrame(() => fitLabels(timelineElement));
+});
+
 /**
  * Draws the timeline from the shown cues (it follows the filters).
  */
@@ -1451,6 +1460,10 @@ function onSelectionChanged() {
   const groups = [];
   api.forEachNode((node) => node.data._group && groups.push(node));
   api.redrawRows({rowNodes: groups});
+  const logButton = document.getElementById('grid-log-written');
+  if (logButton) {
+    logButton.disabled = api.getSelectedRows().length !== 1;
+  }
 }
 
 /** Columns the user resized in this view (their widths are kept). */
@@ -2496,13 +2509,37 @@ async function copyCells(withHeaders) {
 }
 
 /**
+ * Opens a cue's dialog from the grid's config (htmx loads the form).
+ * @param {string} url The dialog's address for cue 0.
+ * @param {number} cueId
+ */
+function openCueDialog(url, cueId) {
+  window.htmx.ajax('GET', url.replace('/0/', `/${cueId}/`), {
+    target: '#app-dialog',
+    swap: 'innerHTML',
+  });
+}
+
+/**
  * The right-click menu on a cue's cell.
  * @param {!Object} params AG Grid cell context menu event.
  */
 function cellMenu(params) {
+  const cueId = params.node?.data?.id;
   showMenu(params.event.clientX, params.event.clientY, [
     {label: 'Copy', shortcut: 'Ctrl+C', action: () => copyCells(false)},
     {label: 'Copy with Headers', action: () => copyCells(true)},
+    null,
+    {
+      label: 'Schedule On…',
+      action: () => openCueDialog(config.scheduleOnUrl, cueId),
+      disabled: !config.canEdit || !cueId,
+    },
+    {
+      label: 'Log Written…',
+      action: () => openCueDialog(config.logWrittenUrl, cueId),
+      disabled: !config.canEdit || !cueId,
+    },
     null,
     {label: 'Autosize All Columns', action: () => api.autoSizeAllColumns()},
     null,
@@ -2757,6 +2794,11 @@ async function start() {
   document.addEventListener('click', (event) => {
     if (event.target.closest('#grid-details')) {
       openDetails();
+    } else if (event.target.closest('#grid-log-written')) {
+      const [cue] = api.getSelectedRows();
+      if (cue) {
+        openCueDialog(config.logWrittenUrl, cue.id);
+      }
     } else if (event.target.closest('#notes-toggle')) {
       toggleSidePanel('notes', event.target.closest('#notes-toggle'));
     } else if (event.target.closest('#stats-toggle')) {

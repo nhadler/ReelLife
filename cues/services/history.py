@@ -42,6 +42,8 @@ TRACKED: tuple[type[db_models.Model], ...] = (
     models.VersionTheme,
     models.CueInstrument,
     models.ProjectNote,
+    models.SchedulePin,
+    models.WritingLog,
     models.CueShare,
     models.Party,
     models.DefaultShare,

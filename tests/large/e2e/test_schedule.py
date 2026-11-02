@@ -52,6 +52,14 @@ def test_the_month_and_week(
     expect(page.get_by_role("checkbox", name=project.title)).not_to_be_checked()
     page.get_by_role("checkbox", name=project.title).check()
     expect(page.locator(".cal-cue").first).to_be_visible()
+    # The month fits a laptop window: busy days say how many more.
+    page.set_viewport_size({"width": 1280, "height": 700})
+    page.reload()
+    expect(page.locator(".page--fill .cal--month")).to_be_attached()
+    height = page.evaluate("document.documentElement.scrollHeight")
+    assert height <= 700
+    expect(page.locator(".cal-day__more:not([hidden])").first).to_be_visible()
+    page.set_viewport_size({"width": 1280, "height": 1000})
     page.get_by_role("link", name="Week", exact=True).click()
     expect(page.locator("li.cal-day")).to_have_count(7)
     axe("schedule week")

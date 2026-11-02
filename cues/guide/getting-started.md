@@ -7,7 +7,7 @@ arrives in **turnovers** (cuts), each covering one or more reels. A
 OUT), and each cue has **versions**: one per delivery of that piece of
 music.
 
-## Make a project
+## Make a Project
 
 1. On **Projects**, choose **New Project**.
 2. Give it a title and, if you like, a production number (e.g. `BH101`).
@@ -24,7 +24,7 @@ music.
    imports accept.
 7. Choose **Create Project**.
 
-## Find your way around
+## Find Your Way Around
 
 - **Projects** lists every project with its progress, cue map, next
   deadline and how much to write a day. Type in the search box to

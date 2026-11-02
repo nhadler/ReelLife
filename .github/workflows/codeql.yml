@@ -14,8 +14,14 @@ permissions:
 
 jobs:
   analyze:
+    # Code scanning is free on public repositories but needs GitHub Code
+    # Security on private ones, so this runs once the repository
+    # variable CODE_SCANNING is set to true (Settings, Secrets and
+    # variables, Actions, Variables).
+    if: vars.CODE_SCANNING == 'true'
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       security-events: write
     strategy:
@@ -24,7 +30,7 @@ jobs:
         language: [python, javascript-typescript]
     steps:
       - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           # Vendored, minified third-party files aren't ours to analyse.
@@ -32,6 +38,6 @@ jobs:
             paths-ignore:
               - cues/static/cues/vendor
               - staticfiles
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
         with:
           category: /language:${{ matrix.language }}

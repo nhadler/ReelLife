@@ -54,8 +54,8 @@ class Pace:
 
     Attributes:
         due: The composition deadline.
-        days: Days left to work: today through the deadline, every day
-            but days off.
+        days: Days left to work, excluding days off: from today, or the
+            deadline's start date if later, through the deadline.
         calendar_days: The same span counting every day.
         write_seconds: Music still to compose (To Write, In Progress),
             per working day, rounded up.
@@ -120,15 +120,17 @@ def pace(project: models.Project, today: datetime.date) -> Pace | None:
     if deadline is None:
         return None
     end = deadline.end_date
+    # Work waits for the start date (the database keeps it by the end).
+    first = max(today, deadline.start_date or today)
     # Shared days off and this project's own, each date once.
     off = (
-        models.DayOff.objects.filter(date__range=(today, end))
+        models.DayOff.objects.filter(date__range=(first, end))
         .filter(Q(project__isnull=True) | Q(project=project))
         .values("date")
         .distinct()
         .count()
     )
-    calendar_days = (end - today).days + 1
+    calendar_days = (end - first).days + 1
     days = calendar_days - off
     write = revise = fractions.Fraction(0)
     rate = project.rate

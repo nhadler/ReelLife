@@ -14,6 +14,10 @@ class Command(BaseCommand):
     """Writes a snapshot; does nothing before the first migrate."""
 
     help = "Write a consistent SQLite snapshot to DATA_DIR/snapshots."
+    # It must see the disk before Django opens the database: from Django
+    # 6.1 the system checks connect, which creates an empty SQLite file
+    # on a fresh install. migrate, which runs next, does the checks.
+    requires_system_checks: list[str] = []
 
     def add_arguments(self, parser: CommandParser) -> None:
         """Adds --before-migrate."""

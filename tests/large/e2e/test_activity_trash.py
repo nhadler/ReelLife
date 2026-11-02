@@ -67,7 +67,7 @@ def test_undo_from_activity_and_restore_from_trash(
         "button", name="Restore"
     ).click()
     expect(page.get_by_text("Restored 1m03.")).to_be_visible()
-    expect(page.get_by_text("The Trash is empty.")).to_be_visible()
+    expect(page.get_by_text("Trash Is Empty")).to_be_visible()
     restored = models.Cue.objects.get(pk=doomed_pk)
     assert restored.current_version is not None
     axe("empty trash")

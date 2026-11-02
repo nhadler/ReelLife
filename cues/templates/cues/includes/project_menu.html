@@ -1,15 +1,13 @@
-{# Project Settings menu. data-palette registers Ctrl+K commands not already in Tools. Needs project and tab, plus section on settings pages. Export, Copy JSON and Stats use data-grid-action on the cue overview; other pages open it with ?do=. #}
+{# Project More menu: the project pages and actions not in the project bar. data-palette registers Ctrl+K commands not already in Tools. Needs project and tab, plus section on settings pages. Export, Copy JSON and Stats use data-grid-action on the cue overview; other pages open it with ?do=. #}
 {% load project_menu %}
 {% url 'cues:project' project.pk as overview %}
 {% settings_sections as sections %}
 <details class="menu project-menu">
-  <summary class="project-bar__link project-menu__button{% if tab == "settings" or tab == "activity" or tab == "trash" or tab == "conform" %} project-menu__button--current{% endif %}" title="Settings and everything else for this project">
-    {% include "cues/includes/icon.html" with name="menu" %}<span>Settings</span></summary>
+  <summary class="project-bar__link project-menu__button{% if tab == "settings" or tab == "activity" or tab == "trash" or tab == "conform" %} project-menu__button--current{% endif %}" title="Conform, Activity, Trash, exports and settings">
+    {% include "cues/includes/icon.html" with name="menu" %}<span>More</span></summary>
   <div class="menu__panel project-menu__panel">
     <p class="project-menu__heading">Project</p>
-    <a class="menu__item" href="{% url 'cues:picture' project.pk %}">Picture &amp; Turnovers</a>
     <a class="menu__item" href="{% url 'cues:conform' project.pk %}"{% if tab == "conform" %} aria-current="page"{% endif %}>Conform</a>
-    <a class="menu__item" href="{% url 'cues:project_notes' project.pk %}">Project Notes</a>
     {% if tab == "cues" %}
       <button class="menu__item" type="button" data-grid-action="stats">Stats<kbd>Ctrl+Shift+S</kbd></button>
     {% else %}

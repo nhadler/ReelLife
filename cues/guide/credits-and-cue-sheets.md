@@ -9,7 +9,7 @@ fields. You can't remove an entry that is still credited on a cue.
 **Undo Last Change** undoes your latest save; Recent Changes shows the
 latest edits. The list can be exported as CSV or Excel.
 
-## A cue's shares
+## A Cue's Shares
 
 On a cue's page, **Credits** lists its writers and publishers with
 their roles (C composer, A author, CA, AR arranger, E publisher...) and
@@ -18,13 +18,13 @@ shares. Writer shares must total 100%. Publisher shares must also total
 edits the same credits before you save, ReelLife shows their saved
 values alongside your attempted changes instead of overwriting them.
 
-## Default shares
+## Default Shares
 
 Set the project's **default shares** in Project Settings, Cue Sheet.
 New compositions receive these shares; Song and Source cues do not.
 Use **Apply** to assign them to existing cues.
 
-## The cue sheet
+## The Cue Sheet
 
 Fill in Project Settings, Cue Sheet (production company, category,
 preparer...). Choose **Export Cue Sheet** from Settings or Tools, then
@@ -34,3 +34,10 @@ before each title, IPI numbers, notes, artist and inactive cues.
 The **checklist** flags missing titles, lengths or writers, incorrect
 share totals, writers without a PRO, and cues that are not yet composed
 or are still on older picture.
+
+## Durations and Sending
+
+Cue sheet durations use timecode time, rounded to the nearest second. At
+23.976 or 29.97, a timecode second is slightly longer than a clock
+second, so durations are slightly shorter than clock time. Send RapidCue
+sheets by email to cuesheets@rapidcue.com.

@@ -9,8 +9,7 @@
 
 {% block content %}
   <div class="page-head">
-    <h1>Trash</h1>
-    {% include "cues/includes/help_link.html" with slug="undo-and-history" %}
+    {% include "cues/includes/page_title.html" with title="Trash" slug="undo-and-history" sub=True %}
     <div class="page-head__actions">
       <a class="button button--quiet button--small" href="{% url 'cues:activity' project.pk %}">Activity</a>
     </div>
@@ -65,6 +64,6 @@
       </nav>
     {% endif %}
   {% else %}
-    <p class="muted">The Trash is empty.</p>
+    {% include "cues/includes/empty.html" with icon="trash" title="Trash Is Empty" %}
   {% endif %}
 {% endblock %}

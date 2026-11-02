@@ -13,17 +13,17 @@
   (Cue, Title, Start or IN, End or OUT, Status, Notes, BPM, Cue Sheet
   Title and more) and shows how it read them.
 
-Leave **Import from** on *Detect from the file* unless it guesses wrong.
+Leave **Import from** on *Detect from the File* unless it guesses wrong.
 
-**New cues go to** assigns cues to the reel, act or clip containing their
+**New Cues Go To** assigns cues to the reel, act or clip containing their
 IN, or to the one you select. If no reel contains a cue's IN, it is
 placed under *No Reel Yet*.
 
-## Clip and marker names
+## Clip and Marker Names
 
-- *Cue # and title*: `1m01 Main Title` (the usual).
-- *Cue # only*: `1m01`.
-- *Titles; number the cues in order*: from the **First cue #** you give.
+- *Cue # and Title*: `1m01 Main Title` (the usual).
+- *Cue # Only*: `1m01`.
+- *Titles, Numbered in Order*: from the **First cue #** you give.
 
 New cues whose numbers don't fit the project's **Valid Cue Numbers**
 are left out and listed in the preview; a clip for a cue you already
@@ -33,7 +33,7 @@ Clips sharing a cue # become one cue (earliest IN, latest OUT). If they
 leave a second or more of silence between them, the preview warns you:
 they may be two uses that need their own numbers.
 
-## The preview
+## The Preview
 
 Nothing changes until you import. The preview lists each cue as
 **New**, **Update** (timecodes, or titles if you tick **Title**) or

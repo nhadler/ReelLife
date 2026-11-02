@@ -84,7 +84,7 @@ def test_page_shows_cue_versions_and_fields(
     assert 'id="cue-updated-at"' in html
     assert f'hx-post="/cues/{cue.pk}/fields/title/"' in html
     assert "Version v1" in html
-    assert 'version-list__current">current' in html
+    assert 'version-list__current">Current' in html
     assert "Needs conform." in html
     assert "Start Offset" in html
     assert 'id="new-version"' in html

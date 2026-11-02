@@ -237,7 +237,7 @@ def test_the_trash_page_restores(
     assert response["Location"] == _url("trash", project) + "?page=1"
     page = unescape(editor.get(_url("trash", project)).content.decode())
     assert "Restored 1m05." in page
-    assert "The Trash is empty." in page
+    assert "Trash Is Empty" in page
 
 
 def test_a_suffix_that_doesnt_fit_isnt_offered(

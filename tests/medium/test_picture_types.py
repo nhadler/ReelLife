@@ -149,14 +149,14 @@ def test_a_type_the_pictures_fit_is_saved(editor: Client) -> None:
         (
             "acts",
             ("1", "2"),
-            ["The act their IN falls in", "No Act Yet", "Act 1", "Act 2"],
+            ["The Act at Their IN", "No Act Yet", "Act 1", "Act 2"],
         ),
         (
             "clips",
             ("A12",),
-            ["The clip their IN falls in", "No Clip Yet", "Clip A12"],
+            ["The Clip at Their IN", "No Clip Yet", "Clip A12"],
         ),
-        ("long_play", ("1",), ["The picture", "No Picture Yet", "Picture"]),
+        ("long_play", ("1",), ["The Picture", "No Picture Yet", "Picture"]),
     ],
 )
 def test_import_places_new_cues_in_the_types_words(

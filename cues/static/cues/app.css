@@ -72,7 +72,8 @@
   --slate: #5d6573;
   --accent: #2a7d46;
   --accent-ink: #ffffff;
-  --amber: #a86a00;
+  /* Dark enough for small text on white (5.4:1). */
+  --amber: #8f5a00;
   --danger: #b3382a;
   --danger-ink: #ffffff;
   --grade-low: #7c8491;
@@ -181,7 +182,9 @@ a {
   display: none !important;
 }
 
-.page--narrow {
+/* A short form or list: same left edge as every page, only its content
+   held narrower, so titles don't jump between pages. */
+.page--narrow > :not(.page-head, .messages) {
   max-width: 44rem;
 }
 
@@ -484,13 +487,26 @@ kbd.palette__detail {
 .page-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space) calc(var(--space) * 3);
   margin-bottom: calc(var(--space) * 3);
 }
 
-.page-head h1 {
+/* The title and its "?" (includes/page_title.html): one size per tier,
+   the "?" close beside it and centred on it. */
+.page-head__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.page-title {
   margin: 0;
+  font-size: var(--step-3);
+}
+
+.page-title--sub {
+  font-size: var(--step-2);
 }
 
 .page-head__actions {
@@ -564,8 +580,10 @@ kbd.palette__detail {
 
 .sign-in > .messages,
 .sign-in__copy {
-  width: min(32rem, 100% - 2rem);
+  /* Its margins come out of the width too, so a phone never scrolls. */
+  width: min(32rem, 100% - clamp(1rem, 11vw, 10rem) - 1rem);
   margin-inline: clamp(1rem, 11vw, 10rem) 1rem;
+  overflow-wrap: anywhere;
 }
 
 .sign-in__mark {
@@ -942,6 +960,37 @@ input[type='checkbox'] {
   color: var(--slate);
 }
 
+/* An empty page or list (includes/empty.html): icon, title, action. */
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: var(--space);
+  padding: calc(var(--space) * 6) calc(var(--space) * 2);
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  color: var(--slate);
+  text-align: center;
+}
+
+.empty-state__icon .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.empty-state__title {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.empty-state__note {
+  margin: 0;
+}
+
+.empty-state .button {
+  margin-top: var(--space);
+}
+
 /* Settings tabs */
 
 .tabs {
@@ -967,6 +1016,14 @@ input[type='checkbox'] {
 }
 
 /* Projects list and the cue map */
+
+/* A control you can't change looks it, wherever it is. */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 .button:disabled {
   opacity: 0.45;
@@ -1099,8 +1156,12 @@ details.form-section summary {
 
 /* Dialogs */
 
+/* Two sizes: --dialog-md for short forms and the
+   cue tools, --dialog-lg for everything else. */
 .dialog {
-  width: min(52rem, calc(100vw - 2rem));
+  --dialog-md: 40rem;
+  --dialog-lg: 56rem;
+  width: min(var(--dialog-lg), calc(100vw - 2rem));
   max-height: calc(100vh - 3rem);
   padding: calc(var(--space) * 3);
   border: 1px solid var(--rule);
@@ -1154,6 +1215,11 @@ details.form-section summary {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+/* New version: shown on the row you're on or pointing at, not all 40. */
+.ag-row:not(:hover, .ag-row-focus) .version-cell__add:not(:focus-visible) {
+  opacity: 0;
 }
 
 .version-cell__add {
@@ -1341,6 +1407,13 @@ body:has(.overview) > .page {
   color: var(--ink);
 }
 
+/* A side panel's toggle while its panel is open: on, but not the page
+   you're on, so it never reads as a second current tab. */
+.project-bar__link[aria-expanded='true'] {
+  background: none;
+  color: var(--accent);
+}
+
 .icon {
   flex: none;
   width: 1.15rem;
@@ -1414,6 +1487,12 @@ body:has(.overview) > .page {
   gap: 0.1rem;
 }
 
+/* Waiting for a selection, e.g. Log Written until one cue is ticked. */
+.toolbar__button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .toolbar__button {
   display: inline-flex;
   align-items: center;
@@ -1429,6 +1508,7 @@ body:has(.overview) > .page {
   color: var(--slate);
   font: inherit;
   font-size: 0.8rem;
+  white-space: nowrap;
   cursor: pointer;
   font-weight: 600;
 }
@@ -1438,7 +1518,7 @@ body:has(.overview) > .page {
   height: 0.95rem;
 }
 
-.toolbar__button:hover,
+.toolbar__button:hover:not(:disabled),
 .toolbar__menu[open] > .toolbar__button,
 .toolbar__button--on {
   border-bottom-color: var(--accent);
@@ -1508,6 +1588,17 @@ body:has(.overview) > .page {
   gap: 0.4rem;
   color: var(--slate);
   cursor: pointer;
+}
+
+.switch__label {
+  font-size: var(--step--1);
+}
+
+/* The active column's head says what its eyes are (its tooltip: Active). */
+.cue-grid .ag-header-cell[col-id='_active'] .ag-header-cell-label::after {
+  content: '◉' / '';
+  margin: auto;
+  color: var(--slate);
 }
 
 .switch input {
@@ -1853,11 +1944,18 @@ body:has(.overview) > .page {
     row-gap: var(--space);
   }
 
+  /* Links past the edge fade out, so the row reads as one that scrolls. */
   .topbar__nav {
     order: 1;
     flex-basis: 100%;
     margin-right: 0;
+    padding-right: calc(var(--space) * 4);
     overflow-x: auto;
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - var(--space) * 4),
+      transparent
+    );
   }
 
   .topbar__search {
@@ -2044,6 +2142,21 @@ body:has(.overview) > .page {
   font-size: var(--step-0);
 }
 
+/* A card's title with a control beside it, e.g. Active Cue. */
+.details-group__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  margin-bottom: calc(var(--space) * 2);
+}
+
+.details-group__head .details-group__title,
+.details-group__head .field {
+  margin: 0;
+}
+
 .details-group__note {
   margin: calc(var(--space) * 1.5) 0 0;
 }
@@ -2117,6 +2230,9 @@ body:has(.overview) > .page {
   border-radius: var(--radius);
   background: var(--panel-raised);
   box-shadow: 0 10px 30px rgb(0 0 0 / 35%);
+  /* The room below it in the window (menus.js), so it never runs off. */
+  max-height: var(--panel-room, none);
+  overflow-y: auto;
 }
 
 .menu__item {
@@ -2374,7 +2490,7 @@ input[type='search'].grid-search {
 
 .filter-panel {
   width: min(30rem, calc(100vw - 2rem));
-  max-height: 70vh;
+  max-height: min(70vh, var(--panel-room, 70vh));
   overflow: auto;
 }
 
@@ -2463,12 +2579,29 @@ input[type='search'].grid-search {
   border-radius: var(--radius);
 }
 
-/* Radios show here (the View menu's .segmented hides them behind
-   spans), and keyboard focus rings the whole choice. */
+/* As a form field (includes/segmented.html): a row of segments under
+   its label, not a column. */
+.segmented.field {
+  flex-direction: row;
+  align-content: flex-start;
+  margin: 0;
+}
+
+/* The segment is the control: its radio is hidden but still takes the
+   keyboard, and focus rings the whole segment. */
 .segmented__choice input {
-  position: static;
-  opacity: 1;
-  accent-color: var(--accent);
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Shift: the per-cue fields only when moving by one cue's new time, the
+   offset only when moving by an offset. */
+.tool-form:has([name='by'][value='offset']:checked)
+  .field:has([name='reference'], [name='new_time']),
+.tool-form:has([name='by']:not([value='offset']):checked)
+  .field:has([name='offset']) {
+  display: none;
 }
 
 .segmented__choice:has(input:focus-visible) {
@@ -2500,16 +2633,16 @@ input[type='search'].grid-search {
 /* Show each source's options only when they apply. "Detect" shows the
    Pro Tools ones (the usual case); a detected Cubase or MIDI file uses
    the remembered start. */
-.import:has([name='kind'][value='detect']:checked) .import__source--protools,
-.import:has([name='kind'][value='detect']:checked) .import__source--daw,
-.import:has([name='kind'][value='protools']:checked) .import__source--protools,
-.import:has([name='kind'][value='protools']:checked) .import__source--daw,
-.import:has([name='kind'][value='cubase']:checked) .import__source--cubase,
-.import:has([name='kind'][value='cubase']:checked) .import__source--start,
-.import:has([name='kind'][value='cubase']:checked) .import__source--daw,
-.import:has([name='kind'][value='midi']:checked) .import__source--midi,
-.import:has([name='kind'][value='midi']:checked) .import__source--start,
-.import:has([name='kind'][value='midi']:checked) .import__source--daw {
+.import:has([name='kind'] [value='detect']:checked) .import__source--protools,
+.import:has([name='kind'] [value='detect']:checked) .import__source--daw,
+.import:has([name='kind'] [value='protools']:checked) .import__source--protools,
+.import:has([name='kind'] [value='protools']:checked) .import__source--daw,
+.import:has([name='kind'] [value='cubase']:checked) .import__source--cubase,
+.import:has([name='kind'] [value='cubase']:checked) .import__source--start,
+.import:has([name='kind'] [value='cubase']:checked) .import__source--daw,
+.import:has([name='kind'] [value='midi']:checked) .import__source--midi,
+.import:has([name='kind'] [value='midi']:checked) .import__source--start,
+.import:has([name='kind'] [value='midi']:checked) .import__source--daw {
   display: block;
 }
 
@@ -2631,10 +2764,6 @@ input[type='search'].grid-search {
   overflow: auto;
 }
 
-.dialog:has(.import) {
-  width: min(66rem, calc(100vw - 2rem));
-}
-
 /* The cue list matters only when something will happen to them. */
 .import__missing:has([value='leave']:checked) .import__missing-list {
   display: none;
@@ -2652,7 +2781,7 @@ input[type='search'].grid-search {
   border-radius: var(--radius);
 }
 
-.export:has([name='preset'][value='custom']:checked) .export__columns {
+.export:has([name='preset'] [value='custom']:checked) .export__columns {
   display: grid;
 }
 
@@ -2776,16 +2905,47 @@ textarea.copy-json {
 /* Project form bands: what a section is for on the left, its fields on
    the right. */
 
+/* New Project, laid out like App Settings: each section's name in a
+   left column, its fields beside it, a rule between sections, and the
+   actions under the fields. */
 .band {
   display: grid;
-  grid-template-columns: minmax(12rem, 1fr) minmax(0, 2.2fr);
-  gap: calc(var(--space) * 3);
-  margin-bottom: calc(var(--space) * 4);
+  grid-template-columns: 12rem minmax(0, 1fr);
+  column-gap: calc(var(--space) * 4);
+  padding: calc(var(--space) * 2.5) 0;
+  border-top: 1px solid var(--rule);
 }
 
+.band:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Level with the first line beside it. */
 .band__intro h2 {
-  margin-bottom: var(--space);
-  font-size: var(--step-1);
+  margin: 0;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.project-form:has(> .band) > .form-actions {
+  margin: 0;
+  padding: calc(var(--space) * 2.5) 0 0 calc(12rem + var(--space) * 4);
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 48rem) {
+  .band {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .band__intro h2 {
+    margin-bottom: var(--space);
+  }
+
+  .project-form:has(> .band) > .form-actions {
+    padding-left: 0;
+  }
 }
 
 /* Credits: a section per kind, found by name (credits.js). */
@@ -2793,13 +2953,6 @@ textarea.copy-json {
 /* Viewers have no search, so the exports take the right end. */
 
 /* Checkboxes, counts and × sit level with the fields. */
-
-.band__body {
-  padding: calc(var(--space) * 2.5);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--panel);
-}
 
 .project-form:not(:has(select[name='kind'] option[value='episode']:checked))
   .episode-only {
@@ -2924,10 +3077,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   margin-bottom: var(--space);
 }
 
-.calendar__hint {
+/* Pushes Today and › to the right, beside each other. */
+.calendar__spacer {
   flex: 1;
-  font-size: var(--step--1);
-  text-align: center;
 }
 
 .calendar__months {
@@ -2983,6 +3135,18 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   background: var(--accent);
   color: var(--panel);
   font-weight: 600;
+}
+
+/* A day off reads as it does on the Schedule: hatched, not a green
+   button (green is for actions and today). */
+.days-off-picker .calendar__day[aria-pressed='true'] {
+  border-color: color-mix(in srgb, var(--ink) 35%, var(--rule));
+  background: repeating-linear-gradient(
+    135deg,
+    var(--bay) 0 5px,
+    color-mix(in srgb, var(--ink) 30%, var(--bay)) 5px 6px
+  );
+  color: var(--ink);
 }
 
 .calendar__day:focus-visible {
@@ -3219,8 +3383,10 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   white-space: nowrap;
 }
 
+/* An empty choice (no Sub Status, say) shows nothing, not a pill. */
 .status-pill--none {
-  color: var(--slate);
+  box-shadow: none;
+  background: none;
 }
 
 .status-editor {
@@ -3306,9 +3472,8 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 /* The active eye at each row's end. */
 .cell--active {
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 0 !important;
+  padding-inline: 0 !important;
 }
 
 .active-toggle {
@@ -3343,6 +3508,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 }
 
 .selection-summary {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) / 2);
   max-width: none;
   margin: 0;
   color: var(--ink);
@@ -3350,15 +3518,8 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   white-space: nowrap;
 }
 
-.selection-summary__link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-  cursor: pointer;
+.selection-summary[hidden] {
+  display: none;
 }
 
 /* Timeline strip: reels side by side, cues in lanes. */
@@ -3424,9 +3585,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   font-size: 0.7rem;
   line-height: 18px;
   text-align: left;
+  text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
-  opacity: 0.85;
   touch-action: none;
 }
 
@@ -3510,10 +3671,44 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   background: none;
 }
 
-/* Single-line cells sit in the middle of taller rows, level with pills. */
+/* Single-line cells sit level with the first line of wrapped ones, so a
+   row that grows reads top down as one block. */
 .cue-grid .ag-cell:not(.ag-cell-wrap-text, .ag-cell-inline-editing) {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: var(--row-padding, 6.5px);
+  line-height: 1.35;
+}
+
+/* Ticks, checkboxes and the active eye share that top line; AG Grid's
+   own wrappers would centre them. */
+.cue-grid
+  .ag-cell
+  :is(
+    .ag-cell-wrapper,
+    .ag-checkbox-cell,
+    .ag-selection-checkbox,
+    .ag-checkbox
+  ) {
+  align-items: flex-start;
+  height: auto;
+}
+
+/* A 16px box level with the first line of 13px text beside it. */
+.cue-grid .ag-cell .ag-checkbox-input-wrapper {
+  margin-top: 1px;
+}
+
+/* The eye is one line tall, so it sits on the first line like the text. */
+.cue-grid .ag-cell .active-toggle {
+  height: calc(1.35em + 2px);
+  margin-top: -1px;
+  line-height: 1.35;
+}
+
+/* A thumbnail fills a single-line row; in a taller one it sits at the top. */
+.cue-grid .ag-cell[col-id='thumbnail']:not(.ag-cell-inline-editing) {
+  padding-top: 2px;
 }
 
 /* The bar's links and New cue keep to one line in narrow windows. */
@@ -3531,6 +3726,20 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   padding-bottom: var(--row-padding, 6.5px);
   line-height: 1.35;
   white-space: pre-line;
+}
+
+/* A row grows to at most six lines; longer text fades out
+   in its sixth (the cue page shows it all). The fade's stops are lengths,
+   so shorter text is never touched. */
+.cue-grid .ag-cell-wrap-text .ag-cell-value {
+  display: block;
+  max-height: calc(1.35em * 6);
+  overflow: hidden;
+  mask-image: linear-gradient(
+    to bottom,
+    #000 calc(1.35em * 5),
+    transparent calc(1.35em * 6)
+  );
 }
 
 /* Theme and Instrumentation: coloured chips. */
@@ -3638,16 +3847,31 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   opacity: 0.45;
 }
 
+/* No picture for the cue or the project: its initials, as the project's
+   own thumbnail shows them. */
 .cue-thumb--empty {
-  border: 1px dashed var(--rule);
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--rule);
+  background: var(--panel-raised);
+  color: var(--slate);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
-.cue-thumbnail {
+/* The Cue card: its fields, with the still at the top right. */
+.cue-card {
   display: grid;
-  grid-template-columns: 10rem 1fr;
+  grid-template-columns: minmax(0, 1fr) 10rem;
   gap: calc(var(--space) * 2);
   align-items: start;
-  margin-bottom: calc(var(--space) * 2);
+}
+
+@media (max-width: 40rem) {
+  .cue-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .cue-thumbnail .cue-thumb {
@@ -3793,7 +4017,7 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 
 /* Cue tools: fields, then a live preview of the change. */
 .dialog:has(.tool-form) {
-  width: min(38rem, calc(100vw - 2rem));
+  width: min(var(--dialog-md), calc(100vw - 2rem));
 }
 
 .tool-form__problem {
@@ -4148,6 +4372,80 @@ button.stats__name:hover,
   align-items: start;
 }
 
+/* App Settings as a sheet: each section is one row, its name in a left
+   column as wide as the project settings' sidebar, its controls on four
+   columns every row shares, so the whole page fits without scrolling. */
+.settings-sheet .form-section {
+  display: grid;
+  grid-template-columns: 12rem minmax(0, 1fr);
+  column-gap: calc(var(--space) * 4);
+  margin: 0;
+  padding: calc(var(--space) * 2) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.settings-sheet .form-section:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Floated, a legend is laid out like any grid item; level with the
+   controls, below their labels. */
+.settings-sheet .form-section > legend {
+  float: left;
+  margin: 0;
+  padding-top: calc(var(--step--1) * 1.45 + 0.3rem);
+  color: var(--ink);
+  font-size: var(--step-0);
+  font-weight: 600;
+  line-height: var(--control-h);
+}
+
+.settings-sheet .fields {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--space) * 1.5) calc(var(--space) * 3);
+}
+
+.settings-sheet .fields > .field--check > label {
+  white-space: nowrap;
+}
+
+.settings-sheet .form-actions {
+  margin: 0;
+  padding: calc(var(--space) * 2) 0 0 calc(12rem + var(--space) * 4);
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 48rem) {
+  .settings-sheet .form-section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settings-sheet .form-section > legend {
+    margin-bottom: var(--space);
+    padding-top: 0;
+    line-height: 1.4;
+  }
+
+  .settings-sheet .fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .settings-sheet .fields > .field--check {
+    grid-column: 1 / -1;
+    padding-top: 0;
+  }
+
+  .settings-sheet .fields > .field--check > label {
+    min-height: 0;
+    white-space: normal;
+  }
+
+  .settings-sheet .form-actions {
+    padding-left: 0;
+  }
+}
+
 .settings__nav ul {
   position: sticky;
   top: var(--space);
@@ -4240,8 +4538,10 @@ button.stats__name:hover,
 }
 
 /* Batch edit's question (overview/batch.js). */
+.dialog:has(.schedule-on),
+.dialog:has(.log-written),
 .dialog:has(.batch-edit) {
-  width: min(28rem, calc(100vw - 2rem));
+  width: min(var(--dialog-md), calc(100vw - 2rem));
 }
 
 .batch-edit p {
@@ -4597,6 +4897,7 @@ a.conform:hover {
 .schedule__side {
   display: grid;
   gap: calc(var(--space) * 2);
+  align-content: start;
   position: sticky;
   top: calc(var(--space) * 2);
 }
@@ -4673,6 +4974,86 @@ a.toggle__option:hover {
   min-height: 7.5rem;
 }
 
+/* The Schedule's month fills the window under the top bar: the page is a
+   column the calendar takes the rest of, its weeks share that height,
+   and each day clips what doesn't fit (schedule.js says how much). */
+body:has(> .page--fill) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.page--fill {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  padding-bottom: calc(var(--space) * 3);
+}
+
+.page--fill .schedule {
+  flex: 1;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.page--fill .schedule__main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page--fill .schedule__side {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.page--fill .cal--month {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.page--fill .cal--month .cal__days {
+  flex: 1;
+  grid-auto-rows: minmax(0, 1fr);
+  /* Shorter than this, the page scrolls rather than squeeze the days
+     below a cue each. */
+  min-height: 26rem;
+}
+
+.page--fill .cal--month .cal-day__link {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.page--fill .cal--month .cal-cue {
+  flex: none;
+}
+
+.page--fill .cal--month .cal-cue__title {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 64rem) {
+  body:has(> .page--fill) {
+    display: block;
+    height: auto;
+  }
+
+  .page--fill .cal--month .cal__days {
+    min-height: 0;
+  }
+
+  .page--fill .cal--month .cal-day__link {
+    overflow: visible;
+  }
+}
+
 .cal--week .cal-day__link {
   min-height: 18rem;
 }
@@ -4714,6 +5095,11 @@ a.toggle__option:hover {
 .cal-day--selected .cal-day__link {
   background: var(--panel-raised);
   box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* Today needs no ring as well as its green date. */
+.cal-day--today.cal-day--selected .cal-day__link {
+  box-shadow: none;
 }
 
 .cal-day__head {
@@ -4783,7 +5169,8 @@ a.toggle__option:hover {
 }
 
 .cal-cue__music {
-  color: var(--slate);
+  /* Slate fails contrast on the tinted chip in the light theme. */
+  color: color-mix(in srgb, var(--ink) 65%, var(--slate));
   font-family: var(--mono);
 }
 
@@ -5512,7 +5899,9 @@ td.party-table__ipi {
 
 .project {
   display: grid;
-  grid-template-columns: 6rem minmax(0, 1fr) repeat(3, 7.5rem) 2.25rem;
+  /* The deadline figure is wider: its label names the deadline and its
+     date ("Orchestration Dec 18"). */
+  grid-template-columns: 6rem minmax(0, 1fr) repeat(2, 7.5rem) 10rem 2.25rem;
   column-gap: calc(var(--space) * 3);
   align-items: center;
   padding: calc(var(--space) * 1.5) calc(var(--space) * 2) 0;
@@ -5888,10 +6277,32 @@ td.party-table__ipi {
   opacity: 0.5;
 }
 
+/* An empty list is one line and Add, without a header over nothing. */
+.inline-table:has(> .inline-table__empty:not([hidden])) > table {
+  display: none;
+}
+
+/* The handle, swatch and × sit level with the middle of the fields
+   beside them (cells keep to the top, so an error below one field
+   doesn't push the others down). */
+.inline-table .drag-handle {
+  margin-top: calc((var(--control-h) - 1.6rem) / 2);
+}
+
+.inline-table .inline-table__x {
+  margin-top: calc((var(--control-h) - 1.8rem) / 2);
+}
+
+/* The swatch's column is as wide as the swatch, so × follows it. */
+.inline-table .table--edit td:has(> input[type='color']) {
+  width: 3rem;
+}
+
 .inline-table .table--edit td input[type='color'] {
   width: 1.75rem;
   min-width: 0;
   height: 1.75rem;
+  margin-top: calc((var(--control-h) - 1.75rem) / 2);
   padding: 0;
   border: 1px solid var(--rule);
   border-radius: 6px;
@@ -5992,8 +6403,18 @@ td.party-table__ipi {
   border-left-color: var(--accent);
 }
 
-.cue-index__empty {
-  color: var(--slate) !important;
+/* A folded section: the same colour (it isn't disabled), marked ▸. */
+.cue-index__empty::after {
+  content: ' ▸';
+  color: var(--slate);
+}
+
+/* On a phone the page is one column, so the index would fill the first
+   screen before the fields; scrolling does its job. */
+@media (max-width: 48rem) {
+  .cue-index {
+    display: none;
+  }
 }
 
 .details-group--fold > summary {
@@ -6134,4 +6555,72 @@ form:has(input[name='confirm']:valid) .backup__restore {
   border-top: 1px solid var(--rule);
   color: var(--slate);
   font-size: var(--step--1);
+}
+
+/* A cue pinned to its day ("Schedule On…"): a small pin by its number. */
+.cal-cue__number .icon,
+.day-cue__number .icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  vertical-align: -0.1rem;
+}
+
+.day-cues__item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.day-cue__actions {
+  display: flex;
+  gap: var(--space);
+}
+
+.day-cue__written {
+  display: block;
+  color: var(--accent);
+  font-size: var(--step--1);
+}
+
+/* Calendar Feed: the new link, then when it was made and last read. */
+.feed-link {
+  display: grid;
+  flex: 1;
+  gap: var(--space);
+  justify-items: start;
+}
+
+.feed-link input {
+  font-family: var(--mono);
+  font-size: var(--step--1);
+}
+
+.feed-facts {
+  display: flex;
+  gap: calc(var(--space) * 6);
+  margin: 0 0 calc(var(--space) * 2);
+}
+
+.feed-facts dt {
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.feed-facts dd {
+  margin: 0;
+}
+
+.feed-actions form {
+  display: contents;
+}
+
+/* On a phone the grid's toolbar wraps rather than widen the page. */
+@media (max-width: 40rem) {
+  .toolbar,
+  .toolbar__menus {
+    flex-wrap: wrap;
+  }
+}
+
+.share-list__none {
+  list-style: none;
 }

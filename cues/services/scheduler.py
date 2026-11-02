@@ -8,6 +8,14 @@ the same effort, the least that meets every deadline, up to the daily
 maximum. Long cues split across days; each part carries its share of
 the cue's music.
 
+Projects are worked one at a time (each day goes to the earliest
+deadline first, at one pace for everything) or in parallel (each
+project keeps its own pace to its own deadlines, and every day gives
+each project its share).
+
+A project's work waits for its start date (the composition deadline's
+start), and its pace counts the days from then.
+
 The plan is worked out afresh each time from where things stand, so
 work finished early pulls the rest forward and work not finished yet
 shifts into the coming days; nothing is ever late.
@@ -43,6 +51,8 @@ class Work:
         started: In progress: goes before unstarted work due the same
             day, so work in hand isn't pushed back.
         pinned: The day the composer fixed it to, if today or later.
+        start: The first day it can be written (its project's start);
+            None for any day.
     """
 
     key: int
@@ -53,6 +63,11 @@ class Work:
     rank: tuple[Any, ...] = ()
     started: bool = False
     pinned: datetime.date | None = None
+    start: datetime.date | None = None
+
+    def waits(self, date: datetime.date) -> bool:
+        """Whether `date` is before the work can start."""
+        return self.start is not None and date < self.start
 
     @property
     def effort(self) -> Fraction:
@@ -225,6 +240,56 @@ class _Dealt:
     unplaced: list[int]
 
 
+@dataclasses.dataclass
+class _Lane:
+    """Work dealt into its own room each day (a project, in parallel)."""
+
+    pending: list[Work]
+    stretches: list[Stretch]
+    left: dict[int, Fraction]
+    # Has work with no deadline, which follows at the open-ended pace.
+    undated: bool
+
+    @classmethod
+    def of(cls, queue: list[Work], stretches: list[Stretch]) -> "_Lane":
+        """A lane for `queue`, paced by `stretches`."""
+        left = {work.key: work.effort for work in queue}
+        undated = any(work.due is None for work in queue)
+        return cls(list(queue), stretches, left, undated)
+
+    def ready(self, date: datetime.date) -> bool:
+        """Whether any of the lane's work can be written on `date`."""
+        return any(not work.waits(date) for work in self.pending)
+
+    def fill(
+        self,
+        date: datetime.date,
+        room: Fraction,
+        smallest: Fraction,
+        calendar: Calendar,
+        parts: list[Part],
+        finish: dict[int, datetime.date],
+    ) -> None:
+        """Deals the lane's work, in order, into `room` on `date`."""
+        index = 0
+        while room > 0 and index < len(self.pending):
+            work = self.pending[index]
+            if not calendar.works(work.project, date) or work.waits(date):
+                index += 1
+                continue
+            remaining = self.left[work.key]
+            take = _take(remaining, room, smallest)
+            if take is None:
+                return  # too little room for a part: the day is full
+            parts.append(_part(work, take))
+            room -= take
+            self.left[work.key] = remaining - take
+            if self.left[work.key]:
+                return  # split: the rest goes on the next day
+            finish[work.key] = date
+            self.pending.pop(index)
+
+
 def _take(
     remaining: Fraction, room: Fraction, smallest: Fraction
 ) -> Fraction | None:
@@ -253,14 +318,13 @@ def _deal(
     whichever is less, so an empty day always takes some of a cue.
     Pinned cues sit whole on their day.
     """
-    left = {work.key: work.effort for work in queue}
-    pending = list(queue)
+    lane = _Lane.of(queue, stretches)
     last_pin = max(pins, default=calendar.today)
     finish: dict[int, datetime.date] = {}
     days: list[Day] = []
     date = calendar.today
     for _ in range(HORIZON_DAYS):
-        if not pending and date > last_pin:
+        if not lane.pending and date > last_pin:
             break
         parts = [_part(w, w.effort, pinned=True) for w in pins.get(date, [])]
         for work in pins.get(date, []):
@@ -268,27 +332,79 @@ def _deal(
         load = _load_on(stretches, date)
         smallest = min(Fraction(min_part), Fraction(load, 4))
         room = load - sum((p.effort for p in parts), Fraction(0))
-        index = 0
-        while room > 0 and index < len(pending):
-            work = pending[index]
-            if not calendar.works(work.project, date):
-                index += 1
-                continue
-            remaining = left[work.key]
-            take = _take(remaining, room, smallest)
-            if take is None:
-                break  # too little room for a part: the day is full
-            parts.append(_part(work, take))
-            room -= take
-            left[work.key] = remaining - take
-            if left[work.key]:
-                break  # split: the rest goes on the next day
-            finish[work.key] = date
-            pending.pop(index)
+        lane.fill(date, room, smallest, calendar, parts, finish)
         if parts:
             days.append(Day(date, tuple(parts)))
         date += _DAY
-    return _Dealt(days, finish, [work.key for work in pending])
+    return _Dealt(days, finish, [work.key for work in lane.pending])
+
+
+def _share(
+    loads: Mapping[int, Fraction], daily_max: int | None
+) -> dict[int, Fraction]:
+    """Each project's room in a day capped at `daily_max`.
+
+    Everyone gets their whole load if the loads fit. If not, the cap is
+    shared fairly: a project asking for less than an even share gets
+    all of it, and what's left is split evenly among the rest, so the
+    cap comes out of the projects that ask the most.
+    """
+    if daily_max is None or sum(loads.values(), Fraction(0)) <= daily_max:
+        return dict(loads)
+    shares: dict[int, Fraction] = {}
+    left = Fraction(daily_max)
+    asking = sorted(loads, key=lambda project: loads[project])
+    for index, project in enumerate(asking):
+        even = left / (len(asking) - index)
+        shares[project] = min(loads[project], even)
+        left -= shares[project]
+    return {project: shares[project] for project in loads}
+
+
+def _deal_parallel(
+    lanes: Mapping[int, _Lane],
+    pins: Mapping[datetime.date, list[Work]],
+    calendar: Calendar,
+    daily_max: int | None,
+    min_part: int,
+) -> _Dealt:
+    """Gives every project its own load each day, side by side.
+
+    A project's load is its own pace on the days it works, once its work
+    can start. When the loads add up to more than the daily maximum, the
+    maximum is shared out (`_share`). Pinned cues sit whole on their day
+    and come out of their project's room.
+    """
+    last_pin = max(pins, default=calendar.today)
+    finish: dict[int, datetime.date] = {}
+    days: list[Day] = []
+    date = calendar.today
+    for _ in range(HORIZON_DAYS):
+        busy = {p: lane for p, lane in lanes.items() if lane.pending}
+        if not busy and date > last_pin:
+            break
+        pinned = pins.get(date, [])
+        parts = [_part(w, w.effort, pinned=True) for w in pinned]
+        for work in pinned:
+            finish[work.key] = date
+        loads = {
+            p: Fraction(_load_on(lane.stretches, date))
+            for p, lane in busy.items()
+            if calendar.works(p, date) and lane.ready(date)
+        }
+        shares = _share(loads, daily_max)
+        for project, share in shares.items():
+            room = share - sum(
+                (w.effort for w in pinned if w.project == project),
+                Fraction(0),
+            )
+            smallest = min(Fraction(min_part), share / 4)
+            busy[project].fill(date, room, smallest, calendar, parts, finish)
+        if parts:
+            days.append(Day(date, tuple(parts)))
+        date += _DAY
+    unplaced = [w.key for lane in lanes.values() for w in lane.pending]
+    return _Dealt(days, finish, unplaced)
 
 
 def _missed(works: Iterable[Work], dealt: _Dealt) -> list[datetime.date]:
@@ -363,12 +479,96 @@ def _risks(works: Iterable[Work], dealt: _Dealt) -> tuple[Risk, ...]:
     )
 
 
+def _split_pins(
+    works: Iterable[Work], today: datetime.date
+) -> tuple[dict[datetime.date, list[Work]], list[Work]]:
+    """The cues pinned to a day from today on, and the rest in order."""
+    pins: dict[datetime.date, list[Work]] = {}
+    queue: list[Work] = []
+    for work in _ordered(works):
+        if work.pinned is not None and work.pinned >= today:
+            pins.setdefault(work.pinned, []).append(work)
+        else:
+            queue.append(work)
+    return pins, queue
+
+
+def _paced(lane: _Lane, date: datetime.date) -> int:
+    """A project's load on `date`.
+
+    Its pace to its deadlines, then its open-ended pace only while it
+    has work with no deadline.
+    """
+    for stretch in lane.stretches:
+        if stretch.until is not None and date <= stretch.until:
+            return stretch.load
+    return lane.stretches[-1].load if lane.undated else 0
+
+
+def _combined(lanes: Collection[_Lane]) -> list[Stretch]:
+    """The projects' loads added up.
+
+    One stretch to each deadline, then an open-ended one for the work
+    with none.
+    """
+    ends = sorted(
+        {
+            stretch.until
+            for lane in lanes
+            for stretch in lane.stretches
+            if stretch.until is not None
+        }
+    )
+    combined = [
+        Stretch(end, sum(_paced(lane, end) for lane in lanes)) for end in ends
+    ]
+    after = sum(lane.stretches[-1].load for lane in lanes if lane.undated)
+    return [*combined, Stretch(None, after)]
+
+
+def _plan_parallel(
+    works: Collection[Work],
+    calendar: Calendar,
+    daily_max: int | None,
+    min_part: int,
+) -> Plan:
+    """Each project paced to its own deadlines, all worked every day."""
+    pins, _ = _split_pins(works, calendar.today)
+    lanes: dict[int, _Lane] = {}
+    for work in _ordered(works):
+        if work.project in lanes:
+            continue
+        own = [w for w in works if w.project == work.project]
+        own_pins, queue = _split_pins(own, calendar.today)
+        stretches = _stretches(own, queue, own_pins, calendar, min_part)
+        last = stretches[-1].load if stretches else 0
+        open_load = last if daily_max is None or stretches else daily_max
+        stretches.append(Stretch(None, open_load))
+        lanes[work.project] = _Lane.of(queue, stretches)
+    dealt = _deal_parallel(lanes, pins, calendar, daily_max, min_part)
+    combined = _combined(list(lanes.values()))
+    needed = max(
+        (stretch.load for stretch in combined if stretch.until is not None),
+        default=0,
+    )
+    if daily_max is not None:
+        combined = [Stretch(s.until, min(s.load, daily_max)) for s in combined]
+    return Plan(
+        days=tuple(dealt.days),
+        stretches=tuple(combined),
+        needed=needed,
+        risks=_risks(works, dealt),
+        unplaced=tuple(dealt.unplaced),
+    )
+
+
 def plan(
     works: Collection[Work],
     calendar: Calendar,
     *,
     daily_max: int | None = None,
     min_part: int = 600,
+    parallel: bool = False,
 ) -> Plan:
     """Deals the work out over the days from today.
 
@@ -378,19 +578,18 @@ def plan(
         daily_max: The most weighted seconds a day, or None for no limit.
         min_part: The smallest part a cue is split into, weighted
             seconds (at most a quarter of the day).
+        parallel: Work every project side by side, each at its own pace,
+            rather than one at a time, earliest deadline first.
 
     Returns:
         The plan. Each working day gets the least even effort that meets
         the deadlines ahead, capped at `daily_max`; work with no deadline
-        follows at the last pace (or at the maximum).
+        follows at the last pace (or at the maximum). In parallel, that
+        holds for each project, and the day is their sum.
     """
-    pins: dict[datetime.date, list[Work]] = {}
-    queue: list[Work] = []
-    for work in _ordered(works):
-        if work.pinned is not None and work.pinned >= calendar.today:
-            pins.setdefault(work.pinned, []).append(work)
-        else:
-            queue.append(work)
+    if parallel:
+        return _plan_parallel(works, calendar, daily_max, min_part)
+    pins, queue = _split_pins(works, calendar.today)
     stretches = _stretches(list(works), queue, pins, calendar, min_part)
     needed = max((stretch.load for stretch in stretches), default=0)
     # Work with no deadline follows at the last pace, or the maximum.

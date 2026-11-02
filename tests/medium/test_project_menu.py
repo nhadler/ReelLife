@@ -12,7 +12,7 @@ from tests import factories
 pytestmark = pytest.mark.django_db
 
 
-def test_the_settings_menu_lists_everything(
+def test_the_more_menu_lists_everything_else(
     role_client: Callable[[Role], Client],
 ) -> None:
     project = factories.ProjectFactory.create()
@@ -22,10 +22,12 @@ def test_the_settings_menu_lists_everything(
     ).content.decode()
     menu = page[page.index('class="menu project-menu"') :]
     menu = menu[: menu.index("</details>")]
+    assert "<span>More</span>" in menu
+    # Picture and Notes are in the bar itself, so not repeated here.
+    assert "Picture &amp; Turnovers" not in menu
+    assert "Project Notes" not in menu
     for item in (
-        "Picture &amp; Turnovers",
         "Conform",
-        "Project Notes",
         'data-grid-action="stats"',
         reverse("cues:activity", args=[project.pk]),
         'data-palette="Activity"',

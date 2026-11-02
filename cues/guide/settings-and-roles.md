@@ -1,6 +1,6 @@
 # Settings and Roles
 
-## Project settings
+## Project Settings
 
 Open these pages from the project bar's **Settings** menu:
 
@@ -15,7 +15,7 @@ Open these pages from the project bar's **Settings** menu:
   copy from another project.
 - **Project**: archive or duplicate the project; admins can delete it.
 
-## App settings
+## App Settings
 
 **Settings** in the top bar contains app-wide preferences: theme (dark
 or light), date format, timecode display (leading zero, subframes),

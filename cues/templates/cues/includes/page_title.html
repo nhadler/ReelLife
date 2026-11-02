@@ -1,0 +1,5 @@
+{# A page's title with its "?" right beside it. Pass title, slug (the Help topic, optional) and sub=True inside a project, where the project bar's name is the page's h1 and this is an h2 one size smaller. #}
+<span class="page-head__title">
+  {% if sub %}<h2 class="page-title page-title--sub">{{ title }}</h2>{% else %}<h1 class="page-title">{{ title }}</h1>{% endif %}
+  {% if slug %}{% include "cues/includes/help_link.html" with slug=slug %}{% endif %}
+</span>

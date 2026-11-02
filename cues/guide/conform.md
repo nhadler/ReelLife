@@ -3,7 +3,7 @@
 After a new cut, cues need to follow the picture. **Conform** (Settings
 menu, or the "on older picture" link in the header) has two parts.
 
-## Reels that moved
+## Reels That Moved
 
 When a reel's head changes and nothing else does, every cue in it moves
 by the same amount. Conform lists each reel whose IN moved in the latest
@@ -11,7 +11,7 @@ turnover and the offset for each. Tick the reels and choose **Shift
 Cues**. Each shift applies once; the page then marks the reel as shifted.
 Cues already placed on the new cut stay where they are.
 
-## On older picture
+## On Older Picture
 
 Cues whose current version was written to an earlier turnover are
 listed with their start offset and change in length. Either re-import

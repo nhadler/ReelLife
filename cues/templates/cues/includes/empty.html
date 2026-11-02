@@ -1,0 +1,7 @@
+{# An empty page or list: a line icon, one short title, and the action that fills it, when there is one. Pass icon and title; optionally url and action for a link, or note for a short line under the title. #}
+<div class="empty-state">
+  <span class="empty-state__icon">{% include "cues/includes/icon.html" with name=icon %}</span>
+  <p class="empty-state__title">{{ title }}</p>
+  {% if note %}<p class="empty-state__note">{{ note }}</p>{% endif %}
+  {% if url %}<a class="button button--quiet" href="{{ url }}">{{ action }}</a>{% endif %}
+</div>

@@ -1,6 +1,6 @@
 # Progress, Pace and Deadlines
 
-## The header
+## The Header
 
 The project header shows how much is **Composed** (cues and time) and
 what **Remains**, the daily pace, the next deadline and how many cues
@@ -15,15 +15,16 @@ Progress counts compositions only, unless App Settings, **Progress
 Counts** includes songs and licensed music. Omitted and on-hold cues
 never count.
 
-## Per day
+## Per Day
 
 **Per day** is the music still to write (To Write and In Progress), and
 to revise (Revisions and Rewrite), spread evenly over the days from
-today through the composition deadline, including both dates and
-excluding days off. It rounds up to the next second.
+today, or from the deadline's start date if it is later, through the
+composition deadline, including both dates and excluding days off. It
+rounds up to the next second.
 Stats lets you count down to another deadline instead.
 
-## Days off
+## Days Off
 
 - **Your days off** (in your picture's menu, or on New Project) apply to
   every project: holidays, vacation.

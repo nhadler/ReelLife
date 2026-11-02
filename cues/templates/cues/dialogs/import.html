@@ -11,25 +11,16 @@
   </header>
 
   <div class="import__options">
-    <fieldset class="segmented segmented--chips">
-      <legend>{{ form.kind.label|title_case }}</legend>
-      {% for choice in form.kind %}
-        <label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>
-      {% endfor %}
-    </fieldset>
+    <div class="fields import__kind">{% include "cues/includes/field.html" with field=form.kind %}</div>
 
     <div class="fields">
-      {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a Pro Tools, Cubase, MIDI or spreadsheet file" %}
+      {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a Pro Tools, Cubase, MIDI or spreadsheet file" file=True %}
     </div>
 
     <fieldset class="import__source import__source--protools">
       <legend>Pro Tools</legend>
-      <p class="muted">File › Export › Session Info as Text, with Time Format set to Timecode and "Include Track EDLs" or "Include Markers" ticked.</p>
       <div class="fields">
-        <div class="field">
-          <span class="field__label">{{ form.method.label|title_case }}</span>
-          {% for choice in form.method %}<label class="menu__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
-        </div>
+        {% include "cues/includes/segmented.html" with field=form.method wide=True %}
         {% include "cues/includes/field.html" with field=form.prefixes %}
       </div>
     </fieldset>

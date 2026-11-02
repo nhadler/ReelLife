@@ -268,7 +268,7 @@ class SplitForm(ToolForm):
     number = forms.CharField(label="New cue #", max_length=20)
     new_takes = forms.ChoiceField(
         label="The new cue takes",
-        choices=[("second", "The second half"), ("first", "The first half")],
+        choices=[("second", "The Second Half"), ("first", "The First Half")],
         initial="second",
         widget=forms.RadioSelect,
     )
@@ -358,7 +358,7 @@ class MergeForm(ToolForm):
     others = forms.ChoiceField(
         label="The others",
         choices=[
-            ("inactive", "Mark Omit and make inactive"),
+            ("inactive", "Mark Omit and Make Inactive"),
             ("delete", "Delete"),
         ],
         initial="inactive",
@@ -532,9 +532,9 @@ class ShiftForm(ToolForm):
     by = forms.ChoiceField(
         label="Shift by",
         choices=[
-            ("offset", "An offset"),
-            ("in", "A new IN for one cue"),
-            ("seq", "A new Seq. start for one cue"),
+            ("offset", "An Offset"),
+            ("in", "A New IN for One Cue"),
+            ("seq", "A New Seq. Start for One Cue"),
         ],
         initial="offset",
         widget=forms.RadioSelect,
@@ -657,7 +657,7 @@ class CopyForm(_ReelForm):
 
     versions = forms.ChoiceField(
         label="Versions",
-        choices=[("current", "Current version only"), ("all", "All versions")],
+        choices=[("current", "Current Version Only"), ("all", "All Versions")],
         initial="current",
         widget=forms.RadioSelect,
     )

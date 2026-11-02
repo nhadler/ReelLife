@@ -3,7 +3,9 @@
  * app's own dialog rather than the browser's confirm box.
  *
  * `ask` shows the question with a named action (Delete, Reset, Discard)
- * and Cancel. htmx's hx-confirm goes through it too.
+ * and Cancel. htmx's hx-confirm goes through it too. A field with
+ * data-confirm-text keeps its form's danger button disabled until the
+ * text is typed exactly (Delete Project, the title).
  */
 
 /** @type {?HTMLDialogElement} */
@@ -82,4 +84,27 @@ document.addEventListener('htmx:confirm', (event) => {
       event.detail.issueRequest(true);
     }
   });
+});
+
+/**
+ * Enables a form's danger button only once its typed confirmation matches.
+ * @param {!HTMLInputElement} input A field with data-confirm-text.
+ */
+function guard(input) {
+  const button = input.form?.querySelector('.button--danger');
+  if (button) {
+    button.disabled = input.value.trim() !== input.dataset.confirmText;
+  }
+}
+
+for (const input of document.querySelectorAll('input[data-confirm-text]')) {
+  guard(/** @type {!HTMLInputElement} */ (input));
+}
+document.addEventListener('input', (event) => {
+  if (
+    event.target instanceof HTMLInputElement &&
+    event.target.dataset.confirmText !== undefined
+  ) {
+    guard(event.target);
+  }
 });

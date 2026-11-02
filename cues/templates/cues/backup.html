@@ -4,28 +4,27 @@
 {% block title %}Backup · ReelLife{% endblock %}
 
 {% block content %}
-  <div class="page-head"><h1>Backup</h1></div>
+  <div class="page-head">{% include "cues/includes/page_title.html" with title="Backup" slug="settings-and-roles" %}</div>
 
   <section class="form-section" aria-labelledby="download-title">
     <h2 id="download-title">Download a Backup</h2>
-    <p class="muted">Includes all projects, cues, settings, history and thumbnails. Excludes emergency sign-in credentials.</p>
     <p><a class="button" href="{% url 'cues:backup_download' %}">Download Backup</a></p>
   </section>
 
   <section class="form-section" aria-labelledby="restore-title">
     <h2 id="restore-title">Restore a Backup</h2>
-    <p class="muted">Requires an install with no projects and a backup from the same ReelLife version. Signs everyone out.</p>
     {% if error %}<p class="import__problem" role="alert">{{ error }}</p>{% endif %}
     <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}
       <div class="fields">
-        {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a backup ZIP" %}
+        {% include "cues/includes/dropzone.html" with field=form.file prompt="Drop a backup ZIP" file=True %}
         {% include "cues/includes/field.html" with field=form.confirm %}
       </div>
       <div class="form-actions"><button class="button button--quiet backup__restore" type="submit">Restore</button></div>
     </form>
     <details class="backup__details">
       <summary>Technical Details</summary>
+      <p class="muted">Includes all projects, cues, settings, history and thumbnails. Excludes emergency sign-in credentials. Restoring requires an install with no projects and a backup from the same ReelLife version, and signs everyone out.</p>
       <p class="muted">Schema: {% for app, name in schema.items %}{{ app }} {{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}. A database snapshot is also written every night to the data directory's <code>snapshots</code> folder, keeping 14.</p>
     </details>
   </section>

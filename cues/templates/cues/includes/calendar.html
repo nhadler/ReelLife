@@ -1,11 +1,12 @@
 {# The calendar: `days` in weeks under `weekdays`, each day one link that #}
-{# selects it. `size` is month (three cues a day, then a count), week or strip. #}
+{# selects it. `size` is month (it fills the window; schedule.js says how many cues don't fit), week or strip. #}
+{# swap=True (the Schedule) swaps just the day's list in, instead of loading the page again. #}
 <div class="cal cal--{{ size }}">
   <div class="cal__weekdays" aria-hidden="true">{% for name in weekdays %}<span>{{ name }}</span>{% endfor %}</div>
   <ol class="cal__days" aria-label="{{ title }}">
     {% for day in days %}
       <li class="cal-day{% if day.today %} cal-day--today{% endif %}{% if day.selected %} cal-day--selected{% endif %}{% if day.outside %} cal-day--outside{% endif %}{% if day.past %} cal-day--past{% endif %}{% if day.off %} cal-day--off{% endif %}">
-        <a class="cal-day__link" href="{{ day.url }}"{% if day.selected %} aria-current="true"{% endif %}>
+        <a class="cal-day__link" href="{{ day.url }}"{% if day.selected %} aria-current="true"{% endif %}{% if swap %} hx-get="{{ day.url }}" hx-select="#schedule-day" hx-target="#schedule-day" hx-swap="outerHTML" hx-push-url="true"{% endif %}>
           <span class="cal-day__head">
             <time class="cal-day__date" datetime="{{ day.date|date:'Y-m-d' }}"><span class="visually-hidden">{{ day.date|date:day_format }}{% if day.today %}, today{% endif %}</span><span aria-hidden="true">{{ day.date|date:"j" }}</span></time>
             <span class="cal-day__weekday" aria-hidden="true">{{ day.date|date:"D" }}</span>
@@ -13,14 +14,12 @@
           </span>
           {% for note in day.off %}<span class="cal-day__off">{{ note }}</span>{% endfor %}
           {% for p in day.parts %}
-            {% if size != "month" or forloop.counter <= 3 %}
-              <span class="cal-cue tone-{{ p.project.tone }}">
-                <span class="cal-cue__top"><span class="cal-cue__number">{{ p.cue.number }}</span><span class="cal-cue__music">{{ p.share }}</span></span>
-                {% if p.cue.title %}<span class="cal-cue__title">{{ p.cue.title }}</span>{% endif %}
-              </span>
-            {% endif %}
+            <span class="cal-cue tone-{{ p.project.tone }}">
+              <span class="cal-cue__top"><span class="cal-cue__number">{{ p.cue.number }}{% if p.part.pinned %} {% include "cues/includes/icon.html" with name="pin" %}<span class="visually-hidden">, scheduled on this day</span>{% endif %}</span><span class="cal-cue__music">{{ p.share }}</span></span>
+              {% if p.cue.title %}<span class="cal-cue__title">{{ p.cue.title }}</span>{% endif %}
+            </span>
           {% endfor %}
-          {% if size == "month" and day.parts|length > 3 %}<span class="cal-day__more">{{ day.parts|length|add:"-3" }} more</span>{% endif %}
+          {% if size == "month" and day.parts %}<span class="cal-day__more" hidden></span>{% endif %}
           {% if day.parts %}<span class="cal-day__count">{{ day.parts|length }} cue{{ day.parts|length|pluralize }}</span>{% endif %}
         </a>
       </li>

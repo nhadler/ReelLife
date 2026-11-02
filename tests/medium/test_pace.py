@@ -57,6 +57,25 @@ def test_pace_spreads_what_is_left_over_the_days() -> None:
     assert (pace.write, pace.revise) == ("1:40", "0:40")
 
 
+def test_a_start_date_ahead_counts_the_days_from_it() -> None:
+    project = _project()
+    factories.DeadlineFactory.create(
+        project=project,
+        kind="composition",
+        start_date=TODAY + datetime.timedelta(days=5),
+        end_date=TODAY + datetime.timedelta(days=9),  # 5 days from the start
+    )
+    models.DayOff.objects.create(date=TODAY + datetime.timedelta(days=2))
+    _cue(project, "To Write", 500)
+    pace = summaries.pace(project, TODAY)
+    assert pace is not None
+    assert (pace.days, pace.calendar_days) == (5, 5)  # the day off is before
+    assert pace.write_seconds == 100
+    started = summaries.pace(project, TODAY + datetime.timedelta(days=7))
+    assert started is not None
+    assert started.days == 3  # from today once the start has passed
+
+
 def test_days_off_are_left_out_and_seconds_round_up() -> None:
     project = _project("23.976")
     _deadline(project, TODAY + datetime.timedelta(days=3))  # 4 days

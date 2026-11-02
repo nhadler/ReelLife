@@ -284,6 +284,9 @@ RATELIMIT_MCP_PER_MINUTE = 120
 RATELIMIT_MCP_PER_ADDRESS_PER_MINUTE = 300
 # Backups read or replace everything; a handful an hour is plenty.
 RATELIMIT_BACKUPS = "10/h"
+# Calendar feeds, per client address: apps refresh every few minutes at
+# most, so this only stops someone guessing links.
+RATELIMIT_CALENDAR = "60/m"
 
 # django-ratelimit warns (E003, W001) that the database cache's
 # increments aren't atomic: a burst of concurrent requests can slightly

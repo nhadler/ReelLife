@@ -25,6 +25,7 @@ from mcp_server import auth
 from mcp_server import common
 from mcp_server import cue_tools
 from mcp_server import prompts
+from mcp_server import schedule
 from mcp_server import setup
 from mcp_server import transfers
 from mcp_server import writes
@@ -41,6 +42,11 @@ through MCP. `undo_last_change` reverts the latest change. Bulk tools
 (cue_tool, conform_shift, import_cues) first return a preview and a
 `confirm` code. Show the preview to the user and call again with the
 code only after they approve it. Exports are returned as files.
+
+`schedule` answers "what should I write today?" (or for a range of
+days), `pin_cue` fixes a cue to a day, the rest flowing around it, and
+`log_written` records how much of a cue was written, which the
+schedule counts as done.
 
 When someone asks how to do something in ReelLife, read `user_guide`
 (the topic list first, then the relevant topic). Use the app's field and
@@ -284,12 +290,14 @@ def build() -> MCPServer:
         *writes.READ_TOOLS,
         *cue_tools.READ_TOOLS,
         *transfers.READ_TOOLS,
+        *schedule.READ_TOOLS,
     ]
     changes: list[Callable[..., Any]] = [
         *setup.TOOLS,
         *writes.TOOLS,
         *cue_tools.TOOLS,
         *transfers.TOOLS,
+        *schedule.TOOLS,
     ]
     for fn in reads:
         server.tool(annotations=READ, structured_output=False)(

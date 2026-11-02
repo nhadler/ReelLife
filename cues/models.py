@@ -55,10 +55,10 @@ class Project(Timestamped):
 
     class Kind(models.TextChoices):
         FILM = "film", "Film"
-        EPISODE = "episode", "Series episode"
+        EPISODE = "episode", "Series Episode"
 
     class PictureType(models.TextChoices):
-        LONG_PLAY = "long_play", "Long play"
+        LONG_PLAY = "long_play", "Long Play"
         REELS = "reels", "Reels"
         ACTS = "acts", "Acts"
         CLIPS = "clips", "Clips"
@@ -414,14 +414,14 @@ class PictureVersion(Timestamped):
 class StatusKind(models.TextChoices):
     """The 11 global status slots; drive totals and colours."""
 
-    TO_DO = "to_do", "To do"
-    IN_PROGRESS = "in_progress", "In progress"
+    TO_DO = "to_do", "To Do"
+    IN_PROGRESS = "in_progress", "In Progress"
     REDO = "redo", "Redo"
     CHANGES = "changes", "Changes"
     DONE = "done", "Done"
     APPROVED = "approved", "Approved"
     COMPLETED = "completed", "Completed"
-    ON_HOLD = "on_hold", "On hold"
+    ON_HOLD = "on_hold", "On Hold"
     OMIT = "omit", "Omit"
     SONG = "song", "Song"
     LICENSE = "license", "License"
@@ -974,8 +974,12 @@ from cues.lists import ThemeOption as ThemeOption  # noqa: E402
 from cues.lists import VersionTheme as VersionTheme  # noqa: E402
 from cues.notes import NoteKind as NoteKind  # noqa: E402
 from cues.notes import ProjectNote as ProjectNote  # noqa: E402
+from cues.schedule import CalendarFeed as CalendarFeed  # noqa: E402
 from cues.schedule import DayOff as DayOff  # noqa: E402
 from cues.schedule import Deadline as Deadline  # noqa: E402
+from cues.schedule import ScheduleEntry as ScheduleEntry  # noqa: E402
+from cues.schedule import SchedulePin as SchedulePin  # noqa: E402
+from cues.schedule import WritingLog as WritingLog  # noqa: E402
 from cues.shares import CueShare as CueShare  # noqa: E402
 from cues.shares import DefaultShare as DefaultShare  # noqa: E402
 from cues.shares import Party as Party  # noqa: E402

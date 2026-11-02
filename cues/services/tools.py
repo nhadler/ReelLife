@@ -405,9 +405,9 @@ def merge(
 class ReelPart(db_models.TextChoices):
     """Where an overwritten number's reel part ('1' in 1m05) comes from."""
 
-    KEEP = "keep", "Keep the start number's"
-    CUE_REEL = "reel", "The cue's reel"
-    HOUR = "hour", "The hour of its IN"
+    KEEP = "keep", "Keep the Start Number's"
+    CUE_REEL = "reel", "The Cue's Reel"
+    HOUR = "hour", "The Hour of Its IN"
 
 
 def bump(numbers: Sequence[str], index: int, by: int) -> list[str]:

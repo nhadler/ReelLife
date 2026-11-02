@@ -103,6 +103,44 @@ def test_build_plans_what_is_left_to_write(film: models.Project) -> None:
     assert found.cues[easy.pk].url == f"/cues/{easy.pk}/"
 
 
+def test_projects_at_once_follows_the_setting() -> None:
+    near = factories.ProjectFactory.create(frame_rate="24")
+    far = factories.ProjectFactory.create(frame_rate="24")
+    factories.DeadlineFactory.create(project=near, end_date=MON + 4 * _DAY)
+    factories.DeadlineFactory.create(project=far, end_date=MON + 30 * _DAY)
+    for n in range(1, 4):
+        _cue(near, f"1m0{n}", minutes=2)
+        _cue(far, f"1m0{n}", minutes=2)
+
+    def projects_on_monday() -> set[int]:
+        found = agenda.build(MON)
+        day = found.plan.day(MON)
+        assert day is not None
+        return {found.cues[part.key].project for part in day.parts}
+
+    # In parallel (the default) both are written on the first day.
+    assert projects_on_monday() == {near.pk, far.pk}
+    settings = models.AppSettings.load()
+    settings.schedule_projects = models.AppSettings.ProjectsAtOnce.ONE
+    settings.save()
+    # One at a time, the nearer deadline has the day to itself.
+    assert projects_on_monday() == {near.pk}
+
+
+def test_a_project_waits_for_its_start_date() -> None:
+    later = factories.ProjectFactory.create(frame_rate="24")
+    factories.DeadlineFactory.create(
+        project=later, start_date=MON + 7 * _DAY, end_date=MON + 9 * _DAY
+    )
+    _cue(later, "1m01", minutes=3)
+    found = agenda.build(MON)
+    assert found.projects[later.pk].start == MON + 7 * _DAY
+    # A minute a day over the three days from the start.
+    assert [(day.date, day.music) for day in found.plan.days] == [
+        (MON + offset * _DAY, Fraction(60)) for offset in (7, 8, 9)
+    ]
+
+
 @pytest.fixture(name="viewer")
 def fixture_viewer(role_client: Callable[[Role], Client]) -> Client:
     return role_client(Role.VIEWER)
@@ -224,7 +262,7 @@ def test_choosing_a_day_lists_its_work(
     assert "Thu Nov 5" in thursday
     assert 'class="day-total"' in thursday  # it has work
     assert "Holiday" in _page(viewer, day="2026-11-03")  # a day off
-    assert "Past days aren't planned." in _page(viewer, day="2026-11-01")
+    assert "Nothing was planned." in _page(viewer, day="2026-11-01")
     assert "Nothing planned." in _page(viewer, day="2026-11-20")
     # A day outside the month shown falls back to today.
     assert "Mon Nov 2" in _page(viewer, month="2026-11", day="2027-01-01")

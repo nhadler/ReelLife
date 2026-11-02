@@ -1,6 +1,6 @@
 """Re-seeds the eight standard views with their columns.
 
-Sub Status replaces tags (Oct 31). Frozen copy of cues.defaults.global_views() at the time of
+Sub Status replaces tags. Frozen copy of cues.defaults.global_views() at the time of
 writing. Reverting leaves the newer columns in place (harmless).
 """
 

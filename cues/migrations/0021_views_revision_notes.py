@@ -1,6 +1,6 @@
 """Re-seeds the eight standard views with their columns.
 
-Revision Notes join Standard and Spotting, after Notes (Oct 31). Frozen copy of cues.defaults.global_views() at the time of
+Revision Notes join Standard and Spotting, after Notes. Frozen copy of cues.defaults.global_views() at the time of
 writing. Reverting leaves the newer columns in place (harmless).
 """
 

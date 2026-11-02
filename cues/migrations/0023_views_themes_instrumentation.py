@@ -1,6 +1,6 @@
 """Re-seeds the eight standard views with their columns.
 
-Theme and Instrumentation join the views (Oct 31). Frozen copy of cues.defaults.global_views() at the time of
+Theme and Instrumentation join the views. Frozen copy of cues.defaults.global_views() at the time of
 writing. Reverting leaves the newer columns in place (harmless).
 """
 

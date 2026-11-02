@@ -7,6 +7,9 @@ __pycache__/
 .pytest_cache/
 .coverage
 .coverage.*
+# iCloud Drive's sync copies ("name 2", "name 3.py").
+* [0-9]
+* [0-9].*
 htmlcov/
 .hypothesis/
 
@@ -35,3 +38,6 @@ fixtures/real/*
 /private/
 /CLAUDE.md
 /.claude/
+/AGENTS.md
+/.codex/
+/.Codex/

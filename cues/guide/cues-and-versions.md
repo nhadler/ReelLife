@@ -1,6 +1,6 @@
 # Cues and Versions
 
-## Add cues
+## Add Cues
 
 - **New Cue** (Ctrl+N; ⌃N on a Mac) opens a dialog: cue #, title, type,
   status, reel, IN and OUT, notes. **Save and Add Another** keeps going.
@@ -13,7 +13,7 @@ number, or your own pattern. This rule applies to new cues, renames,
 tools, restores from Trash and imports. Existing numbers that don't
 match are kept until you change them.
 
-## Edit in the grid
+## Edit in the Grid
 
 - Click a cell to edit it (or double-click, if you turned single-click
   editing off in App Settings). Enter or Tab saves. In notes cells,
@@ -27,7 +27,7 @@ match are kept until you change them.
   Ctrl+Shift+I. Copy selected cells: Ctrl+C.
 - Click a reel's row, or press Enter on it, to collapse or expand its cues.
 
-## Find and arrange
+## Find and Arrange
 
 - **Filter** (F) by status, cue type, reel, priority and more; **Show**
   (Shift+1 to Shift+6) picks active, inactive and so on. Ctrl+Shift+X
@@ -55,7 +55,7 @@ A cue's version is one delivery of its music (v1, v2, v1.1...).
   pick another status.
 - **Tools, Add Versions** adds the next version to each selected cue.
 
-## Cue details
+## Cue Details
 
 **Cue Details** (Ctrl+Enter, or a click on the thumbnail) opens a cue's
 page: every field, its versions, credits (writers and publishers),

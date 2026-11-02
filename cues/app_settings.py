@@ -24,8 +24,8 @@ class AppSettings(models.Model):
         ISO = "Y-m-d", "2026-12-31"
 
     class EnterBehaviour(models.TextChoices):
-        SAVE = "save", "Save the cell"
-        LINE_BREAK = "line_break", "New line in notes"
+        SAVE = "save", "Save the Cell"
+        LINE_BREAK = "line_break", "New Line in Notes"
 
     class VersionIncrement(models.TextChoices):
         MAJOR = "major", "Major (v1 → v2)"
@@ -36,8 +36,8 @@ class AppSettings(models.Model):
         LIGHT = "light", "Light"
 
     class MusicTotals(models.TextChoices):
-        COMPOSITIONS = "compositions", "Compositions only"
-        ALL = "all", "Compositions, songs and licensed"
+        COMPOSITIONS = "compositions", "Compositions Only"
+        ALL = "all", "Compositions, Songs and Licensed"
 
     date_format = models.CharField(
         max_length=5, choices=DateFormat.choices, default=DateFormat.US
@@ -94,6 +94,19 @@ class AppSettings(models.Model):
     # Weighted seconds: None leaves the pace to the deadlines.
     schedule_daily_max = models.PositiveIntegerField(null=True, blank=True)
     schedule_min_part = models.PositiveIntegerField(default=600)
+
+    class ProjectsAtOnce(models.TextChoices):
+        PARALLEL = "parallel", "In Parallel"
+        ONE = "one", "One at a Time"
+
+    # Whether the Schedule works every project each day, each at its own
+    # pace, or one at a time, earliest deadline first.
+    schedule_projects = models.CharField(
+        "projects at once",
+        max_length=8,
+        choices=ProjectsAtOnce.choices,
+        default=ProjectsAtOnce.PARALLEL,
+    )
 
     class Meta:
         verbose_name = "settings"

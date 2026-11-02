@@ -4,7 +4,7 @@
 
 {% block content %}
   <div class="page-head">
-    <h1>Overview</h1>
+    {% include "cues/includes/page_title.html" with title="Overview" slug="getting-started" %}
     {% if request.user.role != "viewer" %}
       <div class="page-head__actions">
         <a class="button" href="{% url 'cues:project_create' %}" data-palette="New Project">New Project</a>
@@ -38,7 +38,8 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p class="empty">No active projects. Create one to start spotting.</p>
+      {% url 'cues:dashboard' as all_projects %}
+      {% include "cues/includes/empty.html" with icon="picture" title="No Active Projects" url=all_projects action="All Projects" %}
     {% endif %}
   </section>
 {% endblock %}

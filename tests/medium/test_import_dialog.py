@@ -105,7 +105,7 @@ def test_dialog_opens_for_editors_only(
     html = editor.get(url).content.decode()
     assert "Import Cues" in html
     assert 'hx-encoding="multipart/form-data"' in html
-    assert 'name="kind" value="detect"' in html
+    assert '<option value="detect" selected>' in html
     assert role_client(Role.VIEWER).get(url).status_code == 403
 
 

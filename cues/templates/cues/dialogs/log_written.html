@@ -1,0 +1,20 @@
+{# How much of a cue was written on a day; the schedule counts it as done. Loaded into #app-dialog by htmx. #}
+<form class="dialog__form log-written" method="post" novalidate
+      hx-post="{% url 'cues:log_written' cue.pk %}"
+      hx-target="#app-dialog" hx-swap="innerHTML">
+  {% csrf_token %}
+  <header class="dialog__head">
+    <h2 id="dialog-title">Log Written: {{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %}</h2>
+    <button class="dialog__close" type="button" data-dialog-close aria-label="Close">×</button>
+  </header>
+  {% include "cues/includes/form_errors.html" %}
+  <div class="fields">
+    {% include "cues/includes/field.html" with field=form.date %}
+    {% include "cues/includes/field.html" with field=form.amount %}
+  </div>
+  <footer class="form-actions">
+    <button class="button" type="submit">Log</button>
+    {% if logged %}<button class="button button--quiet" type="submit" name="remove" value="1">Remove</button>{% endif %}
+    <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>
+  </footer>
+</form>

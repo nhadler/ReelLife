@@ -157,6 +157,24 @@ def test_a_projects_own_day_off_stops_only_its_work() -> None:
     assert _shape(plan) == [(0, [(2, 600)]), (1, [(1, 600)])]
 
 
+def test_work_waits_for_its_start_and_is_paced_from_it() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1000, due=_day(9), start=_day(5)),
+            _work(2, 300, due=_day(9), project=2),
+        ],
+        Calendar(MON),
+    )
+    # Cue 1 has the five days from Saturday; cue 2 fills in before.
+    assert plan.load_on(MON) == 200
+    assert _shape(plan) == [
+        (0, [(2, 200)]),
+        (1, [(2, 100)]),
+        *[(day, [(1, 200)]) for day in range(5, 10)],
+    ]
+    assert not plan.risks
+
+
 def test_a_pinned_cue_sits_whole_on_its_day() -> None:
     plan = scheduler.plan(
         [
@@ -228,3 +246,124 @@ def test_work_past_the_horizon_is_left_unplaced() -> None:
 def test_nothing_to_do() -> None:
     plan = scheduler.plan([], Calendar(MON))
     assert (plan.days, plan.load_on(MON), plan.needed) == ((), 0, 0)
+
+
+# In parallel: every project at its own pace, side by side.
+
+
+def test_in_parallel_each_project_keeps_its_own_pace() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1000, due=_day(9), project=2),
+            _work(2, 2000, due=_day(1)),
+        ],
+        Calendar(MON),
+        parallel=True,
+    )
+    # Project 1 needs 1000 a day to make Tuesday; project 2 has ten days
+    # for 1000, so 100 a day, from the first day.
+    assert _shape(plan) == [
+        (0, [(2, 1000), (1, 100)]),
+        (1, [(2, 1000), (1, 100)]),
+        *[(day, [(1, 100)]) for day in range(2, 10)],
+    ]
+    assert [(s.until, s.load) for s in plan.stretches] == [
+        (_day(1), 1100),
+        (_day(9), 100),
+        (None, 0),
+    ]
+    assert plan.needed == 1100
+    assert not plan.risks
+
+
+def test_in_parallel_a_daily_maximum_scales_every_project_down() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1000, due=_day(9), project=2),
+            _work(2, 2000, due=_day(1)),
+        ],
+        Calendar(MON),
+        daily_max=550,
+        parallel=True,
+    )
+    # 1100 asked for, 550 allowed: project 2 keeps its 100 a day, and
+    # the cap comes out of project 1, which misses Tuesday.
+    assert _shape(plan)[0] == (0, [(2, 450), (1, 100)])
+    assert plan.load_on(MON) == 550
+    assert [(r.project, r.due) for r in plan.risks] == [(1, _day(1))]
+
+
+def test_in_parallel_a_projects_day_off_leaves_the_others() -> None:
+    calendar = Calendar(MON, project_off={1: frozenset({_day(0)})})
+    plan = scheduler.plan(
+        [
+            _work(1, 1200, due=_day(1), project=1),
+            _work(2, 600, due=_day(1), project=2),
+        ],
+        calendar,
+        parallel=True,
+    )
+    assert _shape(plan) == [
+        (0, [(2, 300)]),
+        (1, [(1, 1200), (2, 300)]),
+    ]
+
+
+def test_in_parallel_a_project_not_started_leaves_the_day_to_others() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1000, due=_day(9), start=_day(5)),
+            _work(2, 2000, due=_day(9), project=2),
+        ],
+        Calendar(MON),
+        daily_max=250,
+        parallel=True,
+    )
+    # Before Saturday project 2 has the whole cap to itself, not a share
+    # beside a project with nothing it can do yet.
+    assert _shape(plan)[0] == (0, [(2, 200)])
+    assert all(
+        (day.date - MON).days >= 5
+        for day in plan.days
+        if any(part.key == 1 for part in day.parts)
+    )
+
+
+def test_in_parallel_a_pinned_cue_comes_out_of_its_projects_day() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1200, due=_day(1), project=1),
+            _work(2, 300, due=_day(5), project=1, pinned=_day(0)),
+            _work(3, 600, due=_day(1), project=2),
+        ],
+        Calendar(MON),
+        parallel=True,
+    )
+    day = plan.days[0]
+    assert [(p.key, int(p.effort), p.pinned) for p in day.parts][0] == (
+        2,
+        300,
+        True,
+    )
+    assert plan.days[-1].date <= _day(1)
+    assert not plan.risks
+
+
+def test_in_parallel_work_without_a_deadline_needs_a_maximum() -> None:
+    works = [
+        _work(1, 600, due=_day(1), project=1),
+        _work(2, 900, project=2),
+    ]
+    capped = scheduler.plan(works, Calendar(MON), daily_max=600, parallel=True)
+    # Project 1 needs 300 a day; project 2 follows at the maximum, and
+    # the 900 asked for is shared: 300 each.
+    assert _shape(capped)[0] == (0, [(1, 300), (2, 300)])
+    assert capped.stretches[-1] == scheduler.Stretch(None, 600)
+    uncapped = scheduler.plan(works, Calendar(MON), parallel=True)
+    assert uncapped.unplaced == (2,)
+    assert _shape(uncapped) == [(0, [(1, 300)]), (1, [(1, 300)])]
+
+
+def test_in_parallel_nothing_to_do() -> None:
+    plan = scheduler.plan([], Calendar(MON), parallel=True)
+    assert (plan.days, plan.needed, plan.unplaced) == ((), 0, ())
