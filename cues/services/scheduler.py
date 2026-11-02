@@ -13,6 +13,9 @@ deadline first, at one pace for everything) or in parallel (each
 project keeps its own pace to its own deadlines, and every day gives
 each project its share).
 
+A project's work waits for its start date (the composition deadline's
+start), and its pace counts the days from then.
+
 The plan is worked out afresh each time from where things stand, so
 work finished early pulls the rest forward and work not finished yet
 shifts into the coming days; nothing is ever late.
@@ -48,6 +51,8 @@ class Work:
         started: In progress: goes before unstarted work due the same
             day, so work in hand isn't pushed back.
         pinned: The day the composer fixed it to, if today or later.
+        start: The first day it can be written (its project's start);
+            None for any day.
     """
 
     key: int
@@ -58,6 +63,11 @@ class Work:
     rank: tuple[Any, ...] = ()
     started: bool = False
     pinned: datetime.date | None = None
+    start: datetime.date | None = None
+
+    def waits(self, date: datetime.date) -> bool:
+        """Whether `date` is before the work can start."""
+        return self.start is not None and date < self.start
 
     @property
     def effort(self) -> Fraction:
@@ -247,6 +257,10 @@ class _Lane:
         undated = any(work.due is None for work in queue)
         return cls(list(queue), stretches, left, undated)
 
+    def ready(self, date: datetime.date) -> bool:
+        """Whether any of the lane's work can be written on `date`."""
+        return any(not work.waits(date) for work in self.pending)
+
     def fill(
         self,
         date: datetime.date,
@@ -260,7 +274,7 @@ class _Lane:
         index = 0
         while room > 0 and index < len(self.pending):
             work = self.pending[index]
-            if not calendar.works(work.project, date):
+            if not calendar.works(work.project, date) or work.waits(date):
                 index += 1
                 continue
             remaining = self.left[work.key]
@@ -356,10 +370,10 @@ def _deal_parallel(
 ) -> _Dealt:
     """Gives every project its own load each day, side by side.
 
-    A project's load is its own pace on the days it works. When the
-    loads add up to more than the daily maximum, the maximum is shared
-    out (`_share`). Pinned cues sit whole on their day and come out of
-    their project's room.
+    A project's load is its own pace on the days it works, once its work
+    can start. When the loads add up to more than the daily maximum, the
+    maximum is shared out (`_share`). Pinned cues sit whole on their day
+    and come out of their project's room.
     """
     last_pin = max(pins, default=calendar.today)
     finish: dict[int, datetime.date] = {}
@@ -376,7 +390,7 @@ def _deal_parallel(
         loads = {
             p: Fraction(_load_on(lane.stretches, date))
             for p, lane in busy.items()
-            if calendar.works(p, date)
+            if calendar.works(p, date) and lane.ready(date)
         }
         shares = _share(loads, daily_max)
         for project, share in shares.items():

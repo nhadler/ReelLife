@@ -157,6 +157,24 @@ def test_a_projects_own_day_off_stops_only_its_work() -> None:
     assert _shape(plan) == [(0, [(2, 600)]), (1, [(1, 600)])]
 
 
+def test_work_waits_for_its_start_and_is_paced_from_it() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1000, due=_day(9), start=_day(5)),
+            _work(2, 300, due=_day(9), project=2),
+        ],
+        Calendar(MON),
+    )
+    # Cue 1 has the five days from Saturday; cue 2 fills in before.
+    assert plan.load_on(MON) == 200
+    assert _shape(plan) == [
+        (0, [(2, 200)]),
+        (1, [(2, 100)]),
+        *[(day, [(1, 200)]) for day in range(5, 10)],
+    ]
+    assert not plan.risks
+
+
 def test_a_pinned_cue_sits_whole_on_its_day() -> None:
     plan = scheduler.plan(
         [
@@ -289,6 +307,26 @@ def test_in_parallel_a_projects_day_off_leaves_the_others() -> None:
         (0, [(2, 300)]),
         (1, [(1, 1200), (2, 300)]),
     ]
+
+
+def test_in_parallel_a_project_not_started_leaves_the_day_to_others() -> None:
+    plan = scheduler.plan(
+        [
+            _work(1, 1000, due=_day(9), start=_day(5)),
+            _work(2, 2000, due=_day(9), project=2),
+        ],
+        Calendar(MON),
+        daily_max=250,
+        parallel=True,
+    )
+    # Before Saturday project 2 has the whole cap to itself, not a share
+    # beside a project with nothing it can do yet.
+    assert _shape(plan)[0] == (0, [(2, 200)])
+    assert all(
+        (day.date - MON).days >= 5
+        for day in plan.days
+        if any(part.key == 1 for part in day.parts)
+    )
 
 
 def test_in_parallel_a_pinned_cue_comes_out_of_its_projects_day() -> None:

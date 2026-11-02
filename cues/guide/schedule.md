@@ -42,6 +42,9 @@ Either way:
 - Long cues split across days, each day showing its share of the music
   to write, e.g. **1:20 of 4:00**. No share is smaller than a quarter of
   a day.
+- A project's cues wait for its composition deadline's start date, and
+  its pace counts the days from then. Other projects have the days
+  before it to themselves.
 - Your days off stop all work. A project's own days off (Project
   Settings, Deadlines) stop only that project's cues.
 - Cues in projects with no composition deadline ahead come after

@@ -54,6 +54,8 @@ class ProjectInfo:
     title: str
     production_number: str
     due: datetime.date | None
+    # The pace deadline's start: no work is planned before it.
+    start: datetime.date | None = None
 
     @property
     def tone(self) -> int:
@@ -139,6 +141,7 @@ def _projects(
             title=project.title,
             production_number=project.production_number,
             due=deadline.end_date if deadline else None,
+            start=deadline.start_date if deadline else None,
         )
     return projects, infos
 
@@ -164,6 +167,7 @@ class _Facts:
     """What a cue's work depends on beyond its row."""
 
     due: datetime.date | None
+    start: datetime.date | None = None
     pinned: datetime.date | None = None
     # Seconds of music logged as written, for its current kind of work.
     written: int = 0
@@ -211,6 +215,7 @@ def _work(
         music=music,
         factor=factor,
         due=facts.due,
+        start=facts.start,
         pinned=facts.pinned,
         rank=(
             _PRIORITY.get(row["priority"], 3),
@@ -277,6 +282,7 @@ def _facts(
     return {
         row["id"]: _Facts(
             due=infos[row["project_id"]].due,
+            start=infos[row["project_id"]].start,
             pinned=pins.get(row["id"]),
             written=written.get(row["id"], 0),
         )

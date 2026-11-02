@@ -18,8 +18,8 @@ never count.
 
 **Per day** is the music still to write (To Write and In Progress), and
 to revise (Revisions and Rewrite), spread evenly over the days from
-today through the composition deadline, both counted in full, leaving
-out days off. It rounds up to the second, so you never fall short.
+today (or the deadline's start date, while it's ahead) through the
+composition deadline, both counted in full, leaving out days off. It rounds up to the second, so you never fall short.
 Stats lets you count down to another deadline instead.
 
 ## Days Off

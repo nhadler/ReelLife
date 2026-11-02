@@ -127,6 +127,20 @@ def test_projects_at_once_follows_the_setting() -> None:
     assert projects_on_monday() == {near.pk}
 
 
+def test_a_project_waits_for_its_start_date() -> None:
+    later = factories.ProjectFactory.create(frame_rate="24")
+    factories.DeadlineFactory.create(
+        project=later, start_date=MON + 7 * _DAY, end_date=MON + 9 * _DAY
+    )
+    _cue(later, "1m01", minutes=3)
+    found = agenda.build(MON)
+    assert found.projects[later.pk].start == MON + 7 * _DAY
+    # A minute a day over the three days from the start.
+    assert [(day.date, day.music) for day in found.plan.days] == [
+        (MON + offset * _DAY, Fraction(60)) for offset in (7, 8, 9)
+    ]
+
+
 @pytest.fixture(name="viewer")
 def fixture_viewer(role_client: Callable[[Role], Client]) -> Client:
     return role_client(Role.VIEWER)

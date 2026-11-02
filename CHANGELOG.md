@@ -49,6 +49,20 @@ this project follows [Semantic Versioning](https://semver.org/).
 - App Settings is one sheet: each section a row, its controls lined up
   on shared columns, so the page fits a laptop screen without
   scrolling. Viewers see it read-only.
+- A project's work waits for its composition deadline's start date: the
+  Schedule plans nothing for it before then, and Per Day counts the
+  days from the start. Other projects have those days to themselves.
+- New Project is laid out like App Settings, with Create Project under
+  the fields.
+- Option labels are in Title Case throughout, and blank choices show a
+  dash. Two to four choices are one segmented control; longer lists are
+  menus. Explanations moved from dialogs into Help.
+- Tall grid rows start every cell on the first line, and wrapped text
+  stops at six lines with a fade.
+- The project bar's menu is called More; the selection bar's actions
+  are buttons; empty lists show one line and Add.
+- On a phone the top bar's links fade at the edge, and the cue page
+  skips its section index.
 
 ### Fixed
 
@@ -56,6 +70,9 @@ this project follows [Semantic Versioning](https://semver.org/).
 - A project card's deadline label ("Composition Nov 22") was cut off.
 - A fresh install no longer takes a needless snapshot before its first
   migration.
+- Menus and the Filter panel no longer run past the bottom of the
+  window.
+- Delete Project stays disabled until the project's title is typed.
 
 ## [0.4.0] - 2026-11-01
 
