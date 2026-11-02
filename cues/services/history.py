@@ -1,4 +1,4 @@
-"""Change sets and undo (8, 10).
+"""Change sets and undo.
 
 An import or tool runs inside `recording(...)`. Every history row
 django-simple-history writes meanwhile is tagged with the change set and

@@ -1,4 +1,4 @@
-{# Days off: a clickable calendar (days_off.js) over the days-off formset `fs`, which stays the source of truth and works without JavaScript. #}
+{# days-off.js edits the formset fs through a calendar. The formset also works without JavaScript. #}
 {% load text %}
 <div class="days-off-picker" data-days-off data-prefix="{{ fs.prefix }}">
   <div class="calendar" data-calendar hidden>

@@ -1,9 +1,9 @@
 """Project-wide settings work: copy lists and views, duplicate, delete.
 
-The settings pages' Views and Project sections (Nick's choices on
-Oct 31). Copying adds what the project lacks and never
-overwrites; duplicating makes a project with the same setup and no cues;
-deleting removes a project with everything in it.
+Used by the Views and Project settings pages. Copying adds missing
+entries without overwriting existing ones. Duplicating creates a
+project with the same setup and no cues. Deleting removes the project
+and its contents.
 """
 
 from collections.abc import Iterable

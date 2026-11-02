@@ -4,7 +4,7 @@
  * click opens the list with colour dots (Status divided by category) and
  * a box that filters it as you type. Arrow keys move, Enter picks, Escape
  * leaves the value as it was. Where the column is `creatable`, text that
- * matches nothing offers to add it (Oct 31).
+ * matches nothing offers to add it.
  */
 
 const CATEGORY_ORDER = [

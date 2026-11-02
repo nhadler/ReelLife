@@ -1,7 +1,6 @@
 /*
- * ReelLife styles. The edit bay at night: dark by default,
- * warm projector-white text, leaf green for actions, amber reserved for "written
- * to older picture". Status colours are set per status.
+ * ReelLife styles. Dark theme by default, off-white text, green actions,
+ * and amber for cues written to older picture. Status colours are configurable.
  */
 
 @font-face {
@@ -3103,7 +3102,7 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   background: var(--panel-raised);
 }
 
-/* Daily pace (decided Oct 30): next to the deadline, and summed on the
+/* Daily pace: next to the deadline, and summed on the
    dashboard. */
 
 .pace strong {
@@ -4141,7 +4140,7 @@ button.stats__name:hover,
   white-space: nowrap;
 }
 
-/* Project settings: a sidebar of pages beside the page (Nick, Oct 31). */
+/* Project settings: sidebar navigation beside the settings form. */
 .settings {
   display: grid;
   grid-template-columns: 12rem minmax(0, 1fr);

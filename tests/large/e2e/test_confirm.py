@@ -1,4 +1,4 @@
-"""Deletes ask in the app's own dialog, not the browser's (design review)."""
+"""Deletion confirmation uses the app's dialog, not the browser's."""
 
 from typing import Any
 

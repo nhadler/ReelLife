@@ -6,6 +6,10 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Clarified Help text, UI descriptions, and contributor documentation.
+
 ## [0.4.0] - 2026-11-01
 
 The first public release.

@@ -40,7 +40,7 @@ def mark_signed_in(sender: Any, request: HttpRequest, **kwargs: Any) -> None:
 
 
 class SessionTimeoutMiddleware:
-    """Signs out sessions that are idle too long or simply too old."""
+    """Signs out sessions past the idle or absolute lifetime limit."""
 
     def __init__(
         self, get_response: Callable[[HttpRequest], HttpResponseBase]

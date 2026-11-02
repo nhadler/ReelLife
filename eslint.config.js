@@ -16,7 +16,7 @@ export default [
       'htmlcov/',
       'fixtures/',
       'private/',
-      // Third-party files, pinned in static/cues/vendor/VERSIONS (P1).
+      // Third-party files, pinned in static/cues/vendor/VERSIONS.
       '**/static/**/vendor/',
     ],
   },

@@ -1,4 +1,4 @@
-"""The cue log export and its dialog (7.8)."""
+"""The cue log export and its dialog."""
 
 from collections.abc import Callable
 import csv

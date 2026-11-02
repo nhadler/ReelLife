@@ -7,7 +7,7 @@ Two methods:
 - **Markers**: a cue starts at `<cue #> <title> IN` (or `MX IN`), or at
   a marker that is just a cue number and title (`1m04`), and ends at
   its `<cue #> OUT` (or `MX OUT`). A cue with no OUT ends at the next
-  marker of any kind (Nick, Oct 31, from the composer's real session).
+  marker of any kind.
   Markers without a cue number (`EC`, `OUT`) start no cue.
 
 The format was checked against real exports (fixtures/third_party): tab-

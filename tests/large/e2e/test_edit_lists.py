@@ -1,4 +1,4 @@
-"""Editable lists: reorder by handle, remove with ×, add (design review)."""
+"""Editable lists: reorder by handle, remove with × and add rows."""
 
 from typing import Any
 

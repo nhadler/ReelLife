@@ -1,4 +1,4 @@
-"""The project bar's Settings menu (Nick, Nov 1)."""
+"""The project bar's Settings menu."""
 
 from collections.abc import Callable
 

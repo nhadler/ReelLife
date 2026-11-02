@@ -1,4 +1,4 @@
-"""The grid endpoints: load, edit a cell, undo (7.4)."""
+"""The grid endpoints: load, edit a cell and undo."""
 
 from collections.abc import Callable
 import datetime

@@ -8,13 +8,13 @@
 
   <section class="form-section" aria-labelledby="download-title">
     <h2 id="download-title">Download a Backup</h2>
-    <p class="muted">Every project, cue, setting and change, with thumbnails. Not the break-glass sign-in.</p>
+    <p class="muted">Includes all projects, cues, settings, history and thumbnails. Excludes emergency sign-in credentials.</p>
     <p><a class="button" href="{% url 'cues:backup_download' %}">Download Backup</a></p>
   </section>
 
   <section class="form-section" aria-labelledby="restore-title">
     <h2 id="restore-title">Restore a Backup</h2>
-    <p class="muted">Into a fresh install only, from this version of ReelLife. Everyone is signed out after.</p>
+    <p class="muted">Requires an install with no projects and a backup from the same ReelLife version. Signs everyone out.</p>
     {% if error %}<p class="import__problem" role="alert">{{ error }}</p>{% endif %}
     <form method="post" enctype="multipart/form-data" novalidate>
       {% csrf_token %}

@@ -5,13 +5,12 @@ Code) through MCP, at your ReelLife address plus `/mcp`. The assistant
 signs in through PocketID as you and has your role: a viewer's
 assistant can only read.
 
-It can search and read projects and cues; set up projects (turnovers,
-deadlines, credits, default shares, notes); add and edit cues and
-versions; run the Tools menu and Conform; import a file; export cue
-logs, PDFs and cue sheets; undo; and explain how to do things in
-ReelLife, from this guide.
+The assistant can read and edit projects, cues, versions, turnovers,
+deadlines, credits, default shares and notes. It can also run cue tools
+and Conform, import files, export cue logs, PDFs and cue sheets, and
+undo changes. It uses this guide to answer questions about ReelLife.
 
-Anything that changes many cues (tools, conform shifts, imports) is
-shown to you first: the assistant gets a preview and a confirm code,
-and only goes ahead when you agree. Its changes show in History as made
-through MCP, and Undo takes them back like any other.
+For bulk changes (tools, conform shifts and imports), the assistant gets
+a preview and a confirmation code. It must show you the preview and ask
+for approval before applying it. History labels its changes as made
+through MCP. You can undo them like changes made in the app.

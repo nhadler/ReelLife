@@ -15,9 +15,9 @@
 
 Leave **Import from** on *Detect from the file* unless it guesses wrong.
 
-**New cues go to** the reel their IN falls in (the act or clip, as your
-picture type has it), or to the one you pick; a cue whose IN is in no
-reel waits under *No Reel Yet*.
+**New cues go to** assigns cues to the reel, act or clip containing their
+IN, or to the one you select. If no reel contains a cue's IN, it is
+placed under *No Reel Yet*.
 
 ## Clip and marker names
 
@@ -27,7 +27,7 @@ reel waits under *No Reel Yet*.
 
 New cues whose numbers don't fit the project's **Valid Cue Numbers**
 are left out and listed in the preview; a clip for a cue you already
-have updates it whatever its number.
+have can update it even if its number doesn't match the pattern.
 
 Clips sharing a cue # become one cue (earliest IN, latest OUT). If they
 leave a second or more of silence between them, the preview warns you:
@@ -44,5 +44,5 @@ to do with **cues not in the file**: leave them, make them inactive, or
 set them to Omit.
 
 If someone changes the project while you look at the preview, ReelLife
-shows a fresh preview instead of importing over their change. An import
-is one change: Undo takes all of it back.
+shows a fresh preview instead of overwriting their change. The whole
+import can be undone in one step.

@@ -43,7 +43,7 @@ class DayOff(models.Model):
     """A day not worked, skipped in pace maths.
 
     Shared (no project): the composer's own days off, for every project.
-    With a project: only that one, e.g. its studio is closed (Nick, Nov 1).
+    With a project: only that project, e.g. when its studio is closed.
     """
 
     project = models.ForeignKey(

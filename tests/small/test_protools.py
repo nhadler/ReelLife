@@ -215,7 +215,7 @@ def test_marker_pairing_warnings() -> None:
     )
     parsed = protools.parse(_session(markers=markers), method=MARKERS)
     # The first IN takes 1m01's OUT; a cue with no OUT of its own ends at
-    # the next marker (Nick, Oct 31); the merge step joins the two 1m01s.
+    # the next marker; the merge step joins the two 1m01s.
     assert [(r.number, r.title, r.tc_in, r.tc_out) for r in parsed.rows] == [
         ("1m01", "A", 86_400, 86_448),
         ("1m01", "Again", 86_424, 86_448),

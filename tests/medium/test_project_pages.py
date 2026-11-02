@@ -265,7 +265,7 @@ def test_project_page_hosts_the_grid(editor: Client) -> None:
     assert "ag-grid-community.min.js" in html
     config = response.context["grid_config"]
     assert config["dataUrl"] == reverse("cues:api_grid", args=[project.pk])
-    # The find field looks in the scene and notes as well (Nov 1).
+    # The find field looks in the scene and notes as well.
     assert {"number", "title", "scene", "spotting_notes", "mix_notes"} <= set(
         config["searchFields"]
     )

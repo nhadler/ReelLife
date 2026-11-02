@@ -1,4 +1,4 @@
-"""Who an MCP client acts for (decided Oct 31).
+"""Token verification and role checks for MCP clients.
 
 MCP clients sign in through PocketID and send its access token. Each
 token is checked here, in ReelLife: signed by a key from PocketID's

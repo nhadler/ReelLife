@@ -1,7 +1,7 @@
 # Cue Tools
 
-The **Tools** menu (Q) acts on the selected cues. Each shows a preview
-first, and each run is one change that Undo takes back.
+The **Tools** menu (Q) acts on the selected cues. Tools show a preview
+before applying changes. Each run can be undone in one step.
 
 - **New Cues**: several cues in one reel, numbered in order.
 - **Add Versions**: the next version for each selected cue (or every cue

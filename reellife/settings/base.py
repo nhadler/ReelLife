@@ -131,7 +131,7 @@ LOGOUT_REDIRECT_URL = "/auth/login/"
 # environment; endpoints come from the issuer's discovery document.
 # offline_access asks for a refresh token, so the 5-minute session check
 # (accounts.oidc.check_session) can renew an expired access token instead
-# of ending the session (Nick, Oct 31).
+# of ending the session.
 OIDC_RP_SCOPES = "openid profile email groups offline_access"
 OIDC_AUTHENTICATION_CALLBACK_URL = "accounts:oidc_callback"
 OIDC_USE_PKCE = True

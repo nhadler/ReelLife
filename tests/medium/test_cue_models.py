@@ -1,4 +1,4 @@
-"""Model rules and constraints (12.1 "Model / service")."""
+"""Model validation and database constraints."""
 
 import datetime
 

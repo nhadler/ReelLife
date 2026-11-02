@@ -157,7 +157,7 @@ def test_projects_without_thumbnails_delete_cleanly() -> None:
     factories.ProjectFactory.create().delete()
 
 
-# A cue's thumbnail (the Thumbnail column; Oct 31)
+# A cue's thumbnail (the Thumbnail column)
 
 
 def test_cue_thumbnail_upload_serve_undo_and_remove(
@@ -214,7 +214,7 @@ def test_cue_thumbnail_refusals(
 
 
 def test_cues_without_one_show_the_projects_thumbnail(editor: Client) -> None:
-    """Nick, Oct 31: inherit the project thumbnail, and let it be off."""
+    """Project thumbnail inheritance can be disabled."""
     cue = factories.CueFactory.create()
     project = cue.project
     url = reverse("cues:settings", args=[project.pk])

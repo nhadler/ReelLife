@@ -1,10 +1,8 @@
 """The MCP server and its tools.
 
-Tools call ReelLife's services, never the database directly, so the
-app's rules hold here too. Every tool acts as the signed-in user: its
-role is checked here, and changes go through history so Undo
-reverts them. Timecodes go out as text in the project's format, the
-way the grid shows them.
+Tools use the same services and validation as the web app. Each acts
+as the signed-in user, with role checks and undoable history. Timecodes
+are returned as text in the project's format, matching the grid.
 """
 
 from collections.abc import Callable
@@ -38,16 +36,15 @@ is a moment in the picture (number like 1m01, title, IN and OUT
 timecodes); a version is one delivery of that cue. Find things with
 `search`, then read them by id.
 
-Changes act as the signed-in user and need the editor role. Each is one
-change in the project's History, marked as made through MCP, and
-`undo_last_change` reverts the latest. Tools that change many cues at
-once (cue_tool, conform_shift, import_cues) answer first with a preview
-and a `confirm` code: show the user the preview, and only call again
-with the code once they agree. Exports come back as files.
+Changes require the editor role and are recorded in History as made
+through MCP. `undo_last_change` reverts the latest change. Bulk tools
+(cue_tool, conform_shift, import_cues) first return a preview and a
+`confirm` code. Show the preview to the user and call again with the
+code only after they approve it. Exports are returned as files.
 
 When someone asks how to do something in ReelLife, read `user_guide`
-(the topic list first, then the topic) and answer in the app's own words
-and menu names; offer to do it with the tools when you can.
+(the topic list first, then the relevant topic). Use the app's field and
+menu names in your answer; offer to use the tools when appropriate.
 
 Projects, their cue lists and cue sheets are also resources:
 reellife://projects, reellife://projects/{id}, .../{id}/cues and
@@ -180,7 +177,7 @@ def get_cue(cue_id: int) -> dict[str, Any]:
 
 
 def user_guide(topic: str = "") -> dict[str, Any]:
-    """ReelLife's user guide: how to do things in the app, step by step.
+    """ReelLife's user guide, organised by topic.
 
     With no topic (or an unknown one), lists the topics; with a topic's
     name, returns that page as Markdown. "all" returns every page.

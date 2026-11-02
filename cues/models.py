@@ -259,7 +259,7 @@ class Project(Timestamped):
             raise ValidationError(errors)
 
 
-# Picture type -> (word, plural) for the app's labels (Nick, Nov 1).
+# Picture type -> (word, plural) for the app's labels.
 _PICTURE_WORDS = {
     "reels": ("Reel", "Reels"),
     "acts": ("Act", "Acts"),
@@ -489,7 +489,7 @@ class StatusOption(Timestamped):
 class SubStatusOption(Timestamped):
     """One entry in a project's Sub Status list, with its colour.
 
-    A version has at most one (decided Oct 31); typing a new
+    A version has at most one; typing a new
     name in the grid adds it to the list.
     """
 
@@ -644,9 +644,8 @@ class Cue(Timestamped):
         help_text="Overrides the title on cue sheets.",
     )
     cue_sheet_notes = models.TextField(blank=True)
-    # The Thumbnail column (Nick, Oct 31: a picture per cue, no media
-    # yet). Re-encoded like the project's; replaced files are kept, so
-    # undo can put an earlier one back.
+    # Re-encoded like the project thumbnail. Replaced files are kept
+    # so undo can restore them.
     thumbnail = models.FileField(
         upload_to="thumbnails/",
         storage=thumbnails.storage,
@@ -654,7 +653,7 @@ class Cue(Timestamped):
         editable=False,
     )
     # Department tracking, as the Orchestration, Recording and Mixing
-    # views show it (Nick; Oct 31).
+    # views show it.
     # The department statuses hold a label from the project's list for
     # that department (DepartmentStatus), checked where cues are edited.
     orchestration_status = models.CharField(max_length=30, blank=True)
@@ -803,7 +802,7 @@ class CueVersion(Timestamped):
         max_length=500, blank=True, help_text="URL or path to the bounce."
     )
     delivered_at = models.DateTimeField(null=True, blank=True)
-    # Notes that describe this delivery (decided Oct 30). A new version
+    # Notes that describe this delivery. A new version
     # starts as a copy of the previous one's.
     in_note = models.CharField("IN note", max_length=200, blank=True)
     out_note = models.CharField("OUT note", max_length=200, blank=True)
@@ -816,7 +815,7 @@ class CueVersion(Timestamped):
     )
     meter = models.CharField(max_length=20, blank=True)
     notes = models.TextField(blank=True)
-    # What to change in this revision (Nick, Oct 31). Not carried to the
+    # What to change in this revision. Not carried to the
     # next version: each revision has its own.
     revision_notes = models.TextField(blank=True)
 

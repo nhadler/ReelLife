@@ -1,4 +1,4 @@
-"""Creating cues and versions from the dialogs (7.5).
+"""Creating cues and versions from the dialogs.
 
 Each runs as one undoable change set.
 """
@@ -237,7 +237,7 @@ def set_thumbnail(
 
 
 def reopened_status(cue: models.Cue) -> models.StatusOption | None:
-    """The status a cue takes with a new version (Nick, Oct 31).
+    """The status a cue takes with a new version.
 
     Approved means the current version was approved, so a new version
     reopens review: an Approved cue goes back to the project's Done-kind

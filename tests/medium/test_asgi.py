@@ -1,6 +1,6 @@
 """The ASGI router in front of Django and the MCP server (reellife/asgi.py).
 
-Rate limits for /mcp (4.2): every request counts against
+Rate limits for /mcp: every request counts against
 its client address; a token that verifies also counts against its user
 and client.
 """

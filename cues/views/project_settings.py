@@ -1,4 +1,4 @@
-"""The Views and Project settings pages (Nick, Oct 31).
+"""The Views and Project settings pages.
 
 Views: rename, reorder, duplicate, reset or delete the project's views,
 and copy views or lists from another project. Project: duplicate,

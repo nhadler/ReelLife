@@ -1,4 +1,4 @@
-"""Sign-in through OIDC against the fake provider (12.1)."""
+"""Sign-in through OIDC against the fake provider."""
 
 import time
 import urllib.parse

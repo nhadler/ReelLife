@@ -1,4 +1,4 @@
-"""The grid's column registry (5).
+"""The grid's column registry.
 
 Every column a view can show, whether it reads the cue or the cue's
 current version, and how it is edited. Pure data with no Django imports,
@@ -121,10 +121,8 @@ COLUMNS: tuple[Column, ...] = (
 
 BY_ID: dict[str, Column] = {column.id: column for column in COLUMNS}
 
-# What finding a cue matches besides its number and title: the scene and
-# every notes field, cue and version alike (the grid's find field and
-# Ctrl+K, Nick, Nov 1). Ids are model field names too. The order is the
-# order Ctrl+K looks in for the snippet it shows.
+# Scene and note fields searched by the grid and Ctrl+K. Ids are model
+# field names; their order determines which match Ctrl+K uses for a snippet.
 SEARCHED_NOTES: tuple[str, ...] = (
     "scene",
     "scene_description",

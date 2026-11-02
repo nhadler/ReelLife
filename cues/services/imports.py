@@ -1,4 +1,4 @@
-"""The import dialog's steps on top of the importers (8).
+"""The import dialog's steps on top of the importers.
 
 The dialog posts the file with every step (preview, re-preview, import),
 so nothing uploaded is kept on the server between requests. Each step

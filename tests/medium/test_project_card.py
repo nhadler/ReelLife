@@ -1,4 +1,4 @@
-"""The project card on Projects and the Overview (design review, Nov 1)."""
+"""The project card on Projects and the Overview."""
 
 from collections.abc import Callable
 import datetime

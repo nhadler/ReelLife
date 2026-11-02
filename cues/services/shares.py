@@ -85,7 +85,7 @@ def is_composition(cue: models.Cue) -> bool:
 
     Song and Source cue types never count, whatever their status: a
     third-party song left at To Write mustn't pick up the composer's
-    default shares (Nick, Oct 31).
+    default shares.
     """
     if cue.cue_type in (models.Cue.CueType.SONG, models.Cue.CueType.SOURCE):
         return False

@@ -1,4 +1,4 @@
-"""The Schedule page in a real browser, under axe and the CSP (P6)."""
+"""The Schedule page in a real browser, with axe and CSP checks."""
 
 import datetime
 from typing import Any

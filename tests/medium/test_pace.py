@@ -1,4 +1,4 @@
-"""The daily writing pace (decided Oct 30): every day but days off."""
+"""The daily writing pace, excluding days off."""
 
 from collections.abc import Callable
 import datetime

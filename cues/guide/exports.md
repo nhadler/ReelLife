@@ -3,8 +3,8 @@
 **Export Cues** (Ctrl+E) exports the cues shown (or the selected ones)
 in the current view's columns:
 
-- **Cue log** as Excel, CSV or PDF, with music totals and progress if
-  you like, and optionally in **Long Play Time** (below).
+- **Cue log** as Excel, CSV or PDF, optionally including music totals,
+  progress and **Long Play Time** (below).
 - **Wall chart**: a PDF card per cue, grouped by reel and coloured by
   status.
 - **Version notes**: each cue's notes for its current version, or for
@@ -25,11 +25,11 @@ the ones before it by its current picture length (OUT minus IN), so a
 cue 10 seconds into reel 2 lands at the start, plus the leader, plus
 reel 1's length, plus 10 seconds.
 
-IN, OUT, Seq. Start and the version's IN, OUT and Seq. Start move;
-durations and offsets stay as they are. Cues that aren't on a reel with
-an IN and OUT yet (under *No Reel Yet*, or on a reel no turnover has
-timed) have no place on the timeline: their times are left blank, and
-the Excel and PDF files say which reels those are. A reel without IN and
-OUT takes no time on the timeline. Long-play projects are one timeline
-already, so they don't offer it; the wall chart and version notes don't
-use it.
+IN, OUT, Seq. Start and the corresponding version fields are converted
+to the joined timeline. Durations and offsets stay unchanged.
+
+Cues under *No Reel Yet*, or on a reel without a current IN and OUT,
+have blank positions in the export. Excel and PDF files list the reels
+missing timecodes. Those reels contribute no length to the timeline.
+Long-play projects don't offer this option because they already use one
+timeline. Wall charts and version notes don't use it either.

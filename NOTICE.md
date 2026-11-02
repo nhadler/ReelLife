@@ -3,8 +3,8 @@
 ReelLife is © Nicholas Hadler and contributors, licensed under the
 [GNU Affero General Public License v3.0 or later](LICENSE).
 
-It ships these third-party files unmodified. Each keeps its own licence;
-the licence texts sit beside the files.
+The following third-party files are included unmodified under their own
+licences. Licence texts are included alongside the files.
 
 | What | Where | Licence |
 |---|---|---|

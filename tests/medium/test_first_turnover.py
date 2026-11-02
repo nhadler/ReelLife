@@ -1,4 +1,4 @@
-"""New Project's optional first turnover (Nick, Nov 1)."""
+"""New Project's optional first turnover."""
 
 from collections.abc import Callable
 

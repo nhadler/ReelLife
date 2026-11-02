@@ -236,7 +236,7 @@ PRESET_COLUMNS: dict[str, str | None] = {
     "Conform Notes": "change_notes",
 }
 
-# The seeded global views, in order (Nick, Oct 31), and the preset each
+# The seeded global views, in order, and the preset each
 # is built from.
 VIEW_PRESETS: tuple[tuple[str, str], ...] = (
     ("Standard", "Standard"),
@@ -249,8 +249,8 @@ VIEW_PRESETS: tuple[tuple[str, str], ...] = (
     ("Cue Sheet", "Cue Sheet"),
 )
 
-# Columns ReelLife adds to a seeded view, each after another column
-# (Nick, Oct 31): Revision Notes after Notes, and Difficulty next to
+# Columns ReelLife adds to a seeded view: Revision Notes after Notes,
+# and Difficulty next to
 # Priority in Standard.
 VIEW_EXTRAS: dict[str, tuple[tuple[str, str], ...]] = {
     "Standard": (("revision_notes", "notes"), ("difficulty", "priority")),

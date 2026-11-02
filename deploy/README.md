@@ -1,10 +1,8 @@
 # Deploying ReelLife
 
-Two supported ways to run it: **Docker Compose** or **bare
-Linux with systemd + uv**. Both serve plain HTTP on `127.0.0.1:8000` and
-expect something in front that terminates TLS: Tailscale Serve today, or
-Caddy/Traefik once it's public. Nothing is reachable from outside until
-you point that at it.
+ReelLife supports **Docker Compose** and **Linux with systemd + uv**.
+Both listen for HTTP on `127.0.0.1:8000` and require a TLS reverse proxy,
+such as Tailscale Serve, Caddy or Traefik, for external access.
 
 ## Before either: PocketID
 
@@ -147,8 +145,7 @@ ReelLife redirects plain HTTP to HTTPS (except `/healthz` and `/readyz`)
 and sets HSTS, so it must sit behind TLS.
 
 - **Caddy / Traefik:** set `REELLIFE_TRUST_PROXY=true`; both send
-  `X-Forwarded-Proto` and `X-Forwarded-For`. `deploy/` will get example
-  configs when ReelLife goes public.
+  `X-Forwarded-Proto` and `X-Forwarded-For`.
 - **Tailscale Serve:** `tailscale serve --bg 8000`, and set
   `REELLIFE_ALLOWED_HOSTS` / `REELLIFE_BASE_URL` to the machine's
   `*.ts.net` name. **Check** that your Tailscale version sends
@@ -180,7 +177,7 @@ The same nightly run also writes `backups/reellife-YYYYMMDD.zip` (keeping
 14): a portable backup of every project, cue, version, setting, the change
 history and the project thumbnails, the same file an admin gets from
 **Backup** in the top bar. It leaves out the break-glass password and TOTP
-on purpose.
+by design.
 
 **Restoring a backup ZIP** (e.g. moving to a new server): install the
 same ReelLife version the backup came from, sign in as an admin, open
@@ -289,4 +286,3 @@ In PocketID (v2.13 or later, for Client ID Metadata Documents):
 3. People need one of the ReelLife groups, as for the web app.
 
 A role change or removal in PocketID reaches MCP within five minutes.
-

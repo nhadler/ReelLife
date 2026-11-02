@@ -220,8 +220,8 @@ function announce(message, isError = false) {
   clearTimeout(announce.timer);
   statusElement.textContent = message;
   statusElement.classList.toggle('grid-status--error', isError);
-  // Routine news fades; errors stay until the next message, and the
-  // filter count comes back (Nick, Oct 31: no standing cue count).
+  // Success messages expire; errors stay until the next message.
+  // Restore the filter count afterwards.
   if (message && !isError) {
     announce.timer = setTimeout(() => announce(filterSummary()), 4000);
   }
@@ -748,9 +748,8 @@ function widthBounds(meta) {
 }
 
 /**
- * Text columns show all of their text, wrapping, with rows growing to
- * fit (Nick, Oct 31: "all text should wrap"). The row size is each
- * row's least height (rowMinimum); Auto has none. Short codes don't wrap.
+ * Text columns wrap and rows grow to fit. The selected row size sets
+ * a minimum height (rowMinimum); Auto has none. Short codes don't wrap.
  * @param {!Object} meta Column metadata from the server.
  * @return {{wrapText: boolean, autoHeight: boolean}}
  */
@@ -818,7 +817,6 @@ function columnDef(meta, layout) {
     width: layout.width,
     ...widthBounds(meta),
     pinned: layout.pinned,
-    // Version columns look like the rest (Nick, Oct 31).
     headerTooltip: headerTip(meta),
     tooltipValueGetter: (params) =>
       meta.editor === 'markdown' ? params.value : undefined,

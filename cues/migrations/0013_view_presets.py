@@ -1,6 +1,6 @@
 """Seeds the eight standard views, in order.
 
-Decided Oct 31. Overview is renamed Standard in place, so a browser that
+Overview is renamed Standard in place, so a browser that
 remembers it keeps it; Orchestration, Recording, Mixing and Viewer are
 new. Frozen copy of cues.defaults.global_views() at the time of writing.
 """

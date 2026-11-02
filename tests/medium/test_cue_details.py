@@ -375,7 +375,7 @@ def test_unknown_version_fields_are_not_found(editor: Client) -> None:
     assert _save_version(editor, version, "cue", "1").status_code == 404
 
 
-# Sub status (per version; replacing tags; Oct 31)
+# Sub status (per version)
 
 
 def test_sub_status_is_a_version_field(

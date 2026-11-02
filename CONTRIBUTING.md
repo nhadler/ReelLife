@@ -1,17 +1,15 @@
 # Contributing to ReelLife
 
-Thanks for helping. ReelLife is a small project with a high bar: a
-composer trusts it with deadlines and cue sheets that decide how they
-get paid. This page covers how to get set up and what a change needs
-before it's merged.
+This page covers development setup and the requirements for a pull
+request.
 
 ## Before you start
 
 - **Bugs:** open an issue with steps to reproduce (the bug form asks
   for what's needed).
 - **Features:** open an issue first and describe the problem it solves
-  for a composer, so the approach can be agreed before you write code.
-- **Security issues:** never in public. See [SECURITY.md](SECURITY.md).
+  for a composer. Agree on the approach before writing code.
+- **Security issues:** report them privately. See [SECURITY.md](SECURITY.md).
 
 ## Set up
 
@@ -29,24 +27,35 @@ choose who signs in (an editor, an admin, a viewer, or someone with no
 access). Use `127.0.0.1`, not `localhost`, so the sign-in callback keeps
 your session cookie.
 
+## Project structure
+
+The backend is organised into these packages:
+
+- `cues`: Projects, cues, versions, imports, exports, and scheduling
+- `accounts`: OIDC authentication and user roles
+- `mcp_server`: MCP endpoint
+
+The `reellife` package contains the Django project settings, URLs,
+middleware, and entry points.
+
 ## Make the change
 
 - **Style:** the Google Python, JavaScript and HTML/CSS style guides.
   `just fmt` formats and fixes what it can.
-- **Tests at the right size**, in `tests/small` (no database or
+- **Tests:** put them in `tests/small` (no database or
   network), `tests/medium` (Django and the database) or `tests/large`
   (the browser, the image, systemd). Coverage must stay at 100% branch
   for the whole app; timecode, importers, cue sheet exports and
   authorisation must never drop below it.
-- **Security controls stay on.** Strict CSP (no inline script or
-  style), roles checked on the server, `defusedxml` for XML, formula
+- **Security:** keep the strict CSP (no inline script or
+  style), server-side role checks, `defusedxml` for XML, and formula
   escaping in spreadsheets. If one gets in your way, say so in the pull
-  request rather than working around it.
+  request rather than bypassing it.
 - **Timecodes are integer frames** at the nominal rate; never store a
   timecode string. A cue is a moment in the picture, a version is one
   delivery.
-- **Words in the UI:** names and labels in Title Case, sentences in
-  sentence case; no explanatory paragraphs on pages (Help has those).
+- **UI text:** use Title Case for names and labels, sentence case for
+  sentences. Put detailed explanations in Help, not on the page.
 - Add a line to `CHANGELOG.md` under *Unreleased* for anything a user
   would notice.
 
@@ -63,12 +72,11 @@ just test-container   # the image, Compose and systemd (needs Docker)
 
 ## Commits and pull requests
 
-- Small, focused commits. The subject says what changes for the user in
-  the imperative ("Show form errors above the form"); the body says why.
+- Keep commits focused. Use an imperative subject ("Show form errors
+  above the form") and explain why in the body.
 - One topic per pull request. Fill in the template; link the issue.
-- A maintainer reviews every change against Google's code review
-  practices: design, tests, naming, comments, and whether it fits the
-  plan.
+- A maintainer reviews each change using Google's code review
+  practices, including design, tests, naming, comments, and scope.
 
 ## Licence
 

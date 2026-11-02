@@ -2,7 +2,7 @@
 
 ## Project settings
 
-The project bar's **Settings** menu lists them:
+Open these pages from the project bar's **Settings** menu:
 
 - **General**: title, numbers, thumbnail.
 - **Picture**: frame rate, picture type, timeline lanes.
@@ -17,18 +17,18 @@ The project bar's **Settings** menu lists them:
 
 ## App settings
 
-**Settings** in the top bar is for everyone: theme (dark or light),
-date format, timecodes (leading zero, subframes), one-click editing,
-Enter in notes cells, how new versions are numbered, and what progress
-counts.
+**Settings** in the top bar contains app-wide preferences: theme (dark
+or light), date format, timecode display (leading zero, subframes),
+one-click editing, Enter in notes cells, version numbering and which
+cue types count toward progress.
 
 ## Roles
 
 ReelLife signs in through PocketID, and your role comes from your
 PocketID groups:
 
-- **Viewers** see everything and change nothing.
-- **Editors** do everything in projects.
+- **Viewers** can read project data but can't edit it.
+- **Editors** can create and edit projects and cues.
 - **Admins** also have **Backup** (download a backup, or restore one
   into a new install) and the admin pages.
 

@@ -1,8 +1,7 @@
 """Settings as pages: departments, views, project and app settings.
 
-Nick, Oct 31: a page per section rather than one long page; department
-status lists editable per project; duplicate, archive and delete; and a
-page for the app-wide settings.
+Covers per-project department lists, duplication, archiving, deletion
+and app-wide preferences.
 """
 
 from collections.abc import Callable

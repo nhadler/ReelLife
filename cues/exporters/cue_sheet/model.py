@@ -1,9 +1,9 @@
 """The canonical PRO cue sheet.
 
-Built once from a project, then drawn by thin renderers (RapidCue XLSX,
+Built from a project and exported in two formats (RapidCue XLSX,
 generic CSV). Durations are timecode time rounded to the nearest second,
-halves up, as the grid shows them. The checklist says what a PRO would
-query before the sheet goes out.
+halves up, as the grid shows them. The checklist flags missing or
+inconsistent data before export.
 """
 
 import dataclasses
