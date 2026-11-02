@@ -5,7 +5,7 @@
 {% block page_class %}page--narrow{% endblock %}
 
 {% block content %}
-  <div class="page-head"><h1>Your Days Off</h1>{% include "cues/includes/help_link.html" with slug="progress-and-deadlines" %}</div>
+  <div class="page-head">{% include "cues/includes/page_title.html" with title="Your Days Off" slug="progress-and-deadlines" %}</div>
   <form class="days-off-page" method="post" novalidate>
     {% csrf_token %}
     {# A disabled fieldset disables every control in it, for viewers. #}

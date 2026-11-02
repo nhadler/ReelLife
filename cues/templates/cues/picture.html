@@ -9,7 +9,7 @@
 
 {% block content %}
   <div class="page-head">
-    <h2>Turnovers</h2>
+    {% include "cues/includes/page_title.html" with title="Picture" slug="picture-and-turnovers" sub=True %}
     {% if request.user.role != "viewer" %}
       <div class="page-head__actions">
         <a class="button" href="{% url 'cues:turnover_create' project.pk %}">Log a Turnover</a>

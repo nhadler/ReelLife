@@ -9,8 +9,7 @@
 
 {% block content %}
   <div class="page-head">
-    <h1>Schedule</h1>
-    {% include "cues/includes/help_link.html" with slug="schedule" %}
+    {% include "cues/includes/page_title.html" with title="Schedule" slug="schedule" %}
     <p class="schedule__line">{{ line }}</p>
   </div>
   {% if risks %}

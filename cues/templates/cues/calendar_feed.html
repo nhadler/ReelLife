@@ -6,7 +6,7 @@
 {% block page_class %}page--narrow{% endblock %}
 
 {% block content %}
-  <div class="page-head"><h1>Calendar Feed</h1>{% include "cues/includes/help_link.html" with slug="schedule" %}</div>
+  <div class="page-head">{% include "cues/includes/page_title.html" with title="Calendar Feed" slug="schedule" %}</div>
   {% if link %}
     <div class="callout" role="status">
       {% include "cues/includes/icon.html" with name="calendar" %}

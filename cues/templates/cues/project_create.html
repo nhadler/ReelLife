@@ -4,8 +4,7 @@
 
 {% block content %}
   <div class="page-head">
-    <h1>New Project</h1>
-    {% include "cues/includes/help_link.html" with slug="getting-started" %}
+    {% include "cues/includes/page_title.html" with title="New Project" slug="getting-started" %}
   </div>
   <form class="project-form" method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}

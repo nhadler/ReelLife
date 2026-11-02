@@ -442,7 +442,7 @@ def _log_turnover(
     page.get_by_role("button", name="Log Turnover").click()
     assert project.turnovers.count() == 2
     # Reel 1's head moved: the conform assistant offers to shift its cues.
-    expect(page.get_by_role("heading", name="Conform", level=1)).to_be_visible()
+    expect(page.get_by_role("heading", name="Conform", level=2)).to_be_visible()
     offer = page.get_by_label(
         re.compile(r"Shift Reel 1's \d+ cues by \+00:00:02:12")
     )
@@ -470,7 +470,7 @@ def _settings_pages(
     ):
         page.locator(".settings__nav").get_by_role("link", name=label).click()
         expect(
-            page.get_by_role("heading", name=label, exact=True, level=1)
+            page.get_by_role("heading", name=label, exact=True, level=2)
         ).to_be_visible()
         axe(f"settings: {label}")
     page.goto(f"{app}/settings/")

@@ -183,7 +183,9 @@ a {
   display: none !important;
 }
 
-.page--narrow {
+/* A short form or list: same left edge as every page, only its content
+   held narrower, so titles don't jump between pages. */
+.page--narrow > :not(.page-head, .messages) {
   max-width: 44rem;
 }
 
@@ -486,13 +488,26 @@ kbd.palette__detail {
 .page-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space) calc(var(--space) * 3);
   margin-bottom: calc(var(--space) * 3);
 }
 
-.page-head h1 {
+/* The title and its "?" (includes/page_title.html): one size per tier,
+   the "?" close beside it and centred on it. */
+.page-head__title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.page-title {
   margin: 0;
+  font-size: var(--step-3);
+}
+
+.page-title--sub {
+  font-size: var(--step-2);
 }
 
 .page-head__actions {

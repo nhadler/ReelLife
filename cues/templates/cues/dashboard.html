@@ -9,7 +9,7 @@
 
 {% block content %}
   <div class="page-head">
-    <h1>Projects</h1>
+    {% include "cues/includes/page_title.html" with title="Projects" slug="getting-started" %}
     <p class="page-head__summary">{{ active_count }} active{% if total_pace and request.user.role != "viewer" %} · write <strong>{{ total_pace.0 }}</strong> and revise <strong>{{ total_pace.1 }}</strong> a day across them{% endif %}</p>
     {% if request.user.role != "viewer" %}
       <div class="page-head__actions">

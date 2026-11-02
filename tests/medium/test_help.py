@@ -33,7 +33,7 @@ def test_help_pages(role_client: Callable[[Role], Client]) -> None:
     first = viewer.get(reverse("cues:help")).content.decode()
     assert f"ReelLife {help_view.version()}" in first
     assert 'href="https://github.com/nhadler/reellife">Source Code</a>' in first
-    assert '<h1 class="settings__title">Getting Started</h1>' in first
+    assert '<h1 class="page-title help__title">Getting Started</h1>' in first
     assert "<li>On <strong>Projects</strong>, choose" in first
     page = viewer.get(reverse("cues:help_topic", args=["conform"]))
     assert 'aria-current="page">Conform</a>' in page.content.decode()
