@@ -1509,6 +1509,7 @@ body:has(.overview) > .page {
   color: var(--slate);
   font: inherit;
   font-size: 0.8rem;
+  white-space: nowrap;
   cursor: pointer;
   font-weight: 600;
 }
@@ -2557,12 +2558,29 @@ input[type='search'].grid-search {
   border-radius: var(--radius);
 }
 
-/* Radios show here (the View menu's .segmented hides them behind
-   spans), and keyboard focus rings the whole choice. */
+/* As a form field (includes/segmented.html): a row of segments under
+   its label, not a column. */
+.segmented.field {
+  flex-direction: row;
+  align-content: flex-start;
+  margin: 0;
+}
+
+/* The segment is the control: its radio is hidden but still takes the
+   keyboard, and focus rings the whole segment. */
 .segmented__choice input {
-  position: static;
-  opacity: 1;
-  accent-color: var(--accent);
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Shift: the per-cue fields only when moving by one cue's new time, the
+   offset only when moving by an offset. */
+.tool-form:has([name='by'][value='offset']:checked)
+  .field:has([name='reference'], [name='new_time']),
+.tool-form:has([name='by']:not([value='offset']):checked)
+  .field:has([name='offset']) {
+  display: none;
 }
 
 .segmented__choice:has(input:focus-visible) {
@@ -2594,16 +2612,16 @@ input[type='search'].grid-search {
 /* Show each source's options only when they apply. "Detect" shows the
    Pro Tools ones (the usual case); a detected Cubase or MIDI file uses
    the remembered start. */
-.import:has([name='kind'][value='detect']:checked) .import__source--protools,
-.import:has([name='kind'][value='detect']:checked) .import__source--daw,
-.import:has([name='kind'][value='protools']:checked) .import__source--protools,
-.import:has([name='kind'][value='protools']:checked) .import__source--daw,
-.import:has([name='kind'][value='cubase']:checked) .import__source--cubase,
-.import:has([name='kind'][value='cubase']:checked) .import__source--start,
-.import:has([name='kind'][value='cubase']:checked) .import__source--daw,
-.import:has([name='kind'][value='midi']:checked) .import__source--midi,
-.import:has([name='kind'][value='midi']:checked) .import__source--start,
-.import:has([name='kind'][value='midi']:checked) .import__source--daw {
+.import:has([name='kind'] [value='detect']:checked) .import__source--protools,
+.import:has([name='kind'] [value='detect']:checked) .import__source--daw,
+.import:has([name='kind'] [value='protools']:checked) .import__source--protools,
+.import:has([name='kind'] [value='protools']:checked) .import__source--daw,
+.import:has([name='kind'] [value='cubase']:checked) .import__source--cubase,
+.import:has([name='kind'] [value='cubase']:checked) .import__source--start,
+.import:has([name='kind'] [value='cubase']:checked) .import__source--daw,
+.import:has([name='kind'] [value='midi']:checked) .import__source--midi,
+.import:has([name='kind'] [value='midi']:checked) .import__source--start,
+.import:has([name='kind'] [value='midi']:checked) .import__source--daw {
   display: block;
 }
 
@@ -2742,7 +2760,7 @@ input[type='search'].grid-search {
   border-radius: var(--radius);
 }
 
-.export:has([name='preset'][value='custom']:checked) .export__columns {
+.export:has([name='preset'] [value='custom']:checked) .export__columns {
   display: grid;
 }
 
@@ -3014,10 +3032,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   margin-bottom: var(--space);
 }
 
-.calendar__hint {
+/* Pushes Today and › to the right, beside each other. */
+.calendar__spacer {
   flex: 1;
-  font-size: var(--step--1);
-  text-align: center;
 }
 
 .calendar__months {
@@ -3446,6 +3463,9 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 }
 
 .selection-summary {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) / 2);
   max-width: none;
   margin: 0;
   color: var(--ink);
@@ -3453,15 +3473,8 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   white-space: nowrap;
 }
 
-.selection-summary__link {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--accent);
-  font: inherit;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-  cursor: pointer;
+.selection-summary[hidden] {
+  display: none;
 }
 
 /* Timeline strip: reels side by side, cues in lanes. */
@@ -6518,4 +6531,8 @@ form:has(input[name='confirm']:valid) .backup__restore {
   .toolbar__menus {
     flex-wrap: wrap;
   }
+}
+
+.share-list__none {
+  list-style: none;
 }

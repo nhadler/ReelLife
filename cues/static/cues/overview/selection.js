@@ -95,16 +95,15 @@ export function showSummary(element, selected, totalFrames, fps, actions) {
   const link = (label, title, action) => {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = 'selection-summary__link';
+    button.className = 'button button--quiet button--small';
     button.textContent = label;
     button.title = keys(title);
     button.addEventListener('click', action);
     return button;
   };
   element.replaceChildren(
-    `${count} selected (${clock(frames, fps)} / ${percent}%) – `,
-    link('deselect all', 'Ctrl+Shift+D', actions.deselect),
-    ' – ',
-    link('invert selection', 'Ctrl+Shift+I', actions.invert),
+    `${count} selected (${clock(frames, fps)} / ${percent}%)`,
+    link('Deselect All', 'Ctrl+Shift+D', actions.deselect),
+    link('Invert Selection', 'Ctrl+Shift+I', actions.invert),
   );
 }

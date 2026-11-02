@@ -6,6 +6,7 @@ from django import forms
 
 from cues import columns as columns_registry
 from cues import models
+from cues import text as casing
 from cues import timecode
 from cues.exporters.cue_sheet import model as cue_sheet
 from cues.importers import apply
@@ -41,20 +42,19 @@ class ImportForm(forms.Form):
     kind = forms.ChoiceField(
         label="Import from",
         choices=[
-            (imports.Kind.DETECT, "Detect from the file"),
+            (imports.Kind.DETECT, "Detect from the File"),
             (imports.Kind.SPREADSHEET, "Excel or CSV"),
-            (imports.Kind.PROTOOLS, "Pro Tools session text"),
+            (imports.Kind.PROTOOLS, "Pro Tools Session Text"),
             (imports.Kind.CUBASE, "Cubase or Nuendo XML"),
-            (imports.Kind.MIDI, "MIDI file markers"),
+            (imports.Kind.MIDI, "MIDI File Markers"),
         ],
         initial=imports.Kind.DETECT,
-        widget=forms.RadioSelect,
     )
     method = forms.ChoiceField(
         label="Pro Tools cues are",
         choices=[
-            (protools.Method.CLIPS, "Clips on cue tracks"),
-            (protools.Method.MARKERS, "IN and OUT markers"),
+            (protools.Method.CLIPS, "Clips on Cue Tracks"),
+            (protools.Method.MARKERS, "IN and OUT Markers"),
         ],
         initial=protools.Method.CLIPS,
         required=False,
@@ -76,12 +76,9 @@ class ImportForm(forms.Form):
     mapping = forms.ChoiceField(
         label="Clip and marker names",
         choices=[
-            (
-                merge.Mapping.NUMBER_AND_TITLE,
-                "Cue # and title (1m01 Main Title)",
-            ),
-            (merge.Mapping.NUMBER_ONLY, "Cue # only"),
-            (merge.Mapping.TITLE_ONLY, "Titles; number the cues in order"),
+            (merge.Mapping.NUMBER_AND_TITLE, "Cue # and Title"),
+            (merge.Mapping.NUMBER_ONLY, "Cue # Only"),
+            (merge.Mapping.TITLE_ONLY, "Titles, Numbered in Order"),
         ],
         initial=merge.Mapping.NUMBER_AND_TITLE,
         required=False,
@@ -98,9 +95,9 @@ class ImportForm(forms.Form):
     missing = forms.ChoiceField(
         label="Cues not in the file",
         choices=[
-            (apply.MissingAction.LEAVE, "Leave them"),
-            (apply.MissingAction.INACTIVE, "Make them inactive"),
-            (apply.MissingAction.OMIT, "Set them to Omit"),
+            (apply.MissingAction.LEAVE, "Leave Them"),
+            (apply.MissingAction.INACTIVE, "Make Them Inactive"),
+            (apply.MissingAction.OMIT, "Set Them to Omit"),
         ],
         initial=apply.MissingAction.LEAVE,
         required=False,
@@ -123,9 +120,9 @@ class ImportForm(forms.Form):
             "order", "name"
         )
         picture.empty_label = (
-            "The picture"
+            "The Picture"
             if project.long_play
-            else f"The {project.reel_word.lower()} their IN falls in"
+            else casing.title_case(f"the {project.reel_word} at their IN")
         )
         self.fields["start"].initial = timecode.format_timecode(
             imports.default_start(project), project.rate
@@ -234,9 +231,7 @@ class ExportForm(forms.Form):
         required=False,
         widget=forms.RadioSelect,
     )
-    preset = forms.ChoiceField(
-        label="Columns", initial=CUSTOM, widget=forms.RadioSelect
-    )
+    preset = forms.ChoiceField(label="Columns", initial=CUSTOM)
     columns = forms.MultipleChoiceField(
         label="Columns to include",
         choices=[(c.id, c.label) for c in columns_registry.COLUMNS],
@@ -334,7 +329,7 @@ class CueSheetForm(forms.Form):
     format = forms.ChoiceField(
         choices=[
             ("rapidcue", "RapidCue (Excel, for ASCAP and BMI)"),
-            ("csv", "CSV (one row per writer or publisher)"),
+            ("csv", "CSV (One Row per Writer or Publisher)"),
         ],
         initial="rapidcue",
         widget=forms.RadioSelect,

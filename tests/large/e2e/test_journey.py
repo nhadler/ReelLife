@@ -29,6 +29,13 @@ pytestmark = pytest.mark.django_db(transaction=True, serialized_rollback=True)
 CLIPS = golden.FIXTURES / "protools_clips_23976.txt"
 
 
+def _segment(scope: Any, name: str) -> None:
+    """Chooses a segment: its radio is hidden behind the label."""
+    scope.locator(".segmented__choice").filter(
+        has=scope.page.get_by_label(name, exact=True)
+    ).click()
+
+
 def _rows(page: Any) -> Any:
     """The cue rows (reel group rows are rows too)."""
     return page.locator(".ag-row:not(.group-row-node)")
@@ -98,13 +105,13 @@ def _groups_and_selection(page: Any) -> None:
     expect(summary).to_contain_text("2 cues selected")
     page.keyboard.press("Control+Shift+I")
     expect(summary).to_contain_text("1 cue selected")
-    summary.get_by_role("button", name="deselect all").click()
+    summary.get_by_role("button", name="Deselect All").click()
     expect(summary).to_be_hidden()
     reel_check = group.get_by_role("checkbox", name="Select reel 1")
     reel_check.click()
     expect(summary).to_contain_text("3 cues selected")
     expect(group.locator(".ag-checked")).to_have_count(1)
-    summary.get_by_role("button", name="deselect all").click()
+    summary.get_by_role("button", name="Deselect All").click()
     # Find: a magnifier until used; the field closes again when empty.
     page.get_by_role("button", name="Find a cue").click()
     search = page.get_by_role("searchbox", name=re.compile("^Find a cue"))
@@ -201,7 +208,7 @@ def _split_and_undo(page: Any, axe: Check, project: models.Project) -> None:
     _tool(page, "Undo Last Change")
     expect(new_cue).to_have_count(0)
     page.locator("#grid-selection").get_by_role(
-        "button", name="deselect all"
+        "button", name="Deselect All"
     ).click()
 
 
@@ -235,7 +242,7 @@ def _stats(page: Any, axe: Check) -> None:
     panel.get_by_role("button", name="Select Total cues").click()
     summary = page.locator("#grid-selection")
     expect(summary).to_contain_text("3 cues selected")
-    summary.get_by_role("button", name="deselect all").click()
+    summary.get_by_role("button", name="Deselect All").click()
     panel.get_by_role("button", name="Compositions", exact=True).click()
     badge = page.locator("#grid-filter-button .toolbar__count")
     expect(badge).to_have_text("1")
@@ -295,7 +302,7 @@ def _long_play_time(page: Any, axe: Check, project: models.Project) -> None:
     dialog.get_by_label("Long Play Time").check()
     leader.fill("0:00:08:00")
     axe("export dialog with long play time")
-    dialog.get_by_label("CSV", exact=True).check()
+    _segment(dialog, "CSV")
     with page.expect_download() as info:
         dialog.get_by_role("button", name="Export", exact=True).click()
     text = pathlib.Path(info.value.path()).read_text(encoding="utf-8-sig")
@@ -311,7 +318,7 @@ def _long_play_time(page: Any, axe: Check, project: models.Project) -> None:
     expected = timecode.format_timecode(cue.tc_in + shift, rate)
     assert found["1m01"][header.index("IN")] == expected
     dialog.get_by_label("Long Play Time").uncheck()
-    dialog.get_by_label("Excel", exact=True).check()
+    _segment(dialog, "Excel")
 
 
 def _export(page: Any, axe: Check, project: models.Project) -> None:
@@ -327,7 +334,7 @@ def _export(page: Any, axe: Check, project: models.Project) -> None:
         info.value.suggested_filename,
     )
     _long_play_time(page, axe, project)
-    dialog.get_by_label("Wall Chart").check()
+    _segment(dialog, "Wall Chart")
     expect(dialog.get_by_label("Choose columns")).to_be_hidden()
     with page.expect_download() as info:
         dialog.get_by_role("button", name="Export", exact=True).click()
@@ -369,7 +376,7 @@ def _cue_sheet(page: Any, axe: Check) -> None:
     checklist = dialog.locator("#cue-sheet-checklist")
     expect(checklist).to_contain_text("Add at least one writer.")
     axe("cue sheet dialog")
-    dialog.get_by_label("CSV (one row per writer or publisher)").check()
+    _segment(dialog, "CSV (One Row per Writer or Publisher)")
     with page.expect_download() as info:
         dialog.get_by_role("button", name="Export Cue Sheet").click()
     assert info.value.suggested_filename.endswith(".csv")

@@ -1,6 +1,6 @@
 # Picture and Turnovers
 
-## Picture types
+## Picture Types
 
 Chosen when you make a project, and changeable in Settings, Picture:
 
@@ -14,7 +14,7 @@ Labels across ReelLife follow the type: *Reel 1*, *Act 2*, *Clip A12*,
 or just *Picture*. Settings won't switch to a type the existing pictures
 don't fit (say, Reels while clips are named A12).
 
-## Log a turnover
+## Log a Turnover
 
 When a new cut arrives:
 
@@ -32,7 +32,7 @@ Click a turnover's name on the Picture page to change it, or to delete
 it. A reel that cue versions were written to can't be dropped, and such
 a turnover can't be deleted.
 
-## Cues not on a reel yet
+## Cues Not on a Reel Yet
 
 Cues imported before any reel had timecodes sit on *No Reel Yet*. Once
 a turnover gives the reels timecodes, the Picture page lists those cues

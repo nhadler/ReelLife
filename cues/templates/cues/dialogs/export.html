@@ -23,16 +23,13 @@
       {% for value, label in form.fields.scope.choices %}
         <label class="segmented__choice">
           <input type="radio" name="scope" value="{{ value }}"{% if form.scope.value == value %} checked{% endif %}>
-          {% if value == "shown" %}The {{ shown }} shown in the grid{% else %}All {{ total }}{% endif %}
+          {% if value == "shown" %}The {{ shown }} Shown in the Grid{% else %}All {{ total }}{% endif %}
         </label>
       {% endfor %}
     </fieldset>
   {% endif %}
 
-  <fieldset class="segmented segmented--chips export__log">
-    <legend>{{ form.preset.label|title_case }}</legend>
-    {% for choice in form.preset %}<label class="segmented__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}
-  </fieldset>
+  <div class="fields export__log export__preset">{% include "cues/includes/field.html" with field=form.preset %}</div>
   <fieldset class="export__columns export__log">
     <legend>{{ form.columns.label|title_case }}</legend>
     {% for choice in form.columns %}<label class="menu__choice">{{ choice.tag }} {{ choice.choice_label }}</label>{% endfor %}

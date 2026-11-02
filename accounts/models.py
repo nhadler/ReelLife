@@ -9,7 +9,7 @@ from django.utils import timezone
 class Role(models.TextChoices):
     """What a user may do. Refreshed from groups at login."""
 
-    NONE = "none", "No access"
+    NONE = "none", "No Access"
     VIEWER = "viewer", "Viewer"
     EDITOR = "editor", "Editor"
     ADMIN = "admin", "Admin"

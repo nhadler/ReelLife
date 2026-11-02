@@ -48,8 +48,6 @@ def dialog(request: HttpRequest, project_id: int) -> HttpResponse:
             "form": transfer_forms.CueSheetForm(),
             "sheet": sheet,
             "issues": model.checklist(sheet),
-            # 23.976 and the like: timecode seconds aren't clock seconds.
-            "fractional": project.rate.fps.denominator != 1,
         },
     )
 

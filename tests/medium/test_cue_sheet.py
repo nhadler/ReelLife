@@ -301,7 +301,6 @@ def test_dialog_checklist_and_downloads(
     assert "Export Cue Sheet" in page
     assert "3 cues:" in page
     assert "Writer shares add up to 50%" in page
-    assert "a little shorter than clock time" in page  # 23.976
     checklist = reverse("cues:cue_sheet_checklist", args=[project.pk])
     part = viewer.get(
         checklist, {"format": "csv", "include_inactive": "on"}
@@ -334,11 +333,6 @@ def test_ready_to_send(viewer: Client) -> None:
     shares.set_shares(cue, [shares.Line(writer, "CA", Decimal(100))])
     page = viewer.get(reverse("cues:cue_sheet", args=[project.pk])).content
     assert b"ready to send." in page
-    assert b"a little shorter" in page
-    project.frame_rate = "24"
-    project.save()
-    page = viewer.get(reverse("cues:cue_sheet", args=[project.pk])).content
-    assert b"a little shorter" not in page
 
 
 def test_menu_and_settings(

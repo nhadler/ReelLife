@@ -133,7 +133,6 @@ class CopyFromForm(forms.Form):
     lists = forms.BooleanField(
         label="Statuses and lists",
         required=False,
-        help_text="Adds the entries this project doesn't have yet.",
     )
 
     def __init__(

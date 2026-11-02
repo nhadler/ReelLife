@@ -115,8 +115,8 @@ COLUMNS: tuple[Column, ...] = (
     Column("publishers", "Publishers", _X, Editor.NONE),
     Column("cue_sheet_notes", "Cue Sheet Notes", _C, Editor.MARKDOWN),
     Column("lane", "Lane", _C, Editor.NUMBER),
-    Column("id", "id", _X, Editor.NONE),
-    Column("updated_at", "Upd.", _X, Editor.NONE),
+    Column("id", "ID", _X, Editor.NONE),
+    Column("updated_at", "Updated", _X, Editor.NONE),
 )
 
 BY_ID: dict[str, Column] = {column.id: column for column in COLUMNS}

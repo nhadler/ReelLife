@@ -16,12 +16,11 @@
       {% csrf_token %}
       <input type="hidden" name="shares_seen" value="{{ shares_seen }}">
       {% include "cues/includes/inline_table.html" with fs=share_set add="Add Share" %}
-      <p class="muted">Writer shares add up to 100%, and publisher shares too when there are any. People and companies come from <a href="{% url 'cues:credits' %}">Credits</a>.</p>
-      <div class="form-actions"><button class="button button--small" type="submit">Save Shares</button></div>
+      <div class="form-actions"><button class="button button--quiet button--small" type="submit">Save Shares</button></div>
     </form>
   {% else %}
     <ul class="share-list">
-      {% for share in cue.shares.all %}<li>{{ share }}</li>{% empty %}<li class="muted">No writers or publishers yet.</li>{% endfor %}
+      {% for share in cue.shares.all %}<li>{{ share }}</li>{% empty %}<li class="share-list__none muted">No writers or publishers yet.</li>{% endfor %}
     </ul>
   {% endif %}
 </section>

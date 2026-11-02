@@ -7,8 +7,6 @@
  * the grid.
  */
 
-import {keys} from '../keys.js';
-
 /**
  * Opens the dialog and resolves with the result, or null on Cancel.
  * @param {!Object} input
@@ -83,12 +81,6 @@ export function editView(input) {
   search.setAttribute('aria-label', 'Search fields');
   search.addEventListener('input', () => render());
 
-  const hint = document.createElement('p');
-  hint.className = 'muted';
-  hint.textContent = keys(
-    'Click a field to add or drop it; drag active fields (or Alt+arrow keys) to reorder. Widths and pinning are set in the grid.',
-  );
-
   const activeList = document.createElement('ol');
   activeList.className = 'view-editor__tiles view-editor__tiles--active';
   activeList.setAttribute('aria-label', 'Active Fields');
@@ -136,7 +128,6 @@ export function editView(input) {
     startLabel,
     start,
     search,
-    hint,
     heading('Active Fields'),
     activeList,
     heading('Inactive Fields'),

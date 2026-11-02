@@ -3,7 +3,7 @@
 **Schedule** in the top bar plans what to write each day, across every
 project that isn't archived. Open it from the top bar or Ctrl+K.
 
-## What it plans
+## What It Plans
 
 Every active cue still to write (To Write, In Progress) or to revise
 (Rewrite, Revisions) that has an IN and OUT. Each cue counts toward its
@@ -20,17 +20,17 @@ difficulty counts as, **Projects at Once** (below), **Most Work a Day**
 (a cap, in minutes of Easy music; blank plans whatever the deadlines
 need) and **Smallest Share** (the least a long cue is split into).
 
-## How the days are filled
+## How the Days Are Filled
 
 **Projects at Once** decides how projects share your days:
 
-- **In parallel** (the default): every project is worked every day, each
+- **In Parallel** (the default): every project is worked every day, each
   at its own pace: the least even amount that meets its own deadlines.
   A day's work is the projects' paces added up. If that's more than
   **Most Work a Day**, a project asking for less than an even share
   keeps all of it and the rest is shared by the others, so the cap comes
   out of the busiest projects.
-- **One at a time**: earlier deadlines go first, and one pace covers
+- **One at a Time**: earlier deadlines go first, and one pace covers
   everything: each day gets the least even amount that meets every
   deadline ahead. Once a deadline is met, the pace eases to what the
   later ones need.
@@ -48,7 +48,7 @@ Either way:
   everything else, at the last pace. Cues without an IN or OUT can't be
   planned and are listed under the calendar.
 
-## When things change
+## When Things Change
 
 The plan starts again from today every time you open it. Finish a cue
 early and the next ones move up; leave one unfinished and it simply
@@ -87,7 +87,7 @@ dialog lets it flow again. Pinning is one change, so **Undo** and
 Activity take it back. Once its day has passed, a pinned cue that isn't
 finished rejoins the flow.
 
-## In your calendar app
+## In Your Calendar App
 
 **Calendar Feed** in the profile menu makes a link your calendar app can
 subscribe to: one all-day event per day with work, listing its cues,
@@ -101,7 +101,7 @@ Google Calendar and iCloud's server-side refresh fetch the feed from
 their own servers, so they only work once ReelLife is reachable from
 the internet.
 
-## Month and week
+## Month and Week
 
 Both show a calendar, the week as a single row. Each project has its own
 colour, down the edge of its cues. Click anywhere in a day to list its

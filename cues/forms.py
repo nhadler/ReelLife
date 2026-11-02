@@ -26,6 +26,7 @@ class TimecodeModelForm(forms.ModelForm):  # type: ignore[type-arg]
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Swaps integer fields for text fields showing timecodes."""
         super().__init__(*args, **kwargs)
+        _quiet_blanks(self)
         rate = self._rate(self._instance_values())
         for name in self.timecode_fields:
             if name not in self.fields:
@@ -157,13 +158,12 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
         label="Valid cue numbers",
         choices=[
             ("standard", "Standard: 1m01, 1m04a, 1s01, 1m01s, 101m01"),
-            ("any", "Any cue number"),
-            ("custom", "Custom pattern (advanced)"),
+            ("any", "Any Cue Number"),
+            ("custom", "Custom Pattern (Advanced)"),
         ],
         initial="standard",
         required=False,
         widget=forms.RadioSelect,
-        help_text="Imports can skip rows whose cue number doesn't fit.",
     )
 
     def __init__(
@@ -177,6 +177,7 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
             **kwargs: As for a ModelForm.
         """
         super().__init__(*args, **kwargs)
+        _quiet_blanks(self)
         if only:
             for name in list(self.fields):
                 if name not in only:
@@ -190,7 +191,7 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
         }.get(pattern, "custom" if self.instance.pk else "standard")
         field = self.fields["cue_number_pattern"]
         field.required = False
-        field.label = "Custom pattern"
+        field.label = "Custom Pattern"
         field.help_text = (
             "A regular expression, e.g. ^\\d+m\\d+$. "
             "Only for unusual numbering."
@@ -291,6 +292,13 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
         widgets = {
             "release_date": forms.DateInput(attrs={"type": "date"}),
             "company_address": forms.Textarea(attrs={"rows": 3}),
+        }
+        # Help explains these; the page only names them (design review).
+        labels = {"lanes": "Timeline lanes"}
+        help_texts = {
+            "lanes": "",
+            "sync_review_status": "",
+            "cue_thumbnail_fallback": "",
         }
 
 
@@ -513,6 +521,7 @@ DEFAULT_COLOR = "#6b7280"
 class _ColorForm(forms.ModelForm):  # type: ignore[type-arg]
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
+        _quiet_blanks(self)
         self.fields["color"].initial = DEFAULT_COLOR
 
 
@@ -644,7 +653,7 @@ def _choices(form: forms.BaseForm, name: str) -> forms.ModelChoiceField:  # type
 
 
 def _quiet_blanks(form: forms.BaseForm) -> None:
-    """Shows an empty choice as a dash rather than Django's '---------'."""
+    """Shows an empty choice as a dash, not '- Select an option -'."""
     for field in form.fields.values():
         if isinstance(field, forms.ModelChoiceField):
             # None (no empty choice) stays None.

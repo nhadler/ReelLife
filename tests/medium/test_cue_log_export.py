@@ -205,10 +205,10 @@ def test_dialog_for_viewers_too(
     html = viewer.get(f"{url}?view={view.pk}&ids={first.pk},x").content.decode()
     assert "Export Cues" in html
     assert f'value="{view.pk}"' in html and "checked" in html
-    assert "The 1 shown in the grid" in html
+    assert "The 1 Shown in the Grid" in html
     assert 'value="shown" checked' in html
     html = viewer.get(url).content.decode()
-    assert "shown in the grid" not in html
+    assert "Shown in the Grid" not in html
 
 
 def test_download_xlsx_from_a_view(

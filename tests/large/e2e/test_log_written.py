@@ -37,7 +37,7 @@ def test_log_written_waits_for_one_cue(
     _tick(page, "1m02")
     expect(button).to_be_disabled()  # one cue at a time
     page.locator("#grid-selection").get_by_role(
-        "button", name="deselect all"
+        "button", name="Deselect All"
     ).click()
     _tick(page, "1m01")
     button.click()
