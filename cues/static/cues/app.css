@@ -1945,11 +1945,18 @@ body:has(.overview) > .page {
     row-gap: var(--space);
   }
 
+  /* Links past the edge fade out, so the row reads as one that scrolls. */
   .topbar__nav {
     order: 1;
     flex-basis: 100%;
     margin-right: 0;
+    padding-right: calc(var(--space) * 4);
     overflow-x: auto;
+    mask-image: linear-gradient(
+      to right,
+      #000 calc(100% - var(--space) * 4),
+      transparent
+    );
   }
 
   .topbar__search {
@@ -2134,6 +2141,21 @@ body:has(.overview) > .page {
 
 .details-group__title {
   font-size: var(--step-0);
+}
+
+/* A card's title with a control beside it, e.g. Active Cue. */
+.details-group__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  margin-bottom: calc(var(--space) * 2);
+}
+
+.details-group__head .details-group__title,
+.details-group__head .field {
+  margin: 0;
 }
 
 .details-group__note {
@@ -2884,16 +2906,47 @@ textarea.copy-json {
 /* Project form bands: what a section is for on the left, its fields on
    the right. */
 
+/* New Project, laid out like App Settings: each section's name in a
+   left column, its fields beside it, a rule between sections, and the
+   actions under the fields. */
 .band {
   display: grid;
-  grid-template-columns: minmax(12rem, 1fr) minmax(0, 2.2fr);
-  gap: calc(var(--space) * 3);
-  margin-bottom: calc(var(--space) * 4);
+  grid-template-columns: 12rem minmax(0, 1fr);
+  column-gap: calc(var(--space) * 4);
+  padding: calc(var(--space) * 2.5) 0;
+  border-top: 1px solid var(--rule);
 }
 
+.band:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* Level with the first line beside it. */
 .band__intro h2 {
-  margin-bottom: var(--space);
-  font-size: var(--step-1);
+  margin: 0;
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.project-form:has(> .band) > .form-actions {
+  margin: 0;
+  padding: calc(var(--space) * 2.5) 0 0 calc(12rem + var(--space) * 4);
+  border-top: 1px solid var(--rule);
+}
+
+@media (max-width: 48rem) {
+  .band {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .band__intro h2 {
+    margin-bottom: var(--space);
+  }
+
+  .project-form:has(> .band) > .form-actions {
+    padding-left: 0;
+  }
 }
 
 /* Credits: a section per kind, found by name (credits.js). */
@@ -2901,13 +2954,6 @@ textarea.copy-json {
 /* Viewers have no search, so the exports take the right end. */
 
 /* Checkboxes, counts and × sit level with the fields. */
-
-.band__body {
-  padding: calc(var(--space) * 2.5);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--panel);
-}
 
 .project-form:not(:has(select[name='kind'] option[value='episode']:checked))
   .episode-only {
@@ -3815,12 +3861,18 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   letter-spacing: 0.04em;
 }
 
-.cue-thumbnail {
+/* The Cue card: its fields, with the still at the top right. */
+.cue-card {
   display: grid;
-  grid-template-columns: 10rem 1fr;
+  grid-template-columns: minmax(0, 1fr) 10rem;
   gap: calc(var(--space) * 2);
   align-items: start;
-  margin-bottom: calc(var(--space) * 2);
+}
+
+@media (max-width: 40rem) {
+  .cue-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .cue-thumbnail .cue-thumb {
@@ -4846,6 +4898,7 @@ a.conform:hover {
 .schedule__side {
   display: grid;
   gap: calc(var(--space) * 2);
+  align-content: start;
   position: sticky;
   top: calc(var(--space) * 2);
 }
@@ -5043,6 +5096,11 @@ body:has(> .page--fill) {
 .cal-day--selected .cal-day__link {
   background: var(--panel-raised);
   box-shadow: inset 0 0 0 1px var(--ink);
+}
+
+/* Today needs no ring as well as its green date. */
+.cal-day--today.cal-day--selected .cal-day__link {
+  box-shadow: none;
 }
 
 .cal-day__head {
@@ -6220,10 +6278,32 @@ td.party-table__ipi {
   opacity: 0.5;
 }
 
+/* An empty list is one line and Add, without a header over nothing. */
+.inline-table:has(> .inline-table__empty:not([hidden])) > table {
+  display: none;
+}
+
+/* The handle, swatch and × sit level with the middle of the fields
+   beside them (cells keep to the top, so an error below one field
+   doesn't push the others down). */
+.inline-table .drag-handle {
+  margin-top: calc((var(--control-h) - 1.6rem) / 2);
+}
+
+.inline-table .inline-table__x {
+  margin-top: calc((var(--control-h) - 1.8rem) / 2);
+}
+
+/* The swatch's column is as wide as the swatch, so × follows it. */
+.inline-table .table--edit td:has(> input[type='color']) {
+  width: 3rem;
+}
+
 .inline-table .table--edit td input[type='color'] {
   width: 1.75rem;
   min-width: 0;
   height: 1.75rem;
+  margin-top: calc((var(--control-h) - 1.75rem) / 2);
   padding: 0;
   border: 1px solid var(--rule);
   border-radius: 6px;
@@ -6324,8 +6404,18 @@ td.party-table__ipi {
   border-left-color: var(--accent);
 }
 
-.cue-index__empty {
-  color: var(--slate) !important;
+/* A folded section: the same colour (it isn't disabled), marked ▸. */
+.cue-index__empty::after {
+  content: ' ▸';
+  color: var(--slate);
+}
+
+/* On a phone the page is one column, so the index would fill the first
+   screen before the fields; scrolling does its job. */
+@media (max-width: 48rem) {
+  .cue-index {
+    display: none;
+  }
 }
 
 .details-group--fold > summary {
@@ -6484,7 +6574,6 @@ form:has(input[name='confirm']:valid) .backup__restore {
 .day-cue__actions {
   display: flex;
   gap: var(--space);
-  justify-content: flex-end;
 }
 
 .day-cue__written {

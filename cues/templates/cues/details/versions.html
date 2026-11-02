@@ -15,7 +15,7 @@
          href="{% url 'cues:cue' cue.pk %}?version={{ version.pk }}"
          {% if version == selected %}aria-current="page"{% endif %}>
         <span class="version-list__label">{{ version.label }}</span>
-        {% if version.pk == cue.current_version_id %}<span class="version-list__current">current</span>{% endif %}
+        {% if version.pk == cue.current_version_id %}<span class="version-list__current">Current</span>{% endif %}
         <span class="version-list__meta">{{ version.written_to.turnover.label|default:"no picture" }} · {{ version.created_at|date:short_format }}</span>
       </a>
     </li>

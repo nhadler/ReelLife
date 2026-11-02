@@ -144,7 +144,7 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
     thumbnail_upload = forms.FileField(
         label="Thumbnail",
         required=False,
-        help_text="A still from the film: JPEG, PNG, WebP or GIF under 2 MB.",
+        help_text="JPEG, PNG, WebP or GIF under 2 MB.",
         widget=forms.FileInput(
             attrs={"accept": "image/jpeg,image/png,image/webp,image/gif"}
         ),
