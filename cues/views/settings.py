@@ -318,9 +318,12 @@ def departments(request: HttpRequest, project_id: int) -> HttpResponse:
     """One department's status list at a time, chosen by tab (?list=)."""
     project = get_object_or_404(models.Project, pk=project_id)
     labels = dict(models.DepartmentStatus.Field.choices)
-    field = request.GET.get("list", models.DEPARTMENT_STATUS_FIELDS[0])
-    if field not in labels:
-        field = models.DEPARTMENT_STATUS_FIELDS[0]
+    # The known name, not the request's string, goes on into the redirect.
+    wanted = request.GET.get("list")
+    field = next(
+        (name for name in labels if name == wanted),
+        models.DEPARTMENT_STATUS_FIELDS[0],
+    )
     data = request.POST if request.method == "POST" else None
     formset = forms.DepartmentFormSet(data, instance=project, field=field)
     if (

@@ -2,7 +2,10 @@
 
 import re
 
-_LAST_NUMBER = re.compile(r"^(?P<prefix>.*?)(?P<digits>\d+)(?P<suffix>\D*)$")
+# The prefix is empty or ends in a non-digit, so matching stays linear.
+_LAST_NUMBER = re.compile(
+    r"^(?P<prefix>(?:.*\D)?)(?P<digits>\d+)(?P<suffix>\D*)$"
+)
 
 
 def next_number(number: str) -> str:

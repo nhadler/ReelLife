@@ -64,6 +64,6 @@ def restore(request: HttpRequest, project_id: int, cue_id: int) -> HttpResponse:
         messages.success(request, f"Restored {cue.number}.")
     url = reverse("cues:trash", args=[project.pk])
     number = request.POST.get("page", "")
-    return HttpResponseRedirect(
-        f"{url}?page={number}" if number.isdigit() else url
-    )
+    if number.isdigit():
+        return HttpResponseRedirect(f"{url}?page={int(number)}")
+    return HttpResponseRedirect(url)

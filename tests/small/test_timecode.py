@@ -305,3 +305,10 @@ def test_parse_shift_drop_frame_counts_real_time() -> None:
 def test_parse_shift_refuses(text: str) -> None:
     with pytest.raises(timecode.TimecodeError):
         timecode.parse_shift(text, RATE_23_976)
+
+
+def test_parse_shift_rejects_long_input_quickly() -> None:
+    # Matching stays linear: this would take minutes if it backtracked.
+    with pytest.raises(timecode.TimecodeError):
+        timecode.parse_shift(" " * 50_000 + "x", RATE_24)
+    assert timecode.parse_shift(" - 48 ", RATE_24) == -48

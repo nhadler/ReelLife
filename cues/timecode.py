@@ -334,7 +334,7 @@ def format_offset(frames: int, rate: Rate) -> str:
 
 
 _SHIFT_RE = re.compile(
-    r"^\s*(?P<sign>[+-]?)\s*(?P<body>\d+(?:[.:]\d+){0,3})\s*$"
+    r"^\s*(?:(?P<sign>[+-])\s*)?(?P<body>\d+(?:[.:]\d+){0,3})\s*$"
 )
 
 

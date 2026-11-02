@@ -66,3 +66,10 @@ def test_suffixes() -> None:
     assert numbering.with_suffix("1m05", "s") == "1m05s"
     assert numbering.with_suffix("1m05a", "") == "1m05"
     assert numbering.with_suffix("Main", "s") == "Main"
+
+
+def test_last_number_matches_long_input_quickly() -> None:
+    # Matching stays linear: this would take minutes if it backtracked.
+    assert numbering.suffix_of("0" * 50_000 + "!") == "!"
+    assert numbering.step_number("x" * 50_000, 1) is None
+    assert numbering.with_suffix("1m05", "s") == "1m05s"

@@ -82,6 +82,6 @@ def undo(
         messages.success(request, f"{verb} {original.label}.")
     url = reverse("cues:activity", args=[project_id])
     number = request.POST.get("page", "")
-    return HttpResponseRedirect(
-        f"{url}?page={number}" if number.isdigit() else url
-    )
+    if number.isdigit():
+        return HttpResponseRedirect(f"{url}?page={int(number)}")
+    return HttpResponseRedirect(url)

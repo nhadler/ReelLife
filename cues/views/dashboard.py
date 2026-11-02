@@ -152,8 +152,8 @@ def bulk(request: HttpRequest) -> HttpResponse:
     else:
         messages.error(request, "That isn't something the projects can do.")
     back = request.POST.get("next", "")
-    if not url_has_allowed_host_and_scheme(
+    if url_has_allowed_host_and_scheme(
         back, allowed_hosts={request.get_host()}
     ):
-        back = reverse("cues:dashboard")
-    return HttpResponseRedirect(back)
+        return HttpResponseRedirect(back)
+    return HttpResponseRedirect(reverse("cues:dashboard"))
