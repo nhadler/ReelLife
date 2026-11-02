@@ -3410,9 +3410,8 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 /* The active eye at each row's end. */
 .cell--active {
   display: flex;
-  align-items: center;
   justify-content: center;
-  padding: 0 !important;
+  padding-inline: 0 !important;
 }
 
 .active-toggle {
@@ -3623,15 +3622,35 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   line-height: 1.35;
 }
 
-/* Pictures, ticks and the active eye stay in the middle. */
+/* Ticks, checkboxes and the active eye share that top line: AG Grid's
+   own wrappers centre them otherwise (Nick, Nov 1: "inconsistent"). */
 .cue-grid
-  .ag-cell:is(
-    [col-id='thumbnail'],
-    [col-id='ag-Grid-SelectionColumn'],
-    [col-id='_active']
-  ):not(.ag-cell-inline-editing) {
-  align-items: center;
-  padding-top: 0;
+  .ag-cell
+  :is(
+    .ag-cell-wrapper,
+    .ag-checkbox-cell,
+    .ag-selection-checkbox,
+    .ag-checkbox
+  ) {
+  align-items: flex-start;
+  height: auto;
+}
+
+/* A 16px box level with the first line of 13px text beside it. */
+.cue-grid .ag-cell .ag-checkbox-input-wrapper {
+  margin-top: 1px;
+}
+
+/* The eye is one line tall, so it sits on the first line like the text. */
+.cue-grid .ag-cell .active-toggle {
+  height: calc(1.35em + 2px);
+  margin-top: -1px;
+  line-height: 1.35;
+}
+
+/* A thumbnail fills a single-line row; in a taller one it sits at the top. */
+.cue-grid .ag-cell[col-id='thumbnail']:not(.ag-cell-inline-editing) {
+  padding-top: 2px;
 }
 
 /* The bar's links and New cue keep to one line in narrow windows. */
