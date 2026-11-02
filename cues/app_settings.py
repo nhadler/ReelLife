@@ -100,7 +100,7 @@ class AppSettings(models.Model):
         ONE = "one", "One at a Time"
 
     # Whether the Schedule works every project each day, each at its own
-    # pace, or one at a time, earliest deadline first (Nick, Nov 1).
+    # pace, or one at a time, earliest deadline first.
     schedule_projects = models.CharField(
         "projects at once",
         max_length=8,

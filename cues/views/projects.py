@@ -1,4 +1,4 @@
-"""Creating a project and its main page (7.4)."""
+"""Creating a project and its main page."""
 
 from typing import Any
 

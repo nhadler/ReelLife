@@ -126,7 +126,7 @@ class Context:
 def cue_thumbnail_url(cue: models.Cue) -> str:
     """The cue's thumbnail, else the project's (unless turned off), else ''.
 
-    Nick, Oct 31: cues inherit the project thumbnail, per project.
+    The project setting controls whether cues inherit its thumbnail.
     """
     if cue.thumbnail:
         return reverse("cues:cue_thumbnail", args=[cue.pk, cue.thumbnail_name])

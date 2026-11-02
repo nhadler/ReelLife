@@ -1,6 +1,6 @@
 """Re-seeds the eight standard views with their columns.
 
-Writers and Publishers join the Cue Sheet view, now that cues have shares (Oct 31). Frozen copy of cues.defaults.global_views() at the time of
+Writers and Publishers join the Cue Sheet view, now that cues have shares. Frozen copy of cues.defaults.global_views() at the time of
 writing. Reverting leaves the newer columns in place (harmless).
 """
 

@@ -1,4 +1,4 @@
-"""Project notes: general and per kind (Oct 31)."""
+"""Project notes: general and per kind."""
 
 from collections.abc import Callable
 import re

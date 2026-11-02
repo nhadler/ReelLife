@@ -1,9 +1,8 @@
-"""End-to-end fixtures: a live ReelLife, a real fake OIDC server, axe.
+"""End-to-end fixtures: ReelLife, a fake OIDC server and axe.
 
 Runs the app with Django's live server (test settings, every middleware,
 the strict CSP) and signs in through the fake OIDC provider served over
-HTTP, driven by Playwright (decided Oct 30 to use the live server
-rather than the container, which the container tests already cover).
+HTTP, driven by Playwright. Container deployment is tested separately.
 """
 
 from collections.abc import Callable, Iterator

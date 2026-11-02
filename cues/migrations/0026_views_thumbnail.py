@@ -1,6 +1,6 @@
 """Re-seeds the eight standard views with their columns.
 
-Thumbnail leads every view (Oct 31). Frozen copy of cues.defaults.global_views() at the time of
+Thumbnail leads every view. Frozen copy of cues.defaults.global_views() at the time of
 writing. Reverting leaves the newer columns in place (harmless).
 """
 

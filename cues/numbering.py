@@ -33,7 +33,7 @@ def is_valid(number: str, pattern: str) -> bool:
 def misfit(number: str, pattern: str) -> str:
     """Why a new or renamed cue can't take `number`, or '' if it can.
 
-    Nick, Nov 1: typed numbers keep to Valid Cue Numbers, as imports do.
+    Typed numbers must match Valid Cue Numbers, as imported numbers do.
     """
     if is_valid(number, pattern):
         return ""

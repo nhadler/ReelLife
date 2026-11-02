@@ -1,10 +1,8 @@
-"""P1's "done when" against the composer's real sessions.
+"""Import, edit, conform, undo and export using real session files.
 
-The composer can import a real Pro Tools session text, see every cue
-with correct timecodes, add versions, change statuses, log a new
-turnover, re-import and see which cues moved, undo a bad import, and
-export a cue log to Excel. The real files stay on this machine
-(fixtures/real/, kept out of git), so this skips where they're absent.
+Checks cue timecodes, versions, statuses, turnovers, re-imports, undo
+and Excel export. Session files are kept out of git in fixtures/real/.
+These tests skip when the files are absent.
 """
 
 import datetime

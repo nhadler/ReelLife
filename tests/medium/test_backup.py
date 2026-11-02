@@ -1,4 +1,4 @@
-"""Backup and restore (4.2; 12.1 "backup → restore round trip")."""
+"""Backup validation, restore and round-trip tests."""
 
 from collections.abc import Callable, Iterator
 import contextlib

@@ -1,4 +1,4 @@
-"""Saving a project's department status lists (settings, Oct 31).
+"""Saving a project's department status lists.
 
 A cue keeps the label of its department status, so renaming an entry
 renames it on the project's cues, and an entry that cues use can't be

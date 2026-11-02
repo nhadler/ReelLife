@@ -1,4 +1,4 @@
-"""PDFs from HTML templates, by WeasyPrint (Nick; Oct 31).
+"""PDFs from HTML templates, rendered by WeasyPrint.
 
 The cue log, wall chart and version notes are Django templates styled by
 pdf.css, landscape Letter. The renderer fetches nothing over the network:

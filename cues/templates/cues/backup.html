@@ -24,7 +24,7 @@
     </form>
     <details class="backup__details">
       <summary>Technical Details</summary>
-      <p class="muted">A backup holds every project, cue, setting and change, with thumbnails, but not the break-glass sign-in. Restore it into a fresh install only, from this version of ReelLife; everyone is signed out after.</p>
+      <p class="muted">Includes all projects, cues, settings, history and thumbnails. Excludes emergency sign-in credentials. Restoring requires an install with no projects and a backup from the same ReelLife version, and signs everyone out.</p>
       <p class="muted">Schema: {% for app, name in schema.items %}{{ app }} {{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}. A database snapshot is also written every night to the data directory's <code>snapshots</code> folder, keeping 14.</p>
     </details>
   </section>

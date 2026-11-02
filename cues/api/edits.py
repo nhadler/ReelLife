@@ -318,7 +318,7 @@ def _sub_status(
 ) -> models.SubStatusOption | None:
     """An option by id, none for blank, or one named by new text.
 
-    Typing a name that isn't on the list adds it (Oct 31),
+    Typing a name that isn't on the list adds it,
     inside the edit's change set: undoing the edit removes the new
     option again, unless another version has taken it up since.
     """

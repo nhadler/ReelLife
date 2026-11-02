@@ -1,4 +1,4 @@
-"""The project's Settings menu (Nick, Nov 1): grid actions from any page."""
+"""The project's Settings menu: grid actions from any page."""
 
 from typing import Any
 

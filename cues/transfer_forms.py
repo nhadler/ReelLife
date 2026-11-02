@@ -1,4 +1,4 @@
-"""The import and export dialogs' forms (7.8)."""
+"""The import and export dialogs' forms."""
 
 from typing import Any, cast
 

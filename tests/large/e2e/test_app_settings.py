@@ -1,4 +1,4 @@
-"""App Settings as one sheet that fits a laptop screen (Nick, Nov 1)."""
+"""App Settings as one sheet that fits a laptop screen."""
 
 from typing import Any
 

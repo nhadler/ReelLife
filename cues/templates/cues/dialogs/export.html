@@ -54,7 +54,7 @@
       <div class="export__long-play-choice">
         {% include "cues/includes/field.html" with field=form.leader %}
       </div>
-      <p class="muted export__long-play-choice">{{ project.reels_word }} end to end, each as long as its current picture; positions move, durations don't. Cues not yet on a {{ project.reel_word|lower }} with an IN and OUT are left blank.</p>
+      <p class="muted export__long-play-choice">Joins {{ project.reels_word|lower }} using their current picture lengths. Converts positions, not durations. Cues without a {{ project.reel_word|lower }} with an IN and OUT have blank positions.</p>
     </div>
   {% endif %}
   <fieldset class="export__options export__notes">
@@ -62,8 +62,8 @@
     {% include "cues/includes/field.html" with field=form.all_versions %}
   </fieldset>
 
-  <p class="muted export__chart">A card per cue, five across. PDF.</p>
-  <p class="muted export__notes">Each cue's notes, current version or all. PDF.</p>
+  <p class="muted export__chart">PDF cards for each cue, five per row.</p>
+  <p class="muted export__notes">PDF notes for each cue's current version or all versions.</p>
   <footer class="form-actions">
     <button class="button" type="submit">Export</button>
     <button class="button button--quiet" type="button" data-dialog-close>Cancel</button>

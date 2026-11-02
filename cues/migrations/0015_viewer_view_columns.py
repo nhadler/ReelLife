@@ -1,6 +1,6 @@
 """Re-seeds the eight standard views with their columns.
 
-Viewer's columns as checked on Oct 31 (the first list had Review Status out of place and lacked Current Picture, Scene and Cue Type). Frozen copy of cues.defaults.global_views() at the time of
+Viewer's columns, corrected (the first list had Review Status out of place and lacked Current Picture, Scene and Cue Type). Frozen copy of cues.defaults.global_views() at the time of
 writing. Reverting leaves the newer columns in place (harmless).
 """
 

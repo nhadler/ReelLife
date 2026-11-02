@@ -29,7 +29,7 @@ node_modules/
 /deploy/.env
 node_modules/
 
-# The composer's real exports stay on this machine (Nick, Oct 31).
+# Real session exports may contain private project data; keep them local.
 fixtures/real/*
 !fixtures/real/README.md
 

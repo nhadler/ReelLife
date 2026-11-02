@@ -1,4 +1,4 @@
-"""Themes, instrumentation and department statuses (Oct 31).
+"""Themes, instrumentation and department statuses.
 
 Each project has a list of themes and one of instruments; a version uses
 themes and a cue uses instruments, each optionally for a duration. The
@@ -55,8 +55,8 @@ class DepartmentStatus(_ListOption):
     """An entry in one of a project's department status lists.
 
     Orchestration, Recording, Mix, Music Edit and Licensing each have a
-    list per project, editable in settings (Nick, Oct 31); seeded from
-    defaults. A cue stores the label in its field, as it always did, so
+    list per project, editable in settings and seeded from defaults.
+    A cue stores the label in its field, so
     renaming an entry renames it on the cues that use it
     (services.department_lists).
     """

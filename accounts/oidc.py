@@ -1,6 +1,6 @@
 """Sign-in through an OpenID Connect provider such as PocketID.
 
-Builds on mozilla-django-oidc but tightens it:
+Uses mozilla-django-oidc with the following checks:
 
 - Endpoints come from the issuer's discovery document, fetched when a
   sign-in starts and cached, never at import or on ordinary requests.
@@ -46,7 +46,7 @@ _USERNAME_PREFIX = "oidc-"
 STORED_ACCESS = "oidc_access_token"
 STORED_ID = "oidc_id_token"
 STORED_REFRESH = "oidc_refresh_token"
-# Token endpoint and userinfo answers that mean "this token is no good".
+# Token endpoint and userinfo responses indicating an invalid token.
 _TOKEN_REFUSED = frozenset({400, 401, 403})
 
 
@@ -107,7 +107,7 @@ def _fetch_discovery(issuer: str) -> ProviderConfig:
     if not isinstance(doc, dict):
         raise DiscoveryError("discovery document is not an object")
     # OIDC Discovery 1.0 section 4.3: the issuer must match exactly; we
-    # only forgive a trailing slash in our own configuration.
+    # ignore a trailing slash in our own configuration.
     if doc.get("issuer", "").rstrip("/") != issuer.rstrip("/"):
         raise DiscoveryError("discovery issuer does not match OIDC_ISSUER")
     try:

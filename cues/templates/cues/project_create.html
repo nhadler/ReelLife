@@ -39,7 +39,7 @@
         <h2 id="band-picture">Picture</h2>
       </div>
       <div class="band__body">
-        {# Folded away until wanted (Nick, Nov 1); open when it has errors. #}
+        {# Optional turnover fields; expand on validation errors. #}
         <details class="fold"{% if first.errors or reels.total_error_count %} open{% endif %}>
           <summary>First Turnover</summary>
           {{ first.non_field_errors }}

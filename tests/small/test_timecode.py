@@ -1,4 +1,4 @@
-"""Tests for cues.timecode, including the design's timecode table."""
+"""Timecode examples and property tests for cues.timecode."""
 
 import fractions
 
@@ -20,7 +20,7 @@ ALL_RATES = [
     RATE_59_94_DF,
 ]
 
-# The design's timecode test table (it had to pass before the models).
+# Timecode examples across frame rates and input formats.
 
 
 @pytest.mark.parametrize(

@@ -1,4 +1,4 @@
-"""The export dialog and its downloads (9).
+"""The export dialog and its downloads.
 
 Exports only read, so viewers may use them too. The dialog is a plain
 GET form: the browser downloads the file and the page stays put.

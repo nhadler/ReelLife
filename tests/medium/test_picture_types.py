@@ -1,4 +1,4 @@
-"""Picture types do what they say (Nick, Nov 1).
+"""Picture type names, labels and validation.
 
 Reels and acts are numbered, clips are letters and numbers, and long
 play is one picture with no name; the app's words follow the type.

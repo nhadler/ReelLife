@@ -44,7 +44,7 @@
   <nav class="project-bar__links" aria-label="Project">
     <a href="{% url 'cues:project' project.pk %}"{% if tab == "cues" %} aria-current="page"{% endif %} title="The cues">
       {% include "cues/includes/icon.html" with name="cues" %}<span>Cues</span></a>
-    {# Labelled when there's room; icons with tooltips in narrow windows (Nick, Oct 31). #}
+    {# Show labels when space allows, otherwise icons with tooltips. #}
     <a class="project-bar__icon" href="{% url 'cues:picture' project.pk %}"{% if tab == "picture" %} aria-current="page"{% endif %} data-palette="Picture" title="Picture">
       {% include "cues/includes/icon.html" with name="picture" %}<span>Picture</span></a>
     {% if tab == "cues" %}

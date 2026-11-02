@@ -1,7 +1,6 @@
 """Title Case for names and labels.
 
-Nick, Oct 31: "if it's a title, both words are capitalised". Headings,
-buttons, tabs, menu items, column headers and field labels use Title
+Headings, buttons, tabs, menu items, column headers and field labels use Title
 Case; sentences (help text, messages) don't. Small joining words stay
 lower case unless first or last, and words with capitals past their
 first letter (IN, OUT, BPM, ReelLife) or with digits (#, 1m01, v2) are

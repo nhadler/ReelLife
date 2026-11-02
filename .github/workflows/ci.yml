@@ -87,7 +87,7 @@ jobs:
         run: uv run pytest -m large tests/large -p no:xdist -v --ignore=tests/large/e2e
 
   e2e:
-    # A composer's day in Chromium, with axe-core on every page.
+    # Browser tests in Chromium, with axe-core accessibility checks.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

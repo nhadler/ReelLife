@@ -1,7 +1,7 @@
 """Days off: shared by every project, or one project's.
 
-A clickable calendar (days-off.js) edits these formsets, which stay the
-source of truth and work without JavaScript.
+The calendar (days-off.js) edits these formsets. They can also be
+submitted without JavaScript.
 """
 
 import datetime
@@ -26,7 +26,7 @@ class _DayOffForm(forms.ModelForm):  # type: ignore[type-arg]
 
 
 class _DaysOff(forms.BaseModelFormSet):  # type: ignore[type-arg]
-    """Days off: a day added twice, or already off, is simply skipped.
+    """Skips duplicate dates and dates already marked as days off.
 
     Shared days off, or one project's (`project`), never both at once.
     """

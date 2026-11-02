@@ -1,6 +1,6 @@
 """Writers, publishers and their shares of each cue.
 
-One directory of parties is shared by every project (Nick, Oct 31). A
+One directory of parties is shared by every project. A
 cue's shares say who wrote and published it, in what role and for what
 percentage; they feed the PRO cue sheet. A project's default shares (or
 its series', when it has none) are given to each new composition, and

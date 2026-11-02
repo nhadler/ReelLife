@@ -1,6 +1,6 @@
 """Project notes: general notes and one per kind of cue note.
 
-Decided Oct 31: a project has General notes plus project-wide notes for
+A project has General notes plus project-wide notes for
 each kind of note a cue carries (spotting, notes, revision, conform,
 orchestration, recording, mix, cue sheet). Tracked by history, so an
 edit can be undone like any other. Re-exported from cues.models.

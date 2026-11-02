@@ -7,7 +7,7 @@ finds 1m01 Main Title. Cues rank exact numbers first, then numbers that
 start with a word, then the project being looked at, then active cues.
 
 A word may also match a cue's scene or notes (columns.SEARCHED_NOTES),
-in any of its versions, not only the current one (Nick, Nov 1). Cues
+in any of its versions, not only the current one. Cues
 found that way come after every number and title match, each with a
 snippet of where it matched.
 """

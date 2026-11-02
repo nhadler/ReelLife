@@ -1,4 +1,4 @@
-"""Project settings, a page per section (Nick; Oct 31).
+"""Project settings, a page per section.
 
 General, Picture and Cue Sheet edit parts of the project itself;
 Statuses, Lists and Departments its lists; Deadlines the dates. Views and

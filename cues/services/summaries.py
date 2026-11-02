@@ -54,9 +54,8 @@ class Pace:
 
     Attributes:
         due: The composition deadline.
-        days: Days left to work: today, or the deadline's start date
-            while it's ahead, through the deadline, every day but days
-            off (decided Oct 30; start dates Nov 1).
+        days: Days left to work, excluding days off: from today, or the
+            deadline's start date if later, through the deadline.
         calendar_days: The same span counting every day.
         write_seconds: Music still to compose (To Write, In Progress),
             per working day, rounded up.
@@ -158,7 +157,7 @@ def pace(project: models.Project, today: datetime.date) -> Pace | None:
 
 @dataclasses.dataclass(frozen=True)
 class Breakdown:
-    """The spreadsheet-style breakdown (Nick, Nov 1), as display text.
+    """The spreadsheet-style breakdown, as display text.
 
     Attributes:
         total: All the music counted, e.g. '9:39'.

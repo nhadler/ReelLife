@@ -1,7 +1,7 @@
 """Moves the notes fields onto versions; gives every cue a v1.
 
-Decided Oct 30: IN/OUT notes, spotting notes, temp, notes,
-scene description, key, BPM and meter describe a delivery, so they live
+IN/OUT notes, spotting notes, temp, notes, scene description, key, BPM
+and meter describe a delivery, so they live
 on each version, and every cue has at least v1 to hold them. Existing
 versions all get the cue's values (the only ones there were); cues
 without a version get v1, written to their reel's current turnover so it

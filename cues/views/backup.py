@@ -1,4 +1,4 @@
-"""Backup download and restore, for admins (4.2)."""
+"""Backup download and restore, for admins."""
 
 from collections.abc import Callable
 import io

@@ -1,4 +1,4 @@
-{# The project's More menu (Nick, Nov 1; renamed from Settings after the second design review): everything else a project offers, in one place; the bar itself has Cues, Picture and Notes. data-palette offers items to Ctrl+K, except where the grid's Tools menu already does. Needs project and tab (and section on a settings page). On the cue overview, Export, Copy JSON and Stats act on the grid (grid.js, data-grid-action); elsewhere they open it to do so (?do=). #}
+{# Project More menu: the project pages and actions not in the project bar. data-palette registers Ctrl+K commands not already in Tools. Needs project and tab, plus section on settings pages. Export, Copy JSON and Stats use data-grid-action on the cue overview; other pages open it with ?do=. #}
 {% load project_menu %}
 {% url 'cues:project' project.pk as overview %}
 {% settings_sections as sections %}

@@ -1,8 +1,7 @@
 # Security policy
 
-ReelLife holds a composer's unreleased work and their collaborators'
-details, and is built to be reachable from the internet. Security
-reports are welcome and taken seriously.
+ReelLife stores unreleased project data and collaborator details. Report
+security issues privately so they can be fixed before disclosure.
 
 ## Reporting a vulnerability
 
@@ -27,7 +26,7 @@ Anything that lets someone read or change data they shouldn't, run
 code, or get around sign-in or roles: the web app, the MCP endpoint at
 `/mcp`, the Docker image and the systemd install.
 
-How ReelLife defends itself: OIDC sign-in with PKCE and roles enforced on the server, a strict
+Security controls include OIDC sign-in with PKCE and server-side role checks, a strict
 Content Security Policy with no inline script, rate limits on writes,
 `defusedxml` for XML imports, formula escaping in CSV and Excel exports,
 a read-only container running as an unprivileged user, and weekly

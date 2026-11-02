@@ -67,14 +67,6 @@ The development server uses a mock identity provider, so you don't need to confi
 
 ReelLife uses Django 6.1 with server-rendered templates, HTMX, Alpine.js (CSP build), and AG Grid Community for the cue grid. SQLite handles storage.
 
-The backend is split into three Django apps:
-
-- `cues`: Projects, cues, versions, imports, exports, and scheduling
-- `accounts`: OIDC authentication and user roles
-- `mcp_server`: MCP endpoint
-
-The `reellife` package contains the project settings.
-
 Timecodes are stored as integer frame counts at the project's nominal frame rate rather than as formatted strings.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.

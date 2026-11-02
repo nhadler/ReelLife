@@ -1,4 +1,4 @@
-"""Imports and batch edits write many cues in few queries (7.4).
+"""Imports and batch edits write many cues in few queries.
 
 Each cue still gets its own history rows, so undo is unchanged; what's
 gone is re-checking, for every cue, rows the write already holds.

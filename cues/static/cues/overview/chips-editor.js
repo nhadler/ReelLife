@@ -1,5 +1,5 @@
 /**
- * @fileoverview Theme and Instrumentation cells (13): chips
+ * @fileoverview Theme and Instrumentation cells: chips
  * in their colours, and a popup editor. The editor lists the cue's
  * chips, each with an optional duration (m:ss) and a remove button, and
  * a box to add more: it filters the project's list as you type, and a

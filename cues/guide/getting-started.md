@@ -17,9 +17,8 @@ music.
 4. Under **Picture**, open **First Turnover** to log the cut you're
    spotting from: its label (e.g. `LOCK`), the date it arrived, and each
    reel's IN and OUT. You can also do this later on the Picture page.
-5. Under **Deadlines**, set the composition deadline at least: the daily
-   pace counts down to it. **Your Days Off** are days you won't write,
-   for every project.
+5. Under **Deadlines**, set a composition deadline to calculate the
+   daily writing pace. **Your Days Off** apply across all projects.
 6. **Cue Sheet and Numbering** is optional: production company,
    distributor and so on for the cue sheet, and which cue numbers
    imports accept.
@@ -34,15 +33,15 @@ music.
 - A project opens on its **cue overview**: the header (progress and the
   **Breakdown**), a timeline of the cues, and the grid.
 - The project bar has **Cue Details**, **Picture**, **Notes** and the
-  **Settings** menu (☰), which lists everything else: Conform, Stats,
-  import and export, Copy JSON, and each settings page.
+  **Settings** menu (☰). Settings includes Conform, Stats, import and
+  export, Copy JSON and the project settings pages.
 - **Search** (Ctrl+K, ⌘K on a Mac) finds any project or cue (`1m01`,
   `1m01 main`, or a production number and cue, `BH101 1m01`) and runs
   commands such as New Cue or Export Cues. It also finds cues by their
-  scene and notes, in any version (`foghorn`); those come after the
-  number and title matches, with a line showing where the words are,
+  scene and notes in any version (`foghorn`). These results follow
+  number and title matches and show where the text was found,
   e.g. *Spotting Notes (v1): …as the door closes…*. Choosing one found
   in an older version opens the cue on that version.
-- Your picture in the top right opens your name, email and role,
-  **Your Days Off**, **Help**, **Manage Account** (your PocketID
+- Click your picture in the top right to see your name, email and role,
+  or open **Your Days Off**, **Help**, **Manage Account** (your PocketID
   account) and **Sign Out**.

@@ -1,4 +1,4 @@
-"""The new cue and new version dialogs (5 "Version rules").
+"""The new cue and new version dialogs.
 
 htmx loads each form into the page's <dialog>. Invalid forms re-render
 in place (200); a save answers 204 with HX-Trigger events that reload the

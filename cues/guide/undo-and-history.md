@@ -7,23 +7,22 @@ page or of Credits.
 - **Undo** (Ctrl+Z, or Tools, Undo Last Change) takes back your own
   latest change in the project, then the one before, and so on.
 - A cue's page lists its **History**: each change, who made it and
-  when, what it changed. **Revert** undoes that one change when nothing
+  when, and what changed. **Revert** undoes that change when nothing
   later depends on it; otherwise undo the later change first.
 - Changes made by an AI assistant say so ("via MCP").
 
 ## Activity
 
 **Activity** (Settings menu, Project) lists every change to the
-project, newest first: when, who, what and how many cues it touched.
+project, newest first, with the time, author, action and cue count.
 **Undo** takes back any of them, not just your latest, as long as
 nothing it changed was changed again afterwards; such an entry says
 **Changed Since**, so undo the later change first. An undo can itself
 be taken back with **Redo**. Viewers see the list without the buttons.
 
-Undo also refuses rather than leave things broken: it won't remove a
-status, sub status, theme, instrument, department status or writer
-that cues use now, or put back something whose name or cue number is
-taken since, and it says which.
+Undo won't remove a status, sub status, theme, instrument, department
+status or writer still in use. It also won't restore an entry if its
+name or cue number is now taken. The error identifies the conflict.
 
 ## Trash
 
@@ -38,9 +37,9 @@ deletion from Activity.
 ## Lists and Credits
 
 Saving Project Settings' Statuses, Lists, Departments or Cue Sheet page
-is one change set too, so Undo and Activity take it back, renamed cues
-and all. The **Credits** page has its own **Undo Last Change** for your
-latest change there, and lists its recent changes.
+is also one change set. Undo and Activity restore both the lists and
+any affected cues. The **Credits** page has its own **Undo Last Change**
+and Recent Changes list.
 
 Not undoable: views, the General, Picture and Deadlines settings pages,
 and App Settings. Admins also have nightly backups (see *Settings and

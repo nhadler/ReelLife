@@ -63,6 +63,7 @@ this project follows [Semantic Versioning](https://semver.org/).
   are buttons; empty lists show one line and Add.
 - On a phone the top bar's links fade at the edge, and the cue page
   skips its section index.
+- Clarified Help text, UI descriptions, and contributor documentation.
 
 ### Fixed
 

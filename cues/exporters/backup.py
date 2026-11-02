@@ -1,4 +1,4 @@
-"""Full backups and restore (4.2).
+"""Full backups and restore.
 
 A backup is a ZIP: manifest.json (format, the schema it was made with,
 row counts), data.json (every row of the accounts and cues apps, history

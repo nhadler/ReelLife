@@ -1,4 +1,4 @@
-"""Moves tags to Sub Status (decided Oct 31).
+"""Moves tags to Sub Status.
 
 Each project's tags become its Sub Status list (the default order first,
 then the rest by name), and each cue's first tag (by name) becomes its

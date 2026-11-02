@@ -1,7 +1,8 @@
 """Re-seeds the eight standard views with their columns.
 
-Difficulty joins Standard, next to Priority (Nick, Oct 31). Frozen copy of cues.defaults.global_views() at the time of
-writing. Reverting leaves the newer columns in place (harmless).
+Adds Difficulty next to Priority in Standard. Uses a frozen copy of
+cues.defaults.global_views() at the time of writing. Reverting leaves
+the newer columns in place.
 """
 
 from django.apps.registry import Apps

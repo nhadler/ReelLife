@@ -293,7 +293,7 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
             "release_date": forms.DateInput(attrs={"type": "date"}),
             "company_address": forms.Textarea(attrs={"rows": 3}),
         }
-        # Help explains these; the page only names them (design review).
+        # Help explains these fields.
         labels = {"lanes": "Timeline lanes"}
         help_texts = {
             "lanes": "",
@@ -476,11 +476,10 @@ class TurnoverForm(forms.ModelForm):  # type: ignore[type-arg]
 
 
 class FirstTurnoverForm(TurnoverForm):
-    """New Project's optional first turnover (Nick, Nov 1).
+    """New Project's optional first turnover.
 
-    Left blank, the project starts without one, as before. A label or a
-    named reel means one is wanted: then the label and date are needed,
-    and the reels table (a NewReelFormSet) needs a reel.
+    If left blank, no turnover is created. Entering a label or a reel
+    name requires a label, a date and at least one reel in NewReelFormSet.
     """
 
     class Meta(TurnoverForm.Meta):
@@ -644,7 +643,7 @@ DeadlineFormSet = forms.inlineformset_factory(
 )
 
 
-# Dialogs (5 "Version rules").
+# Cue and version dialogs.
 
 
 def _choices(form: forms.BaseForm, name: str) -> forms.ModelChoiceField:  # type: ignore[type-arg]
