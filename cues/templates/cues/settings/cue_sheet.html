@@ -31,12 +31,12 @@
       <div class="fields">{% include "cues/includes/numbering.html" %}</div>
     </fieldset>
     <section class="form-section">
-      <h2>Default Shares</h2>
+      <h3>Default Shares</h3>
       {% include "cues/includes/inline_table.html" with fs=defaults add="Add Share" %}
     </section>
     {% if series_defaults %}
       <section class="form-section">
-        <h2>Series Default Shares <span class="muted">{{ project.series }}</span></h2>
+        <h3>Series Default Shares <span class="muted">{{ project.series }}</span></h3>
         {% include "cues/includes/inline_table.html" with fs=series_defaults add="Add Share" %}
       </section>
     {% endif %}
@@ -46,7 +46,7 @@
   </form>
   {% if project.default_shares.exists or project.series.default_shares.exists %}
     <section class="form-section">
-      <h2>Apply to Existing Cues</h2>
+      <h3>Apply to Existing Cues</h3>
       <form method="post" action="{% url 'cues:apply_default_shares' project.pk %}">
         {% csrf_token %}
         <div class="fields">

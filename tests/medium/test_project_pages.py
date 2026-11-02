@@ -727,7 +727,7 @@ def test_themes_and_instruments_are_project_lists(editor: Client) -> None:
     assert str(project.themes.get()) == "Aurora"
     assert str(project.instruments.get()) == "Strings"
     html = editor.get(url).content.decode()
-    assert "<h2>Themes</h2>" in html and "<h2>Instruments</h2>" in html
+    assert "<h3>Themes</h3>" in html and "<h3>Instruments</h3>" in html
 
 
 # Bulk actions on the Projects page

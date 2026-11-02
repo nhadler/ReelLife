@@ -3,6 +3,7 @@
 from typing import Any
 
 from django.apps import AppConfig
+from django.db.models import fields as model_fields
 from django.db.models.signals import post_delete
 from django.db.models.signals import post_migrate
 
@@ -20,7 +21,7 @@ class CuesConfig(AppConfig):
     name = "cues"
 
     def ready(self) -> None:
-        """Connects the history and thumbnail signal handlers."""
+        """Connects the signal handlers and sets the blank choice label."""
         # pylint: disable=import-outside-toplevel
         from simple_history import signals
 
@@ -39,3 +40,6 @@ class CuesConfig(AppConfig):
             sender="cues.Project",
             dispatch_uid="reellife.delete_thumbnail_file",
         )
+        # Blank choices in every select show a dash, not Django's
+        # "- Select an option -" (Django reads this setting at runtime).
+        model_fields.BLANK_CHOICE_LABEL = "—"

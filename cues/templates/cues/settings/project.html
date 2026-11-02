@@ -2,7 +2,7 @@
 
 {% block settings %}
   <section class="form-section">
-    <h2>Duplicate</h2>
+    <h3>Duplicate</h3>
     <form method="post" action="{% url 'cues:project_duplicate' project.pk %}" novalidate>
       {% csrf_token %}
       <div class="fields">{% include "cues/includes/field.html" with field=duplicate_form.title wide=True %}</div>
@@ -11,7 +11,7 @@
   </section>
 
   <section class="form-section">
-    <h2>{% if project.archived %}Archived{% else %}Archive{% endif %}</h2>
+    <h3>{% if project.archived %}Archived{% else %}Archive{% endif %}</h3>
     <form method="post" action="{% url 'cues:project_archive' project.pk %}">
       {% csrf_token %}
       {% if project.archived %}
@@ -26,7 +26,7 @@
 
   {% if can_delete %}
   <section class="form-section danger-zone">
-    <h2>Delete</h2>
+    <h3>Delete</h3>
       <form method="post" action="{% url 'cues:project_delete' project.pk %}" novalidate>
         {% csrf_token %}
         <div class="fields">{% include "cues/includes/field.html" with field=delete_form.confirm wide=True %}</div>

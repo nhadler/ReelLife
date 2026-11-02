@@ -52,8 +52,10 @@ this project follows [Semantic Versioning](https://semver.org/).
 - A project's work waits for its composition deadline's start date: the
   Schedule plans nothing for it before then, and Per Day counts the
   days from the start. Other projects have those days to themselves.
-- New Project is laid out like App Settings, with Create Project under
-  the fields.
+- New Project and every Project Settings page use the App Settings
+  layout: each section's name in a left column, its fields beside it,
+  and a rule between sections.
+- Empty choices in every menu show a dash.
 - Option labels are in Title Case throughout, and blank choices show a
   dash. Two to four choices are one segmented control; longer lists are
   menus. Explanations moved from dialogs into Help.

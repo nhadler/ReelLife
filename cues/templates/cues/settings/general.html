@@ -5,6 +5,7 @@
     {% csrf_token %}
     {% include "cues/includes/form_errors.html" %}
     <fieldset class="form-section">
+      <legend>Project</legend>
       <div class="fields">
         {% include "cues/includes/field.html" with field=form.title wide=True %}
         {% include "cues/includes/field.html" with field=form.sub_title %}
@@ -24,7 +25,7 @@
         <div class="fields">
           {% include "cues/includes/dropzone.html" with field=form.thumbnail_upload prompt="Drop a new still" %}
           {% if project.thumbnail %}
-            {% include "cues/includes/field.html" with field=form.remove_thumbnail %}
+            {% include "cues/includes/field.html" with field=form.remove_thumbnail wide=True %}
           {% endif %}
           {% include "cues/includes/field.html" with field=form.cue_thumbnail_fallback wide=True %}
         </div>

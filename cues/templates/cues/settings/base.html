@@ -16,7 +16,7 @@
         {% endfor %}
       </ul>
     </nav>
-    <div class="settings__body">
+    <div class="settings__body settings-sheet">
       <div class="page-head">{% include "cues/includes/page_title.html" with title=page_title slug="settings-and-roles" sub=True %}</div>
       {% if read_only %}<div class="callout" role="note">{% include "cues/includes/icon.html" with name="eye" %}<p class="callout__title">View only. Changing settings needs the editor role.</p></div>{% endif %}
       {# For viewers the fieldset is disabled, which disables every control in it. #}

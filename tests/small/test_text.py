@@ -8,6 +8,7 @@ from typing import Any, cast
 from django import forms
 import pytest
 
+from cues import models
 from cues import text
 from cues.templatetags import text as text_tags
 
@@ -78,3 +79,8 @@ def test_fixed_option_labels_are_title_case() -> None:
         if label not in _AS_GIVEN and label != text.title_case(label)
     ]
     assert not wrong
+
+
+def test_blank_choices_show_a_dash() -> None:
+    field = forms.ModelChoiceField(queryset=models.Project.objects.none())
+    assert field.empty_label == "—"

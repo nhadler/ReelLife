@@ -768,7 +768,7 @@ kbd.palette__detail {
   border: 0;
 }
 
-.form-section legend {
+.form-section > legend {
   margin-bottom: calc(var(--space) * 1.5);
   padding: 0;
   font-size: var(--step-1);
@@ -4372,21 +4372,78 @@ button.stats__name:hover,
   align-items: start;
 }
 
-/* App Settings as a sheet: each section is one row, its name in a left
-   column as wide as the project settings' sidebar, its controls on four
-   columns every row shares, so the whole page fits without scrolling. */
+/* App Settings and Project Settings as sheets: each section is one row,
+   its name in a 12rem left column and its content beside it, with a rule
+   between sections. Fields sit on four columns every row shares. */
 .settings-sheet .form-section {
   display: grid;
   grid-template-columns: 12rem minmax(0, 1fr);
-  column-gap: calc(var(--space) * 4);
+  gap: calc(var(--space) * 1.5) calc(var(--space) * 4);
   margin: 0;
   padding: calc(var(--space) * 2) 0;
   border-top: 1px solid var(--rule);
 }
 
-.settings-sheet .form-section:first-of-type {
+/* The first section on the page has no rule above it. */
+.settings-sheet .settings__fields > .form-section:first-child,
+.settings-sheet
+  .settings__fields
+  > :is(:first-child, nav + form)
+  > .form-section:not(.form-section ~ .form-section) {
   padding-top: 0;
   border-top: 0;
+}
+
+/* A section named by a heading (lists, tables, actions): the name sits
+   level with the top of the content. */
+.settings-sheet section.form-section > :is(h3, .form-section__name) {
+  grid-column: 1;
+  margin: 0;
+}
+
+.settings-sheet section.form-section > :not(h3, .form-section__name) {
+  grid-column: 2;
+}
+
+.settings-sheet .form-section h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--step-0);
+  line-height: 1.4;
+}
+
+.form-section__name a {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+/* Actions inside a section sit under its content. */
+.settings-sheet .form-section .form-actions {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.settings-sheet .form-section :is(.fields, .inline-table) + .form-actions {
+  margin-top: calc(var(--space) * 1.5);
+}
+
+/* Department tabs line up with the content column. */
+.settings-sheet .settings__fields > nav {
+  margin-left: calc(12rem + var(--space) * 4);
+}
+
+.settings-sheet .danger-zone {
+  border-width: 1px 0 0;
+  border-color: var(--rule);
+  border-radius: 0;
+  padding-inline: 0;
+}
+
+.settings-sheet .danger-zone > h3 {
+  color: var(--danger);
 }
 
 /* Floated, a legend is laid out like any grid item; level with the
@@ -4419,6 +4476,15 @@ button.stats__name:hover,
 @media (max-width: 48rem) {
   .settings-sheet .form-section {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .settings-sheet section.form-section > :is(h3, .form-section__name),
+  .settings-sheet section.form-section > :not(h3, .form-section__name) {
+    grid-column: 1;
+  }
+
+  .settings-sheet .settings__fields > nav {
+    margin-left: 0;
   }
 
   .settings-sheet .form-section > legend {
@@ -6195,23 +6261,6 @@ td.party-table__ipi {
 }
 
 /* A section's heading with a quiet link at its end. */
-.section-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space);
-}
-
-.section-head h2 {
-  margin-bottom: var(--space);
-}
-
-.section-head a {
-  color: var(--slate);
-  font-size: var(--step--1);
-}
-
 /* A viewer's settings read as text: the disabled controls lose their
    boxes, and Save, Add Row, Remove and uploads go. */
 .settings__fields:disabled :is(input:not([type='checkbox']), select, textarea) {

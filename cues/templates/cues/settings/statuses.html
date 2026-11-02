@@ -4,11 +4,12 @@
   <form method="post" novalidate>
     {% csrf_token %}
     <section class="form-section">
+      <h3>Statuses</h3>
       {% include "cues/includes/inline_table.html" with fs=status_set add="Add Status" %}
       <div class="fields">{% include "cues/includes/field.html" with field=sync_form.sync_review_status wide=True %}</div>
     </section>
     <section class="form-section">
-      <h2>Sub Statuses</h2>
+      <h3>Sub Statuses</h3>
       {% include "cues/includes/inline_table.html" with fs=sub_set add="Add Sub Status" %}
     </section>
     <div class="form-actions">
