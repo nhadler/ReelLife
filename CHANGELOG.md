@@ -6,6 +6,10 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-01
+
+The first stable release.
+
 ### Added
 
 - **Schedule On…** (the cue page's ⋯ menu, the grid's right-click menu,
@@ -66,6 +70,14 @@ this project follows [Semantic Versioning](https://semver.org/).
 - On a phone the top bar's links fade at the edge, and the cue page
   skips its section index.
 - Clarified Help text, UI descriptions, and contributor documentation.
+- The grid's toolbar has Export beside Import.
+- Picture names use an en dash everywhere ("Reel 1 – c0917").
+- Timecodes and cue numbers are set in mono in tool previews, the
+  viewer's cue page, Shift's fields and the cue page's ‹ › buttons.
+- The Schedule On dialog's title reads "Schedule On: 1m01".
+- New Project's deadline names match the other field labels.
+- Calendar Feed's Make a Link and Download .ics sit side by side.
+- In the light theme, pale statuses (To Write) have a thin outline.
 
 ### Fixed
 
@@ -76,6 +88,9 @@ this project follows [Semantic Versioning](https://semver.org/).
 - Menus and the Filter panel no longer run past the bottom of the
   window.
 - Delete Project stays disabled until the project's title is typed.
+- On a phone, project cards no longer cut off their figures' captions
+  or start a line with a stray "·".
+- Opening Breakdown no longer moves the project bar's links.
 
 ## [0.4.0] - 2026-11-01
 
@@ -120,5 +135,6 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v0.4.0...HEAD
-[0.4.0]: https://github.com/nhadler/reellife/releases/tag/v0.4.0
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/nhadler/reellife/releases/tag/v1.0.0
+[0.4.0]: https://github.com/nhadler/reellife/commit/1d2429b

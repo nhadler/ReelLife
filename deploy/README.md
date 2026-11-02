@@ -65,10 +65,10 @@ docker compose ps        # web should become "healthy"
 ```
 
 The image is `ghcr.io/nhadler/reellife`, for `linux/amd64` and
-`linux/arm64`, tagged by release (`0.4.0`, `0.4`) and `latest`. Each one
+`linux/arm64`, tagged by release (`1.0.0`, `1.0`, `1`) and `latest`. Each one
 carries an SBOM and build provenance; check it came from this
 repository's release workflow with
-`gh attestation verify oci://ghcr.io/nhadler/reellife:0.4.0 --repo nhadler/reellife`.
+`gh attestation verify oci://ghcr.io/nhadler/reellife:1.0.0 --repo nhadler/reellife`.
 
 To build from a checkout instead, add the build override:
 `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build`
@@ -99,10 +99,10 @@ To build from a checkout instead, add the build override:
 ## Bare Linux with systemd + uv
 
 Tested on Debian trixie with systemd 257; any recent systemd works.
-Clone a release tag (below, `v0.4.0`) rather than `main`.
+Clone a release tag (below, `v1.0.0`) rather than `main`.
 
 ```sh
-sudo git clone --branch v0.4.0 https://github.com/nhadler/reellife.git /opt/reellife
+sudo git clone --branch v1.0.0 https://github.com/nhadler/reellife.git /opt/reellife
 sudo sh /opt/reellife/deploy/systemd/install.sh
 sudo $EDITOR /etc/reellife/reellife.env
 echo '<pocketid client secret>' | sudo tee /etc/reellife/oidc_client_secret
@@ -203,7 +203,7 @@ From a checkout: `git pull`, then `just up`.
 systemd:
 
 ```sh
-cd /opt/reellife && sudo git fetch --tags && sudo git checkout v0.4.1   # the new release
+cd /opt/reellife && sudo git fetch --tags && sudo git checkout v1.0.1   # the new release
 sudo sh deploy/systemd/install.sh
 sudo systemctl restart reellife.service
 ```

@@ -39,12 +39,12 @@ docker compose up -d
 
 By default, ReelLife listens on `127.0.0.1:8000`. You'll need a reverse proxy with TLS, such as Caddy, Traefik, or Tailscale Serve.
 
-Container images are available for `linux/amd64` and `linux/arm64` at [ghcr.io/nhadler/reellife](https://github.com/nhadler/reellife/pkgs/container/reellife). Images are tagged with their release version (`0.4.0`, `0.4`) and `latest`.
+Container images are available for `linux/amd64` and `linux/arm64` at [ghcr.io/nhadler/reellife](https://github.com/nhadler/reellife/pkgs/container/reellife). Images are tagged with their release version (`1.0.0`, `1.0`, `1`) and `latest`.
 
 To pin a specific version, set the following in `.env`:
 
 ```env
-REELLIFE_IMAGE=ghcr.io/nhadler/reellife:0.4.0
+REELLIFE_IMAGE=ghcr.io/nhadler/reellife:1.0.0
 ```
 
 See [deploy/README.md](deploy/README.md) for OIDC configuration, environment variables, backups, upgrades, and installation without Docker (systemd + uv).
