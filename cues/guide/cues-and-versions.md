@@ -16,9 +16,33 @@ match are kept until you change them.
 ## Edit in the Grid
 
 - Click a cell to edit it (or double-click, if you turned single-click
-  editing off in App Settings). Enter or Tab saves. In notes cells,
-  Enter adds a line or saves, depending on App Settings; Shift+Enter
-  always adds a line and Ctrl+Enter (⌘+Enter) always saves.
+  editing off in App Settings). Enter or Tab saves.
+- Click a notes cell, or press Enter on it, to write in the notes panel
+  beside the grid. It saves as you type. Hover over a notes cell to read
+  the whole note.
+
+## Notes
+
+Notes are written in Markdown, and the grid and the panel show them
+formatted:
+
+- `**bold**` and `*italic*` for **bold** and *italic*
+- `## Heading` for a heading
+- `- item` or `1. item` for a list
+- `- [ ] to do` and `- [x] done` for a check list
+- `[label](https://…)`, or a plain web address, for a link
+- `> quote` for a quote
+
+The panel's toolbar adds these for you; Ctrl+B, Ctrl+I and Ctrl+K
+(⌘ on a Mac) do bold, italic and a link. Enter in a list starts the next
+item, and Enter on an empty item ends the list. **Preview** shows the
+note formatted, and you can tick its check boxes there. A cell with a
+check list shows how many items are done ("3/7").
+
+- Click another cue's row, or press Alt+↑ and Alt+↓, to move the panel
+  to the cue before or after. It keeps showing the same notes.
+- Esc, or Ctrl+Enter (⌘+Enter), goes back to the grid. If App Settings
+  say Enter saves, Enter does too and Shift+Enter adds a line.
 - Each save is one change, so **Undo** (Ctrl+Z) takes it back.
 - Edit several cues at once: select them (tick their boxes; Shift-click
   for a range), then change one cell. ReelLife asks whether to apply it

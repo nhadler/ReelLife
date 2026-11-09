@@ -32,6 +32,8 @@ import {editView} from './overview/view-editor.js';
 import {drawTimeline, fitLabels} from './overview/timeline.js';
 import {setUpTools} from './overview/tools.js';
 import {askBatch} from './overview/batch.js';
+import {checklist, render as renderNotes} from './overview/markdown.js';
+import {setUpNotesPanel} from './overview/notes-panel.js';
 
 const {createGrid, themeQuartz} = window.agGrid;
 
@@ -190,10 +192,12 @@ const FILTER_GROUPS = [
 
 /** @type {?Object} */
 let api = null;
+/** The cue notes panel (setUpNotesPanel), once the grid is up. */
+let notesPanel = null;
 /** @type {!Object<string, !Object>} */
 let columnMeta = {};
 
-/** App Settings' Enter in a notes cell: true when Enter saves the cell. */
+/** App Settings' Enter in notes: true when Enter finishes writing. */
 let enterSaves = false;
 /** @type {!Array<!Object>} */
 let views = [];
@@ -820,8 +824,6 @@ function columnDef(meta, layout) {
     ...widthBounds(meta),
     pinned: layout.pinned,
     headerTooltip: headerTip(meta),
-    tooltipValueGetter: (params) =>
-      meta.editor === 'markdown' ? params.value : undefined,
   };
   if (meta.editor === 'text') {
     Object.assign(def, fullNotes(meta));
@@ -913,12 +915,14 @@ function columnDef(meta, layout) {
     case 'checkbox':
       return {...def, cellDataType: 'boolean'};
     case 'markdown':
+      // Written in the notes panel (click or Enter), not in the cell.
       return {
         ...def,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        cellEditorParams: {maxLength: 10000, rows: 8, cols: 50},
-        suppressKeyboardEvent: notesKeepEnter,
+        editable: false,
+        cellClass: 'cell--notes',
+        cellRenderer: notesRenderer,
+        tooltipValueGetter: (params) => params.value || undefined,
+        tooltipComponent: NotesTooltip,
         ...fullNotes(meta),
       };
     default:
@@ -927,21 +931,41 @@ function columnDef(meta, layout) {
 }
 
 /**
- * Whether the grid leaves a key to a notes editor's text box: Enter adds
- * a line unless App Settings say Enter saves the cell. Ctrl+Enter (⌘ on
- * a Mac) always saves and Shift+Enter always adds a line.
- * @param {!Object} params AG Grid suppressKeyboardEvent params.
- * @return {boolean}
+ * A notes cell: the note formatted, led by its check-list progress.
+ * @param {!Object} params AG Grid cell renderer params.
+ * @return {?HTMLElement}
  */
-function notesKeepEnter(params) {
-  const event = params.event;
-  return (
-    params.editing &&
-    event.key === 'Enter' &&
-    !enterSaves &&
-    !event.ctrlKey &&
-    !event.metaKey
-  );
+function notesRenderer(params) {
+  if (!params.value) {
+    return null;
+  }
+  const cell = document.createElement('div');
+  cell.className = 'md md--cell';
+  const {done, total} = checklist(params.value);
+  if (total) {
+    const count = document.createElement('span');
+    count.className = 'md-count' + (done === total ? ' md-count--done' : '');
+    count.textContent = `${done}/${total}`;
+    count.title = `${done} of ${total} done`;
+    cell.append(count);
+  }
+  cell.append(renderNotes(params.value));
+  return cell;
+}
+
+/** The hover card on a notes cell: the whole note, formatted. */
+class NotesTooltip {
+  /** @param {!Object} params AG Grid tooltip params. */
+  init(params) {
+    this.gui = document.createElement('div');
+    this.gui.className = 'notes-card md';
+    this.gui.append(renderNotes(params.value));
+  }
+
+  /** @return {!HTMLElement} */
+  getGui() {
+    return this.gui;
+  }
 }
 
 /**
@@ -2379,6 +2403,8 @@ async function toggleSidePanel(name, button) {
     closeSidePanel();
     return;
   }
+  await notesPanel?.flush();
+  panel.classList.remove('side-panel--notes');
   await window.htmx.ajax('GET', button.dataset.panelUrl, {
     target: '#side-panel',
     swap: 'innerHTML',
@@ -2392,9 +2418,28 @@ async function toggleSidePanel(name, button) {
   }
 }
 
+/**
+ * The shown cue before or after one, in the grid's order.
+ * @param {number} id
+ * @param {number} delta -1 or +1.
+ * @return {?Object} The cue's row.
+ */
+function shownNeighbour(id, delta) {
+  const rows = [];
+  api.forEachNodeAfterFilterAndSort((node) => {
+    if (!node.data._group) {
+      rows.push(node.data);
+    }
+  });
+  const at = rows.findIndex((row) => row.id === id);
+  return at === -1 ? null : (rows[at + delta] ?? null);
+}
+
 /** Closes the panel beside the grid. */
-function closeSidePanel() {
+async function closeSidePanel() {
   const panel = document.getElementById('side-panel');
+  await notesPanel?.flush();
+  panel.classList.remove('side-panel--notes');
   panel.hidden = true;
   panel.dataset.showing = '';
   panel.replaceChildren();
@@ -2674,6 +2719,13 @@ async function start() {
     onCellContextMenu: (params) =>
       params.event && !params.data?._group && cellMenu(params),
     onCellClicked: (params) => {
+      if (!params.data?._group && notesPanel) {
+        if (columnMeta[params.column.getColId()]?.editor === 'markdown') {
+          notesPanel.open(params.data, params.column.getColId());
+        } else {
+          notesPanel.follow(params.data);
+        }
+      }
       // Alt-click a cue's checkbox: every shown cue with its status
       // (Alt+Shift adds them).
       if (
@@ -2694,6 +2746,20 @@ async function start() {
     stopEditingWhenCellsLoseFocus: true,
     undoRedoCellEditing: false,
     tooltipShowDelay: 400,
+    // The pointer can move onto a notes card to scroll it.
+    tooltipInteraction: true,
+    // Enter on a notes cell opens it in the notes panel.
+    onCellKeyDown: (params) => {
+      const field = params.column?.getColId();
+      if (
+        params.event?.key === 'Enter' &&
+        !params.data?._group &&
+        columnMeta[field]?.editor === 'markdown'
+      ) {
+        params.event.preventDefault();
+        notesPanel.open(params.data, field);
+      }
+    },
     isExternalFilterPresent: () => true,
     doesExternalFilterPass: (node) =>
       node.data._group
@@ -2702,7 +2768,10 @@ async function start() {
     onCellValueChanged: saveEdit,
     // Cells that can't be edited open the cue instead.
     onCellDoubleClicked: (params) => {
-      if (!params.colDef.editable) {
+      if (
+        !params.colDef.editable &&
+        params.colDef.cellClass !== 'cell--notes'
+      ) {
         openDetails();
       }
     },
@@ -2746,6 +2815,27 @@ async function start() {
     } else if (action === 'clear') {
       clearFilters();
     }
+  });
+  notesPanel = setUpNotesPanel({
+    panel: document.getElementById('side-panel'),
+    label: (field) => columnMeta[field]?.label ?? field,
+    row: (id) => allRows.find((row) => row.id === id) ?? null,
+    save: (row, field, value) => sendEdit(row, field, value),
+    neighbour: shownNeighbour,
+    canEdit: config.canEdit,
+    enterSaves: () => enterSaves,
+    onShow: () => {
+      for (const id of Object.values(PANEL_TOGGLES)) {
+        document.getElementById(id)?.setAttribute('aria-expanded', 'false');
+      }
+    },
+    onDone: (id, field) => {
+      const node = api.getRowNode(String(id));
+      if (node?.rowIndex !== null && node?.rowIndex !== undefined) {
+        api.ensureNodeVisible(node);
+        api.setFocusedCell(node.rowIndex, field);
+      }
+    },
   });
   buildTabs();
   showView(initialView());

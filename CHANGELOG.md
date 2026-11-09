@@ -15,6 +15,13 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Notes are written in a panel beside the grid: click a notes cell or
+  press Enter on it. It has a Markdown toolbar (bold, italic, heading,
+  lists, check lists, links) with shortcuts, a Preview whose check boxes
+  can be ticked, saving as you type, and Alt+↑/↓ to move to the cue
+  before or after. Grid cells show notes formatted, with check-list
+  progress ("3/7"), and hovering shows the whole note in a card you can
+  scroll.
 - The calendar feed has an event for each cue on each day it's planned,
   titled with the cue and that day's music ("1m02 Main Title (0:43 of
   2:32)"), instead of one event a day listing them.

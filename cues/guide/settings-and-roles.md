@@ -19,7 +19,7 @@ Open these pages from the project bar's **Settings** menu:
 
 **Settings** in the top bar contains app-wide preferences: theme (dark
 or light), date format, timecode display (leading zero, subframes),
-one-click editing, Enter in notes cells, version numbering and which
+one-click editing, Enter in notes, version numbering and which
 cue types count toward progress.
 
 ## Roles
