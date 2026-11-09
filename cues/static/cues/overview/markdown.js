@@ -13,7 +13,24 @@ const QUOTE = /^>\s?(.*)$/;
 // Code, bold, italic, a [link](url), or a bare URL, in that order.
 const INLINE =
   /`([^`]+)`|\*\*(.+?)\*\*|__(.+?)__|\*([^*\s][^*]*?)\*|_([^_\s][^_]*?)_|\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/;
-const SAFE_URL = /^(https?:\/\/|mailto:)/i;
+const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
+
+/**
+ * A link's address, if it's a web or mail address.
+ * @param {string} text
+ * @return {?string} The address as the browser reads it, else null.
+ */
+function safeUrl(text) {
+  if (!/^(https?:\/\/|mailto:)/i.test(text)) {
+    return null;
+  }
+  try {
+    const url = new URL(text);
+    return SAFE_PROTOCOLS.has(url.protocol) ? url.href : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * A note's check-list items: how many there are and how many are ticked.
@@ -77,8 +94,8 @@ function inline(parent, text) {
       inline(node, em ?? em2);
       parent.append(node);
     } else {
-      const url = href ?? bare;
-      if (SAFE_URL.test(url)) {
+      const url = safeUrl(href ?? bare);
+      if (url) {
         const link = document.createElement('a');
         link.href = url;
         link.target = '_blank';

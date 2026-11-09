@@ -12,7 +12,10 @@ from tests.large.e2e.conftest import SignInAs
 
 pytestmark = pytest.mark.django_db(transaction=True, serialized_rollback=True)
 
-FIRST = "## Spotting\n- [ ] Lower strings\n- [x] Kalimba out"
+FIRST = (
+    "## Spotting\nSee [the cut](https://example.com/cut).\n\n"
+    "- [ ] Lower strings\n- [x] Kalimba out"
+)
 # Markup and a script link must show as text, never run.
 HOSTILE = "<img src=x onerror=alert(1)> [click](javascript:alert(1)) **bold**"
 
@@ -110,6 +113,9 @@ def test_writing_notes_in_the_panel(
     expect(cell.locator(".md-count")).to_have_text("2/3")
     expect(panel.locator(".notes-panel__preview strong")).to_have_text(
         "Brass swell"
+    )
+    expect(panel.get_by_role("link", name="the cut")).to_have_attribute(
+        "href", "https://example.com/cut"
     )
 
     # Alt+↓ shows the next cue's notes; its markup stays text.
