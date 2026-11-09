@@ -117,16 +117,20 @@ def test_the_feed_lists_each_days_cues(
         'attachment; filename="reellife-schedule.ics"'
     )
     calendar = icalendar.Calendar.from_ical(body.content)
-    events = {e.decoded("dtstart"): e for e in calendar.walk("VEVENT")}
-    assert min(events) == MON - _DAY  # yesterday, as it was planned
-    today = events[MON]
-    assert str(today["summary"]).startswith("ReelLife: 1m01 Main Title")
-    assert str(today["uid"]) == "reellife-schedule-20261102@testserver"
-    description = str(today["description"])
-    assert "1m01 Main Title · Night Ferry · " in description
+    events = list(calendar.walk("VEVENT"))
+    assert min(e.decoded("dtstart") for e in events) == MON - _DAY  # as planned
+    today = [e for e in events if e.decoded("dtstart") == MON]
+    assert len(today) > 1  # one event per cue
+    first = next(e for e in today if "1m01" in str(e["summary"]))
+    assert str(first["summary"]).startswith("1m01 Main Title (")
+    assert str(first["uid"]) == f"reellife-20261102-cue-{cue.pk}@testserver"
+    assert str(first["url"]) == f"http://testserver/cues/{cue.pk}/"
+    description = str(first["description"])
+    assert description.startswith("Night Ferry · ")
     assert f"http://testserver/cues/{cue.pk}/" in description
-    split = [e for e in events.values() if " of " in str(e["description"])]
-    assert split  # the Hard cue is split: "… of 9:00"
+    assert len({str(e["uid"]) for e in events}) == len(events)
+    split = [e for e in events if " of " in str(e["summary"])]
+    assert split  # the Hard cue is split: "(… of 9:00)"
     assert "Hard" in str(split[0]["description"])
 
 

@@ -5,11 +5,11 @@ once when it's made; only its SHA-256 is kept, and it's looked up by
 that. Making a new link revokes the old. A feed stops working once its
 user is inactive or loses every ReelLife role.
 
-The feed has one all-day event per day with work: the last 30 days as
-they were planned, and the next 90.
+The feed has an all-day event for each cue on each day it's planned:
+the last 30 days as they were planned, and the next 90.
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 import datetime
 import hashlib
 import secrets
@@ -71,45 +71,37 @@ def _music(part: scheduler.Part) -> str:
     return today if part.whole else f"{today} of {clock(round(part.of_music))}"
 
 
-def _event(
+def _events(
     agenda: agenda_service.Agenda,
     date: datetime.date,
     parts: Iterable[scheduler.Part],
     base_url: str,
     host: str,
-) -> icalendar.Event:
-    """A day's event: its cues in the title, each in the description."""
-    shown = list(parts)
-    total = clock(sum(round(p.music) for p in shown))
-    names = ", ".join(
-        " ".join(
-            filter(None, (agenda.cues[p.key].number, agenda.cues[p.key].title))
-        )
-        for p in shown
-    )
-    lines = []
-    for part in shown:
+) -> Iterator[icalendar.Event]:
+    """A day's cues, each as its own all-day event."""
+    for part in parts:
         cue = agenda.cues[part.key]
         project = agenda.projects.get(cue.project)
+        name = " ".join(filter(None, (cue.number, cue.title)))
         facts = [
-            " ".join(filter(None, (cue.number, cue.title))),
             project.title if project else "",
             _music(part),
             cue.difficulty,
             "Revision" if cue.revise else "",
         ]
-        lines.append(" · ".join(filter(None, facts)))
-        lines.append(f"{base_url}{cue.url}")
-    event = icalendar.Event()
-    event.add("uid", f"reellife-schedule-{date:%Y%m%d}@{host}")
-    event.add("dtstamp", timezone.now())
-    event.add("dtstart", date)
-    event.add("dtend", date + datetime.timedelta(days=1))
-    event.add("summary", f"ReelLife: {names} ({total})")
-    event.add("description", "\n".join(lines))
-    event.add("url", f"{base_url}/schedule/?day={date.isoformat()}")
-    event.add("transp", "TRANSPARENT")
-    return event
+        event = icalendar.Event()
+        event.add("uid", f"reellife-{date:%Y%m%d}-cue-{cue.id}@{host}")
+        event.add("dtstamp", timezone.now())
+        event.add("dtstart", date)
+        event.add("dtend", date + datetime.timedelta(days=1))
+        event.add("summary", f"{name} ({_music(part)})")
+        event.add(
+            "description",
+            f"{' · '.join(filter(None, facts))}\n{base_url}{cue.url}",
+        )
+        event.add("url", f"{base_url}{cue.url}")
+        event.add("transp", "TRANSPARENT")
+        yield event
 
 
 def ics(agenda: agenda_service.Agenda, base_url: str) -> bytes:
@@ -127,11 +119,11 @@ def ics(agenda: agenda_service.Agenda, base_url: str) -> bytes:
                 scheduler.Part(p.key, p.effort, p.music, p.music)
                 for p in agenda.past[date]
             ]
-            calendar.add_component(_event(agenda, date, parts, base_url, host))
+            for event in _events(agenda, date, parts, base_url, host):
+                calendar.add_component(event)
     last = agenda.today + datetime.timedelta(days=AHEAD_DAYS)
     for day in agenda.plan.days:
         if day.date <= last:
-            calendar.add_component(
-                _event(agenda, day.date, day.parts, base_url, host)
-            )
+            for event in _events(agenda, day.date, day.parts, base_url, host):
+                calendar.add_component(event)
     return bytes(calendar.to_ical())
