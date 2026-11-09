@@ -1,7 +1,5 @@
 """Help: the user guide's pages (cues/services/guide.py)."""
 
-from importlib import metadata
-
 from django.conf import settings
 from django.http import Http404
 from django.http import HttpRequest
@@ -10,15 +8,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
 from cues.services import guide
-
-
-def version() -> str:
-    """ReelLife's installed version, e.g. '1.0.0'."""
-    try:
-        # None when the installed metadata is damaged.
-        return metadata.version("reellife") or "development"
-    except metadata.PackageNotFoundError:  # a checkout that was never installed
-        return "development"
+from reellife import updates
 
 
 @require_GET
@@ -35,7 +25,7 @@ def page(request: HttpRequest, slug: str = "") -> HttpResponse:
             "topics": topics,
             "topic": found,
             "body": guide.html(found),
-            "version": version(),
+            "version": updates.installed(),
             "source_url": settings.REELLIFE_SOURCE_URL,
         },
     )

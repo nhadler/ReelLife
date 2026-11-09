@@ -72,6 +72,7 @@ TEMPLATES = [
                 "csp.context_processors.nonce",
                 "reellife.context_processors.preferences",
                 "reellife.context_processors.account",
+                "reellife.context_processors.version",
             ],
         },
     },
@@ -156,6 +157,9 @@ OIDC_ACCOUNT_URL = env.get("OIDC_ACCOUNT_URL", "")
 REELLIFE_SOURCE_URL = env.get(
     "REELLIFE_SOURCE_URL", "https://github.com/nhadler/reellife"
 )
+# Whether the scheduler asks GitHub (REELLIFE_SOURCE_URL's repository)
+# for the latest release, so the profile menu can tell admins about it.
+UPDATE_CHECK = env.get_bool("REELLIFE_UPDATE_CHECK", default=True)
 
 
 def origin(url: str) -> str:

@@ -302,6 +302,51 @@ a {
   font-size: 0.85rem;
 }
 
+/* The installed version at the foot of the menu; amber, with the newer
+   release's page, when an admin has an update waiting. */
+.profile__version {
+  display: grid;
+  margin: 0;
+  padding: 0.35rem 0.6rem 0.2rem;
+  color: var(--slate);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.profile__version--update {
+  border-radius: var(--radius);
+  color: var(--amber);
+  text-decoration: none;
+}
+
+.profile__version--update:hover,
+.profile__version--update:focus-visible {
+  background: var(--panel-raised);
+}
+
+.profile__version--update span {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* A dot on the picture, so the waiting update shows without opening
+   the menu. */
+.profile__button--update {
+  position: relative;
+}
+
+.profile__button--update::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  background: var(--amber);
+  content: '';
+}
+
 .topbar__search {
   display: inline-flex;
   align-items: center;

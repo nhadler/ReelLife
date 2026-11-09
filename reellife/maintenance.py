@@ -31,6 +31,7 @@ from django.utils import timezone
 from accounts import audit
 from cues.exporters import backup
 from cues.services import agenda
+from reellife import updates
 
 _LOGGER = logging.getLogger(__name__)
 _SNAPSHOT_GLOB = "reellife-[0-9]*.sqlite3"
@@ -236,6 +237,7 @@ def nightly(now: datetime.datetime) -> NightlyResult:
     # The schedule's plan for the day, kept so split cues in progress
     # know what's left (cues.services.agenda.record).
     agenda.nightly(timezone.localdate(now))
+    updates.check()
     result = NightlyResult(path, backup_path, purged, sessions)
     _LOGGER.info(
         "nightly maintenance: snapshot=%s backup=%s audit_purged=%d "

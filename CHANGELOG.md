@@ -6,6 +6,13 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- The profile menu shows ReelLife's version. When a newer release is
+  out, admins see it there in amber with a link to its notes, and a dot
+  on their picture. The scheduler checks GitHub once a day;
+  `REELLIFE_UPDATE_CHECK=false` turns the check off.
+
 ## [1.0.0] - 2026-11-01
 
 The first stable release.

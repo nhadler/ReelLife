@@ -44,6 +44,7 @@ all with comments. Any variable can instead be read from a file by setting
 | `OIDC_GROUP_ADMIN`, `OIDC_GROUP_EDITOR`, `OIDC_GROUP_VIEWER` | Defaults `reellife-admins`, `reellife-editors`, `reellife-viewers`. |
 | `OIDC_ACCOUNT_URL` | Optional: where the profile menu's Manage Account goes. Default: PocketID's account page, `OIDC_ISSUER` + `/settings/account`. |
 | `REELLIFE_SOURCE_URL` | Optional: where Help's Source Code link goes. Default: this repository. If you run a modified copy for others, the AGPL asks you to point it at your source. |
+| `REELLIFE_UPDATE_CHECK` | Optional: `false` stops the daily check for a new release. Default `true`: the scheduler asks GitHub (`REELLIFE_SOURCE_URL`'s repository) for the latest release once a day and when it starts, and admins see it in the profile menu. Only the request itself is sent. |
 | `REELLIFE_TIME_ZONE` | Where times are shown, as an IANA name such as `America/Los_Angeles`. Default `UTC`. Times are always stored in UTC, so changing it is safe. |
 | `REELLIFE_BREAKGLASS_ENABLED` | Leave `false` (see "When PocketID is down"). |
 | `REELLIFE_DATA_DIR` | Set for you: `/data` in Docker, `/var/lib/reellife` with systemd. |
