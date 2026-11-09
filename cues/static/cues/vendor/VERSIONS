@@ -3,8 +3,8 @@
 htmx.org 2.0.11 0BSD htmx.min.js d6fdc75f204e6bdefa99b69bf1e6d4ac69b8a364f77929f45c13476b4000f717
 htmx.org 2.0.11 0BSD htmx.LICENSE d3d2456f76414f2456104660ebd65aff1c04cd7966b942bdabd63f3cdb316a38
 @alpinejs/csp 3.17.5 MIT alpine-csp.min.js 48c170c92032e527cbae71b8ce75cf1f96ca06fa869a6120ef0fe438d8e92c36
-ag-grid-community 36.2.0 MIT ag-grid-community.min.js 3b05777f78aa10b6d7fd020bc2076936b889e5a0ff9c1a764fdbe6aa19456993
-ag-grid-community 36.2.0 MIT ag-grid-community.LICENSE 31636f0472dda16bba11a7b78204e1f677b77452092e185a65cddd45b6c9fb29
+ag-grid-community 36.3.0 MIT ag-grid-community.min.js f736d7745fa031a448cf28e0aee1eadd8aecd7ea686f5cd004215f3737bb35bd
+ag-grid-community 36.3.0 MIT ag-grid-community.LICENSE 31636f0472dda16bba11a7b78204e1f677b77452092e185a65cddd45b6c9fb29
 @fontsource-variable/instrument-sans 5.3.0 OFL-1.1 instrument-sans-latin-wght.woff2 2ee17598a98d8a59e4df8152d015bec9ab8e4d5672cc0ab42bef806b568e3971
 @fontsource-variable/instrument-sans 5.3.0 OFL-1.1 instrument-sans-latin-ext-wght.woff2 c4fcfea41f2c1cfeea9211fa43679845454a1d0e0d7e95e069c7e73c4ae302d2
 @fontsource-variable/instrument-sans 5.3.0 OFL-1.1 instrument-sans.LICENSE c27a3c53c3beed7f5c26853afa15991478ff7145d3754a36b0382f84e10c0d03
