@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-09
+
 ### Added
 
 - The profile menu shows ReelLife's version. When a newer release is
@@ -25,6 +27,12 @@ this project follows [Semantic Versioning](https://semver.org/).
 - The calendar feed has an event for each cue on each day it's planned,
   titled with the cue and that day's music ("1m02 Main Title (0:43 of
   2:32)"), instead of one event a day listing them.
+- Runs on Django 6.1.3 and AG Grid 36.3.0.
+
+### Fixed
+
+- A very long cue number or Shift offset can no longer keep the server
+  busy matching it.
 
 ## [1.0.0] - 2026-11-01
 
@@ -155,6 +163,7 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/nhadler/reellife/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/nhadler/reellife/releases/tag/v1.0.0
 [0.4.0]: https://github.com/nhadler/reellife/commit/1d2429b
