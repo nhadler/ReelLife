@@ -12,6 +12,7 @@ DATA_DIR = pathlib.Path(tempfile.gettempdir()) / "reellife-test"
 DATABASES = {"default": sqlite_database(":memory:")}
 
 BASE_URL = "http://testserver"
+UPDATE_CHECK = False  # tests never call GitHub; they turn it on themselves
 OIDC_ISSUER = "https://id.example.test"
 OIDC_RP_CLIENT_ID = "reellife-test"
 OIDC_RP_CLIENT_SECRET = "reellife-test-secret-long-enough-for-hs256"  # noqa: S105  # nosec B105

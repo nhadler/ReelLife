@@ -1,7 +1,6 @@
 """The user guide: Help pages, and the MCP server's how-to."""
 
 from collections.abc import Callable, Iterator
-from importlib import metadata
 from typing import Any
 
 from django.test import Client
@@ -14,8 +13,8 @@ import pytest
 from accounts.models import Role
 from accounts.models import User
 from cues.services import guide
-from cues.views import help as help_view
 from mcp_server import server
+from reellife import updates
 from tests import factories
 
 pytestmark = pytest.mark.django_db
@@ -31,7 +30,7 @@ def test_every_guide_file_is_a_listed_topic() -> None:
 def test_help_pages(role_client: Callable[[Role], Client]) -> None:
     viewer = role_client(Role.VIEWER)
     first = viewer.get(reverse("cues:help")).content.decode()
-    assert f"ReelLife {help_view.version()}" in first
+    assert f"ReelLife {updates.installed()}" in first
     assert 'href="https://github.com/nhadler/reellife">Source Code</a>' in first
     assert '<h1 class="page-title help__title">Getting Started</h1>' in first
     assert "<li>On <strong>Projects</strong>, choose" in first
@@ -87,13 +86,3 @@ def test_pages_link_their_help_topic(
     html = role_client(Role.EDITOR).get(reverse(page)).content.decode()
     href = reverse("cues:help_topic", args=[topic])
     assert f'class="help-link" href="{href}"' in html
-
-
-def test_version_without_an_installed_package(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    def missing(name: str) -> str:
-        raise metadata.PackageNotFoundError(name)
-
-    monkeypatch.setattr(metadata, "version", missing)
-    assert help_view.version() == "development"

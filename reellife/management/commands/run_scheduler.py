@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from reellife import maintenance
+from reellife import updates
 
 
 class Command(BaseCommand):
@@ -31,6 +32,7 @@ class Command(BaseCommand):
         self.stdout.write(
             f"Scheduler running; nightly at {settings.NIGHTLY_HOUR_UTC}:00 UTC."
         )
+        updates.check()  # so admins hear of a release before the first night
         maintenance.run_forever(
             clock=timezone.now,
             wait=stop.wait,

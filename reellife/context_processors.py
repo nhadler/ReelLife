@@ -4,7 +4,9 @@ from django.conf import settings
 from django.db import DatabaseError
 from django.http import HttpRequest
 
+from accounts.models import Role
 from cues import models
+from reellife import updates
 
 
 def preferences(request: HttpRequest) -> dict[str, str]:
@@ -33,3 +35,18 @@ def account(request: HttpRequest) -> dict[str, str]:
     return {
         "account_url": settings.OIDC_ACCOUNT_URL or f"{issuer}/settings/account"
     }
+
+
+def version(request: HttpRequest) -> dict[str, object]:
+    """The installed version for the profile menu.
+
+    Admins also get any newer release (reellife.updates): only they can
+    install it.
+    """
+    context: dict[str, object] = {"app_version": updates.installed()}
+    if getattr(request.user, "role", "") == Role.ADMIN:
+        try:
+            context["update"] = updates.available()
+        except DatabaseError:  # error pages render without the cache
+            context["update"] = None
+    return context

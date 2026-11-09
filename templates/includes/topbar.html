@@ -18,7 +18,8 @@
   </button>
   {% with user=request.user %}
     <details class="menu profile">
-      <summary class="profile__button" aria-label="Account: {{ user }}" title="{{ user }}">
+      <summary class="profile__button{% if update %} profile__button--update{% endif %}"
+               aria-label="Account: {{ user }}{% if update %}, update available{% endif %}" title="{{ user }}">
         {% include "includes/avatar.html" %}
       </summary>
       <div class="menu__panel profile__panel">
@@ -41,6 +42,13 @@
           {% csrf_token %}
           <button class="menu__item" type="submit">Sign Out</button>
         </form>
+        <hr class="menu__rule">
+        {% if update %}
+          <a class="profile__version profile__version--update" href="{{ update.url }}" target="_blank" rel="noopener noreferrer">
+            Version {{ app_version }}<span>Update to {{ update.version }}</span></a>
+        {% else %}
+          <p class="profile__version">Version {{ app_version }}</p>
+        {% endif %}
       </div>
     </details>
   {% endwith %}

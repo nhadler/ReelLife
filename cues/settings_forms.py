@@ -53,7 +53,7 @@ class AppSettingsForm(forms.ModelForm):  # type: ignore[type-arg]
             "leading_zero": "Leading zero (01:00:10:00)",
             "subframes": "Show subframes",
             "single_click_edit": "Edit cells with one click",
-            "enter_behaviour": "Enter in a notes cell",
+            "enter_behaviour": "Enter in notes",
             "music_totals": "Progress counts",
             "schedule_easy": "Easy",
             "schedule_moderate": "Moderate",

@@ -93,7 +93,7 @@ finished rejoins the flow.
 ## In Your Calendar App
 
 **Calendar Feed** in the profile menu makes a link your calendar app can
-subscribe to: one all-day event per day with work, listing its cues,
+subscribe to: an all-day event for each cue on each day it's planned,
 the last 30 days as planned and the next 90. The link is shown once;
 copy it, or click **Subscribe in Calendar**. Anyone with the link can
 read your schedule, so **Revoke Link** if it gets out, and **Make a New

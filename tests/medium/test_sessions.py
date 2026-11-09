@@ -11,7 +11,11 @@ from accounts import oidc
 from accounts import sessions
 from accounts.models import Role
 
-START = datetime.datetime(2026, 11, 2, 9, 0, tzinfo=datetime.UTC)
+# Recent, so the test client's session (saved at START) hasn't expired
+# by the time a test reads it back outside the frozen clock.
+START = datetime.datetime.now(datetime.UTC).replace(
+    minute=0, second=0, microsecond=0
+)
 HOUR = datetime.timedelta(hours=1)
 
 
