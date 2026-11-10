@@ -577,10 +577,19 @@ kbd.palette__detail {
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  transition: transform 100ms ease-out;
 }
 
 .button:hover {
   filter: brightness(1.08);
+}
+
+/* A press shows at once; the release eases back. */
+@media (prefers-reduced-motion: no-preference) {
+  .button:active:not(:disabled) {
+    transform: scale(0.97);
+    transition-duration: 0s;
+  }
 }
 
 .button--quiet {
@@ -1986,7 +1995,7 @@ body:has(.overview) > .page {
 /* htmx request indicator; htmx's inline indicator styles are disabled. */
 .htmx-indicator {
   opacity: 0;
-  transition: opacity 200ms ease-in;
+  transition: opacity 200ms ease-out;
 }
 
 .htmx-request .htmx-indicator,

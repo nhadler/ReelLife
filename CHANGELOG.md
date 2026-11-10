@@ -6,6 +6,11 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Buttons shrink slightly while pressed (not with reduced motion), and
+  the loading indicator fades in faster.
+
 ## [1.2.0] - 2026-11-09
 
 ### Added
