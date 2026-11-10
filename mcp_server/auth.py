@@ -32,6 +32,7 @@ import requests
 from accounts import audit
 from accounts import models as account_models
 from accounts import oidc
+from reellife import updates
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -61,10 +62,17 @@ class Caller:
 def _signing_key(token: str, jwks_uri: str) -> Any:
     # The key set is cached for _JWKS_TTL, then fetched again; keys are
     # looked up in it each time (cache_keys=False), so a key PocketID
-    # retires stops verifying tokens once the set is refreshed.
+    # retires stops verifying tokens once the set is refreshed. It names
+    # ReelLife as the User-Agent: Cloudflare's Browser Integrity Check
+    # refuses Python's default one.
     client = _jwks.get(jwks_uri)
     if client is None:
-        client = jwt.PyJWKClient(jwks_uri, cache_keys=False, lifespan=_JWKS_TTL)
+        client = jwt.PyJWKClient(
+            jwks_uri,
+            cache_keys=False,
+            lifespan=_JWKS_TTL,
+            headers={"User-Agent": f"ReelLife/{updates.installed()}"},
+        )
         _jwks[jwks_uri] = client
     return client.get_signing_key_from_jwt(token).key
 

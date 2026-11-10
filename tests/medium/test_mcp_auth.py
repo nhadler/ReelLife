@@ -176,6 +176,7 @@ def test_signing_keys_come_from_one_cached_client(
     class Client:  # pylint: disable=too-few-public-methods
         def __init__(self, uri: str, **kwargs: Any) -> None:
             assert not kwargs["cache_keys"]
+            assert kwargs["headers"]["User-Agent"].startswith("ReelLife/")
             made.append(uri)
 
         def get_signing_key_from_jwt(self, token: str) -> Any:
