@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-09
+
 ### Added
 
 - **Color** (Project Settings, General, or New Project): one of eight
@@ -13,6 +15,12 @@ this project follows [Semantic Versioning](https://semver.org/).
   project bar, the bar and page washed lightly toward it; actions stay
   green), marks its card on Projects and the Overview, and colours its
   cues on the Schedule. Choosing one previews it before saving.
+
+### Fixed
+
+- AI assistants can sign in when PocketID is behind Cloudflare. ReelLife
+  now names itself when it fetches PocketID's signing keys, so
+  Cloudflare's Browser Integrity Check no longer refuses the request.
 
 ## [1.1.0] - 2026-11-09
 
@@ -171,7 +179,8 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/nhadler/reellife/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/nhadler/reellife/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/nhadler/reellife/releases/tag/v1.0.0
 [0.4.0]: https://github.com/nhadler/reellife/commit/1d2429b
