@@ -59,13 +59,13 @@ def test_dashboard_search_and_archived(editor: Client) -> None:
     factories.ProjectFactory.create(title="Old Film", archived=True)
     found = editor.get("/projects/?q=lh1 light").content.decode()  # every word
     assert re.search(
-        r'<li class="project"[^>]*the lighthouse[^>]*"\s*\n', found
+        r'<li class="project tone-\d"[^>]*the lighthouse[^>]*"\s*\n', found
     )
     assert re.search(r"data-no-match hidden>", found)
     # A search only hides cards, so clearing it brings the rest back.
     missed = editor.get("/projects/?q=nothing").content.decode()
     assert re.search(
-        r'<li class="project"[^>]*the lighthouse[^>]*" hidden', missed
+        r'<li class="project tone-\d"[^>]*the lighthouse[^>]*" hidden', missed
     )
     assert re.search(r"data-no-match>.*No Projects Match", missed, re.S)
     assert (
@@ -230,6 +230,8 @@ def test_create_form_renders(editor: Client) -> None:
     assert "First turnover" not in html
     assert "data-dropzone" in html
     assert 'value="standard"' in html and "checked" in html
+    # Automatic shows the first colour until the project exists.
+    assert "swatches__choice tone-0 swatches__choice--auto" in html
 
 
 def test_settings_show_the_projects_numbering(editor: Client) -> None:

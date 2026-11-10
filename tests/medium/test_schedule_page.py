@@ -193,6 +193,10 @@ def test_the_projects_list_picks_what_shows(
     # Each project is a ticked box, in its own tone.
     assert f'name="p" value="{film.pk}" checked' in every
     assert f"cal-project tone-{other.pk % 8}" in every
+    # A chosen colour replaces the automatic one.
+    other.color = "teal"
+    other.save()
+    assert "cal-project tone-2" in _page(viewer)
     response = viewer.get(
         reverse("cues:schedule"), {"f": "1", "p": [str(other.pk), "x", "999"]}
     )

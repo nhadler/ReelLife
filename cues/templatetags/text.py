@@ -5,6 +5,7 @@ import datetime
 from django import forms
 from django import template
 
+from cues import colors
 from cues import dates
 from cues import text
 
@@ -61,3 +62,14 @@ def stamp(value: datetime.datetime | None, short_format: str) -> str:
 def invalid_fields(form: forms.BaseForm) -> int:
     """How many of the form's visible fields have errors."""
     return sum(1 for field in form.visible_fields() if field.errors)
+
+
+@register.filter(name="tone_of")
+def tone_of(color: object, project: object = None) -> int:
+    """A colour choice's tone (colors.tone).
+
+    Automatic shows the one the project gets, or the first for a project
+    not made yet.
+    """
+    project_id = getattr(project, "pk", None)
+    return colors.tone(project_id, str(color or ""))

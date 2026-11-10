@@ -78,4 +78,4 @@ def test_projects_moved_to_their_own_page(
     _project("Night Ferry", None)
     page = role_client(Role.EDITOR).get("/projects/").content.decode()
     assert 'aria-current="page">Projects</a>' in page
-    assert 'class="project"' in page
+    assert 'class="project tone-' in page

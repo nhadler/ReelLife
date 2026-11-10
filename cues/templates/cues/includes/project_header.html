@@ -1,5 +1,6 @@
 {# The project bar and progress bar. Needs project, summary, tab. #}
-<header class="project-bar">
+{# data-tone: the project's colour, which tints the page (app.css). #}
+<header class="project-bar" data-tone="{{ project.tone }}">
   <span class="project-bar__thumb" aria-hidden="true">
     {% include "cues/includes/thumbnail.html" %}
   </span>

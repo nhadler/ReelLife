@@ -6,6 +6,14 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Color** (Project Settings, General, or New Project): one of eight
+  colours, or Automatic. It tints the project's pages (a stripe on the
+  project bar, the bar and page washed lightly toward it; actions stay
+  green), marks its card on Projects and the Overview, and colours its
+  cues on the Schedule. Choosing one previews it before saving.
+
 ## [1.1.0] - 2026-11-09
 
 ### Added

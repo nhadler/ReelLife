@@ -5,6 +5,7 @@ from typing import Any, ClassVar, cast
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 
+from cues import colors
 from cues import defaults
 from cues import models
 from cues import numbering
@@ -183,6 +184,9 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
             for name in list(self.fields):
                 if name not in only:
                     del self.fields[name]
+        if "color" in self.fields:  # Automatic is a choice, not a blank
+            color = cast(forms.ChoiceField, self.fields["color"])
+            color.choices = colors.Color.choices
         if "numbering" not in self.fields:
             return
         pattern = self.instance.cue_number_pattern
@@ -289,8 +293,10 @@ class ProjectForm(forms.ModelForm):  # type: ignore[type-arg]
             "cue_number_pattern",
             "sync_review_status",
             "cue_thumbnail_fallback",
+            "color",
         ]
         widgets = {
+            "color": forms.RadioSelect,
             "release_date": forms.DateInput(attrs={"type": "date"}),
             "company_address": forms.Textarea(attrs={"rows": 3}),
         }

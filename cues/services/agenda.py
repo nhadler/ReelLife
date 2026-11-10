@@ -15,6 +15,7 @@ from typing import Any
 from django.db.models import Q
 from django.urls import reverse
 
+from cues import colors
 from cues import models
 from cues import timecode
 from cues.services import scheduler
@@ -42,10 +43,6 @@ class CueInfo:
     status: str = ""
 
 
-# How many project colours the calendar has (app.css --tone-0 to -7).
-TONES = 8
-
-
 @dataclasses.dataclass(frozen=True)
 class ProjectInfo:
     """A project with work on the schedule."""
@@ -56,11 +53,12 @@ class ProjectInfo:
     due: datetime.date | None
     # The pace deadline's start: no work is planned before it.
     start: datetime.date | None = None
+    color: str = ""
 
     @property
     def tone(self) -> int:
-        """Its colour on the calendar, one of eight (stable per project)."""
-        return self.id % TONES
+        """Its colour on the calendar (colors.tone)."""
+        return colors.tone(self.id, self.color)
 
 
 # Each day off's notes, with the project for a project's own (else None).
@@ -142,6 +140,7 @@ def _projects(
             production_number=project.production_number,
             due=deadline.end_date if deadline else None,
             start=deadline.start_date if deadline else None,
+            color=project.color,
         )
     return projects, infos
 

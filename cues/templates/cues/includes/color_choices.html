@@ -1,0 +1,13 @@
+{# A project's colour as a row of swatches over real radios. Pass field and, when editing, project (its Automatic swatch shows the colour it picked). #}
+{% load text %}
+<fieldset class="swatches field field--wide">
+  <legend>{{ field.label|title_case }}</legend>
+  <div class="swatches__row">
+    {% for choice in field %}
+      <label class="swatches__choice tone-{{ choice.data.value|tone_of:project }}{% if not choice.data.value %} swatches__choice--auto{% endif %}" title="{{ choice.choice_label }}">
+        {{ choice.tag }}<span class="swatches__swatch" aria-hidden="true"></span><span class="swatches__name">{{ choice.choice_label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+  {{ field.errors }}
+</fieldset>

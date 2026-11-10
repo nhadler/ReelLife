@@ -278,9 +278,8 @@ document.body.addEventListener('cues:changed', (event) => {
  * @return {string}
  */
 function token(name) {
-  return getComputedStyle(document.documentElement)
-    .getPropertyValue(name)
-    .trim();
+  // The body's values: a project's colour washes them (app.css).
+  return getComputedStyle(document.body).getPropertyValue(name).trim();
 }
 
 /**

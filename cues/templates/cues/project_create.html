@@ -30,6 +30,7 @@
           {% include "cues/includes/field.html" with field=form.drop_frame %}
           {% include "cues/includes/dropzone.html" with field=form.thumbnail_upload prompt="Drop a still from the film" %}
           {% include "cues/includes/field.html" with field=form.cue_thumbnail_fallback wide=True %}
+          {% include "cues/includes/color_choices.html" with field=form.color project=None %}
         </div>
       </div>
     </section>

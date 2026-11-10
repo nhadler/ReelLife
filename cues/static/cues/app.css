@@ -5246,6 +5246,165 @@ a.conform:hover {
   --tone: var(--tone-7);
 }
 
+/* A project's colour (Project Settings, General) tints its pages: a
+   stripe on the project bar, the bar faintly in the colour, and the page
+   washed a few percent toward it. Actions stay green. The base values
+   are kept on the root so the body's can be mixed from them. */
+:root {
+  --bay-root: var(--bay);
+  --panel-root: var(--panel);
+}
+
+body:has(.project-bar[data-tone='0']) {
+  --tone: var(--tone-0);
+}
+
+body:has(.project-bar[data-tone='1']) {
+  --tone: var(--tone-1);
+}
+
+body:has(.project-bar[data-tone='2']) {
+  --tone: var(--tone-2);
+}
+
+body:has(.project-bar[data-tone='3']) {
+  --tone: var(--tone-3);
+}
+
+body:has(.project-bar[data-tone='4']) {
+  --tone: var(--tone-4);
+}
+
+body:has(.project-bar[data-tone='5']) {
+  --tone: var(--tone-5);
+}
+
+body:has(.project-bar[data-tone='6']) {
+  --tone: var(--tone-6);
+}
+
+body:has(.project-bar[data-tone='7']) {
+  --tone: var(--tone-7);
+}
+
+body:has(.project-bar[data-tone]) {
+  --bay: color-mix(in srgb, var(--tone) 4%, var(--bay-root));
+}
+
+.project-bar[data-tone] {
+  border-top: 3px solid var(--tone);
+  background: color-mix(in srgb, var(--tone) 10%, var(--panel-root));
+}
+
+/* The colour being chosen previews on the page before it's saved. */
+body:has(.swatches__choice.tone-0 input:checked) {
+  --tone: var(--tone-0);
+}
+
+body:has(.swatches__choice.tone-1 input:checked) {
+  --tone: var(--tone-1);
+}
+
+body:has(.swatches__choice.tone-2 input:checked) {
+  --tone: var(--tone-2);
+}
+
+body:has(.swatches__choice.tone-3 input:checked) {
+  --tone: var(--tone-3);
+}
+
+body:has(.swatches__choice.tone-4 input:checked) {
+  --tone: var(--tone-4);
+}
+
+body:has(.swatches__choice.tone-5 input:checked) {
+  --tone: var(--tone-5);
+}
+
+body:has(.swatches__choice.tone-6 input:checked) {
+  --tone: var(--tone-6);
+}
+
+body:has(.swatches__choice.tone-7 input:checked) {
+  --tone: var(--tone-7);
+}
+
+/* Projects and the Overview: the colour down the card's left edge. */
+.project[class*='tone-'] {
+  box-shadow: inset 3px 0 0 var(--tone);
+}
+
+/* The colour choice: swatches over real radios. Automatic shows, ringed,
+   the colour it picks. */
+.swatches {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.swatches legend {
+  margin-bottom: 0.3rem;
+  padding: 0;
+  color: var(--slate);
+  font-size: var(--step--1);
+  font-weight: 500;
+}
+
+.swatches__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.swatches__choice {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.4rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--slate);
+  font-size: var(--step--1);
+  cursor: pointer;
+}
+
+.swatches__choice input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.swatches__swatch {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: var(--tone);
+}
+
+.swatches__choice--auto .swatches__swatch {
+  box-shadow:
+    inset 0 0 0 2px var(--panel),
+    0 0 0 1px var(--tone);
+}
+
+.swatches__choice:hover {
+  color: var(--ink);
+}
+
+.swatches__choice:has(input:checked) {
+  border-color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  color: var(--ink);
+}
+
+.swatches__choice:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .schedule__line {
   margin: 0;
   color: var(--slate);

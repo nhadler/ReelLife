@@ -58,6 +58,7 @@ _FIELDS = {
         "thumbnail_upload",
         "remove_thumbnail",
         "cue_thumbnail_fallback",
+        "color",
     ),
     "picture": ("frame_rate", "drop_frame", "picture_type", "lanes"),
     "cue_sheet": (

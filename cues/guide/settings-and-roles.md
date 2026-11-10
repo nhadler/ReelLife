@@ -4,7 +4,9 @@
 
 Open these pages from the project bar's **Settings** menu:
 
-- **General**: title, numbers, thumbnail.
+- **General**: title, numbers, colour, thumbnail. The colour tints the
+  project's pages and marks it on the Schedule, the Overview and
+  Projects; Automatic picks one for you.
 - **Picture**: frame rate, picture type, timeline lanes.
 - **Cue Sheet**: the cue sheet's header, numbering, default shares.
 - **Statuses**: the status and sub status lists and colours.

@@ -22,6 +22,7 @@ from django.db.models import Q
 from django.db.models.functions import Lower
 from django.utils import timezone
 
+from cues import colors
 from cues import columns as grid_columns
 from cues import defaults
 from cues import timecode
@@ -129,6 +130,10 @@ class Project(Timestamped):
         help_text="Regular expression a valid cue number matches.",
     )
     archived = models.BooleanField(default=False)
+    # Tints its pages and colours it on the Schedule; blank picks one.
+    color = models.CharField(
+        max_length=10, choices=colors.Color.choices, blank=True, default=""
+    )
     daw_start = models.IntegerField(
         "DAW project start",
         null=True,
@@ -189,6 +194,11 @@ class Project(Timestamped):
     def __str__(self) -> str:
         """Returns e.g. 'BH101 The Big Heist'."""
         return f"{self.production_number} {self.title}".strip()
+
+    @property
+    def tone(self) -> int:
+        """Its tone, 0-7 (colors.tone)."""
+        return colors.tone(self.pk, self.color)
 
     @property
     def long_play(self) -> bool:

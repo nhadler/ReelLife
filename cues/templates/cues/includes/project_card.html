@@ -1,5 +1,5 @@
 {# One project as a card (Projects and the Overview): identity, three figures that line up from card to card, a ⋯ menu, and the cue map along the bottom. Needs s (a ProjectSummary); week shows This Week instead of the daily pace; listed (the Projects page) adds the search data and, for editors, the bulk checkbox. #}
-<li class="project{% if s.project.archived %} project--archived{% endif %}"{% if listed %} data-search="{{ s.project.title|lower }} {{ s.project.production_number|lower }} {{ s.project.series.title|lower }}"{% if s.project.pk in hidden %} hidden{% endif %}
+<li class="project tone-{{ s.project.tone }}{% if s.project.archived %} project--archived{% endif %}"{% if listed %} data-search="{{ s.project.title|lower }} {{ s.project.production_number|lower }} {{ s.project.series.title|lower }}"{% if s.project.pk in hidden %} hidden{% endif %}
     data-title="{{ s.project.title|lower }}" data-number="{{ s.project.production_number|lower }}"
     data-changed="{{ s.project.updated_at|date:'c' }}" data-deadline="{{ s.next_deadline.date|date:'Y-m-d' }}"{% endif %}>
   <div class="project__media">
