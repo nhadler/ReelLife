@@ -6,11 +6,18 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-12
+
 ### Added
 
 - **Reset Schedule** unpins every cue in a project in one undoable
   change, from the project's More menu or the Schedule when only that
   project is shown. Logged written work stays.
+
+### Changed
+
+- Buttons shrink slightly while pressed (not with reduced motion), and
+  the loading indicator fades in faster.
 
 ### Fixed
 
@@ -18,11 +25,6 @@ this project follows [Semantic Versioning](https://semver.org/).
   load that stalls for 20 seconds, can't connect or gets a server error
   (a proxy's 502 or 524) is tried again, up to three times. The grid's
   data is also compressed, so it crosses a slow upload faster.
-
-### Changed
-
-- Buttons shrink slightly while pressed (not with reduced motion), and
-  the loading indicator fades in faster.
 
 ## [1.2.0] - 2026-11-09
 
@@ -197,7 +199,8 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/nhadler/reellife/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/nhadler/reellife/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/nhadler/reellife/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/nhadler/reellife/releases/tag/v1.0.0
