@@ -177,3 +177,58 @@ def test_a_script_that_keeps_failing_says_so(
     )
     page.wait_for_timeout(1000)
     assert len(loads) == 2  # one reload, then no more
+
+
+def _hold_confirm_js(page: Any, times: int) -> list[Any]:
+    """Never answers the first `times` requests for confirm.js."""
+    held: list[Any] = []
+
+    def handle(route: Any) -> None:  # playwright wants a function here
+        if len(held) < times:
+            held.append(route)  # no answer, ever: a stuck request
+        else:
+            route.continue_()
+
+    confirm = re.compile(r"/static/cues/confirm(\.[0-9a-f]{12})?\.js$")
+    page.route(confirm, handle)
+    return held
+
+
+def test_a_stuck_script_reloads_the_page_once(
+    page: Any, app: str, sign_in_as: SignInAs, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    project = demo.build_demo().project
+    sign_in_as("Casey Composer")
+    held = _hold_confirm_js(page, times=1)
+    loads = _page_loads(page)
+    page.clock.install()
+    page.goto(f"{app}/projects/{project.pk}/", wait_until="commit")
+    page.wait_for_timeout(500)
+    assert len(held) == 1 and len(loads) == 1
+    expect(page.locator("#cue-grid[data-ready=true]")).to_have_count(0)
+    page.clock.run_for(16000)  # past the 15 s the guard allows
+    page.clock.resume()
+    expect(page.locator("#cue-grid[data-ready=true]")).to_be_attached()
+    assert len(loads) == 2
+    expect(page.locator("#load-guard")).to_have_count(0)
+
+
+def test_a_script_that_stays_stuck_says_so(
+    page: Any, app: str, sign_in_as: SignInAs, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    project = demo.build_demo().project
+    sign_in_as("Casey Composer")
+    _hold_confirm_js(page, times=99)
+    loads = _page_loads(page)
+    page.clock.install()
+    page.goto(f"{app}/projects/{project.pk}/", wait_until="commit")
+    page.wait_for_timeout(500)
+    page.clock.run_for(16000)
+    page.wait_for_timeout(500)
+    page.clock.run_for(16000)
+    expect(page.locator("#load-guard")).to_have_text(
+        "Part of this page didn't load. Reload the page."
+    )
+    assert len(loads) == 2  # one reload, then no more
