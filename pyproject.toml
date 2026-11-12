@@ -1,6 +1,6 @@
 [project]
 name = "reellife"
-version = "1.3.1"
+version = "1.4.0"
 description = "Self-hosted music cue tracking for film and TV composers."
 readme = "README.md"
 license = "AGPL-3.0-or-later"
