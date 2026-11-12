@@ -72,6 +72,13 @@ Only logged work counts: a planned day you didn't log just leaves the
 work in the queue. Writing and revising are logged apart, so a cue sent
 back for revisions starts its revision work from nothing.
 
+The grid's **% Written** column, after Status in the Standard view,
+shows the same: what's logged against the cue's length, as a bar in its
+status colour. It stops at 99% until you mark the cue composed, which
+makes it 100%. A cue in revisions counts its revision work from 0%, with
+a striped bar. On Hold, Omit, songs, licensed music and cues without an
+IN and OUT show a dash. Click a cue's percent to log more.
+
 Each day's plan is kept from the first time anyone looks (or
 overnight), so a past day's list shows what was planned beside what you
 logged, faded on the calendar.

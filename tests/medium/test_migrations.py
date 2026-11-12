@@ -207,3 +207,34 @@ def test_existing_lists_and_credits_get_history_to_undo_to() -> None:
         "Undo: Edit statuses",
     }
     call_command("migrate", "cues", stdout=io.StringIO())
+
+
+@pytest.mark.django_db(transaction=True)
+def test_projects_own_standard_views_get_percent_written() -> None:
+    apps = _migrate([("cues", "0045_project_color")])
+    project = apps.get_model("cues", "Project").objects.create(
+        title="Old views", production_number="OLD2", frame_rate="24"
+    )
+    views = apps.get_model("cues", "View").objects
+    mine = views.create(
+        project=project,
+        name="Standard",
+        columns=[{"id": "number"}, {"id": "status", "width": 140}],
+    )
+    other = views.create(
+        project=project, name="Standard 2", columns=[{"id": "status"}]
+    )
+    _migrate([("cues", "0046_views_percent_written")])
+    assert models.View.objects.get(pk=mine.pk).columns == [
+        {"id": "number"},
+        {"id": "status", "width": 140},
+        {"id": "percent_written"},
+    ]
+    # Only views named Standard.
+    assert models.View.objects.get(pk=other.pk).columns == [{"id": "status"}]
+    _migrate([("cues", "0045_project_color")])
+    assert models.View.objects.get(pk=mine.pk).columns == [
+        {"id": "number"},
+        {"id": "status", "width": 140},
+    ]
+    call_command("migrate", "cues", stdout=io.StringIO())

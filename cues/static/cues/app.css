@@ -3449,6 +3449,58 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   white-space: nowrap;
 }
 
+/* % Written (grid.js writtenRenderer): a bar in the status colour and
+   the percent. Revisions fill with stripes; written cues sit full. */
+.written {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  height: 100%;
+}
+
+.written__bar {
+  flex: 1;
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--chip, var(--slate)) 18%, var(--panel));
+}
+
+.written__bar > span {
+  display: block;
+  width: calc(var(--written, 0) * 1%);
+  height: 100%;
+  border-radius: inherit;
+  background: var(--chip, var(--slate));
+}
+
+.written--revise .written__bar > span {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--chip, var(--slate)) 0 4px,
+    color-mix(in srgb, var(--chip, var(--slate)) 60%, var(--panel)) 4px 7px
+  );
+}
+
+.written__label {
+  flex: none;
+  min-width: 2.6rem;
+  color: var(--slate);
+  font-family: var(--mono);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.written--done .written__label {
+  color: var(--ink);
+}
+
+.written--none {
+  color: var(--slate);
+}
+
 /* On light rows a hairline keeps pale colours (To Write) visible. */
 [data-theme='light'] .status-pill:not(.status-pill--none) {
   box-shadow:

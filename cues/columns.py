@@ -55,6 +55,7 @@ COLUMNS: tuple[Column, ...] = (
     Column("thumbnail", "Thumbnail", _C, Editor.NONE),
     Column("sequence_number", "#", _X, Editor.NONE),
     Column("status", "Status", _C, Editor.STATUS),
+    Column("percent_written", "% Written", _X, Editor.NONE),
     Column("number", "Cue #", _C, Editor.TEXT),
     Column("title", "Title", _C, Editor.TEXT),
     Column("version", "Cue Version", _V, Editor.NONE),

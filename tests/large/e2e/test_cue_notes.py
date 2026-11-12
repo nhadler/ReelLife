@@ -161,6 +161,7 @@ def test_links_other_cues_and_leaving(
     # (After a list, the end of the notes is an empty line for more.)
     _to_end(page)
     page.keyboard.type("Ref mix")
+    _saved(page, first, lambda t: t.endswith("Ref mix"))
     _select_back(page, "Ref mix")
     page.keyboard.press("ControlOrMeta+k")
     address = panel.get_by_role("textbox", name="Link Address")

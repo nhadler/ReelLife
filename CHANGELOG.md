@@ -6,6 +6,16 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **% Written** column, after Status in the Standard view: how much of
+  each cue is written, from Log Written, as a bar in the status colour.
+  Marking a cue composed (or approved) makes it 100%; until then logged
+  work stops at 99%. Revisions count their own work from 0%, striped.
+  Clicking the percent opens Log Written, and the bar follows at once.
+  It sorts, exports, and is added after Status to projects' own
+  Standard views.
+
 ## [1.4.0] - 2026-11-12
 
 ### Changed

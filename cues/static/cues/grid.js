@@ -121,6 +121,8 @@ const HEADER_TIPS = {
   version_out: 'OUT when the current version was written',
   version_duration: 'Length when the current version was written',
   version_seq_start: 'Seq. start when the current version was written',
+  percent_written:
+    'How much is written, from Log Written; revisions count anew',
 };
 // The side panel's contents and the buttons that toggle them.
 const PANEL_TOGGLES = {notes: 'notes-toggle', stats: 'stats-toggle'};
@@ -143,6 +145,7 @@ const NOTE_KINDS = {
 const WIDTHS_BY_COLUMN = {
   sequence_number: [44, 64],
   status: [110, 190],
+  percent_written: [96, 130],
   number: [72, 110],
   title: [140, 320],
   version: [92, 130],
@@ -171,6 +174,7 @@ const PINNED = new Set([
   'thumbnail',
   'sequence_number',
   'status',
+  'percent_written',
   'number',
   'title',
 ]);
@@ -611,6 +615,41 @@ function openExport() {
 }
 
 /**
+ * % Written: a bar in the status colour and the percent, or a dash for
+ * cues that aren't written (On Hold, songs) or have no IN and OUT.
+ * @param {!Object} params AG Grid cell renderer params.
+ * @return {!HTMLElement}
+ */
+function writtenRenderer(params) {
+  const value = params.data?.percent_written;
+  const wrap = document.createElement('span');
+  wrap.className = 'written';
+  if (!value) {
+    wrap.classList.add('written--none');
+    wrap.textContent = '–';
+    return wrap;
+  }
+  // The bar in the cue's status colour, like its Status pill.
+  const option = (columnMeta.status.options || []).find(
+    (o) => o.value === params.data.status,
+  );
+  if (option?.color) {
+    wrap.style.setProperty('--chip', option.color);
+  }
+  wrap.style.setProperty('--written', String(value.percent));
+  wrap.classList.add(`written--${value.stage}`);
+  wrap.title = value.title;
+  const bar = document.createElement('span');
+  bar.className = 'written__bar';
+  bar.append(document.createElement('span'));
+  const label = document.createElement('span');
+  label.className = 'written__label';
+  label.textContent = value.display;
+  wrap.append(bar, label);
+  return wrap;
+}
+
+/**
  * Renders the version label with a button to add the next version.
  * @param {!Object} params AG Grid cell renderer params.
  * @return {!HTMLElement}
@@ -845,6 +884,23 @@ function columnDef(meta, layout) {
       onCellClicked: (params) => openCue(params.data.id),
     };
   }
+  if (meta.id === 'percent_written') {
+    // Read-only; sorts by percent, and a click opens Log Written for a
+    // cue being written or revised.
+    const percent = (node) => node.data?.percent_written?.percent ?? -1;
+    return {
+      ...def,
+      cellRenderer: writtenRenderer,
+      valueGetter: (params) => params.data.percent_written?.display ?? '',
+      comparator: (a, b, nodeA, nodeB) => percent(nodeA) - percent(nodeB),
+      onCellClicked: (params) => {
+        const stage = params.data?.percent_written?.stage;
+        if (config.canEdit && (stage === 'write' || stage === 'revise')) {
+          openCueDialog(config.logWrittenUrl, params.data.id);
+        }
+      },
+    };
+  }
   if (meta.id === 'updated_at') {
     return {...readOnlyColumn(meta, def), cellRenderer: updatedRenderer};
   }
@@ -985,7 +1041,7 @@ function columnsFor(view) {
       if (phone) {
         pinned = layout.id === 'number' ? 'left' : undefined;
       } else if (pinned === undefined && PINNED.has(layout.id)) {
-        pinned = 'left'; // #, Status, Cue # and Title stay pinned left
+        pinned = 'left'; // #, Status, % Written, Cue # and Title stay left
       }
       return columnDef(columnMeta[layout.id], {...layout, pinned});
     });
@@ -2978,6 +3034,8 @@ async function start() {
     },
     true,
   );
+  // Log Written or Schedule On saved: % Written may have moved.
+  document.body.addEventListener('schedule:changed', () => reload());
   // A dialog saved a cue or version: fetch the rows again.
   document.body.addEventListener('cues:reload', () => {
     reload();

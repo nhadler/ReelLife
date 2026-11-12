@@ -230,12 +230,15 @@ export function setUpNotesPanel(options) {
   function selected() {
     const dom = window.getSelection();
     const view = editor.view;
+    const {from, to} = editor.state.selection;
     if (dom?.anchorNode && view.dom.contains(dom.anchorNode)) {
       const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset);
       const head = view.posAtDOM(dom.focusNode, dom.focusOffset);
-      return {from: Math.min(anchor, head), to: Math.max(anchor, head)};
+      // The browser's, unless it lost a selection the editor still has.
+      if (anchor !== head || from === to) {
+        return {from: Math.min(anchor, head), to: Math.max(anchor, head)};
+      }
     }
-    const {from, to} = editor.state.selection;
     return {from, to};
   }
 

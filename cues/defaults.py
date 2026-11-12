@@ -250,10 +250,13 @@ VIEW_PRESETS: tuple[tuple[str, str], ...] = (
 )
 
 # Columns ReelLife adds to a seeded view: Revision Notes after Notes,
-# and Difficulty next to
-# Priority in Standard.
+# and in Standard % Written after Status and Difficulty next to Priority.
 VIEW_EXTRAS: dict[str, tuple[tuple[str, str], ...]] = {
-    "Standard": (("revision_notes", "notes"), ("difficulty", "priority")),
+    "Standard": (
+        ("percent_written", "status"),
+        ("revision_notes", "notes"),
+        ("difficulty", "priority"),
+    ),
     "Spotting": (("revision_notes", "notes"),),
 }
 
@@ -263,6 +266,7 @@ VIEW_COLUMNS: dict[str, tuple[str, ...]] = {
     "Standard": (
         "thumbnail",
         "status",
+        "percent_written",
         "number",
         "title",
         "version",

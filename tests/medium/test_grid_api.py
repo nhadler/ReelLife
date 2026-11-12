@@ -3,6 +3,7 @@
 from collections.abc import Callable
 import datetime
 import json
+import math
 from typing import Any
 
 from django.core.exceptions import ValidationError
@@ -20,6 +21,8 @@ from cues.api import edits
 from cues.api import grid
 from cues.services import demo
 from cues.services import history
+from cues.services import writing
+from cues.services.summaries import clock
 from tests import factories
 
 pytestmark = pytest.mark.django_db
@@ -762,3 +765,60 @@ def test_bad_chip_lists_are_refused(
     assert response.status_code == 400
     assert error in response.json()["error"]
     assert not project.themes.exists()
+
+
+# % Written
+
+
+def test_percent_written_follows_logs_and_status(
+    editor: Client, project: models.Project
+) -> None:
+    cue = project.cues.get(number="1m01")
+    statuses = {s.kind: s for s in project.statuses.all()}
+    cue.status = statuses[models.StatusKind.TO_DO]
+    cue.save(update_fields=["status"])
+    assert cue.tc_in is not None and cue.tc_out is not None
+    frames = cue.tc_out - cue.tc_in
+    length = round(timecode.seconds(frames, project.rate))
+    assert _row(_grid(editor, project), "1m01")["percent_written"] == {
+        "percent": 0,
+        "stage": "write",
+        "display": "0%",
+        "title": f"0:00 of {clock(length)} written",
+    }
+    # About half logged as written.
+    writing.log(cue, datetime.date(2026, 11, 2), length // 2, None)
+    written = _row(_grid(editor, project), "1m01")["percent_written"]
+    music = float(timecode.seconds(frames, project.rate))
+    assert written["percent"] == math.floor((length // 2) * 100 / music)
+    assert (
+        written["title"] == f"{clock(length // 2)} of {clock(length)} written"
+    )
+    # Marked written: 100%, straight back in the saved cell's row.
+    done = _patch(editor, cue, "status", statuses[models.StatusKind.DONE].pk)
+    assert done.json()["row"]["percent_written"] == {
+        "percent": 100,
+        "stage": "done",
+        "display": "100%",
+        "title": "Written",
+    }
+    # Into revisions: the writing logs don't count; revision logs do.
+    redo = statuses[models.StatusKind.REDO]
+    response = _patch(editor, cue, "status", redo.pk)
+    assert response.json()["row"]["percent_written"]["percent"] == 0
+    cue.refresh_from_db()
+    writing.log(cue, datetime.date(2026, 11, 3), length // 4, None)
+    revised = _row(_grid(editor, project), "1m01")["percent_written"]
+    expected = math.floor((length // 4) * 100 / music)
+    assert (revised["percent"], revised["stage"]) == (expected, "revise")
+    assert revised["title"].endswith("revised")
+    # On hold isn't being written: nothing to show.
+    _patch(editor, cue, "status", statuses[models.StatusKind.ON_HOLD].pk)
+    assert _row(_grid(editor, project), "1m01")["percent_written"] is None
+
+
+def test_percent_written_sits_after_status_in_standard() -> None:
+    standard = models.View.objects.get(project=None, name="Standard")
+    ids = [column["id"] for column in standard.columns]
+    assert ids[ids.index("status") + 1] == "percent_written"
+    assert columns.BY_ID["percent_written"].label == "% Written"

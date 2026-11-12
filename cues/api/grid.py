@@ -20,7 +20,10 @@ from cues import defaults
 from cues import models
 from cues import timecode
 from cues.services import progress
+from cues.services import summaries
 from cues.services import view_presets
+from cues.services import writing
+from cues.services.summaries import clock
 
 Json = dict[str, Any]
 
@@ -66,6 +69,7 @@ class Context:
     picture_options: dict[int, list[Json]]  # picture id -> written-to options
     sequence: dict[int, int]
     users: dict[int | None, str]  # user id -> display name
+    logged: dict[tuple[int, bool], int]  # (cue, revising) -> seconds
 
     @classmethod
     def build(cls, project: models.Project) -> "Context":
@@ -90,6 +94,7 @@ class Context:
             picture_options=options,
             sequence=progress.sequence_numbers(project),
             users={u.pk: str(u) for u in User.objects.all()},
+            logged=writing.logged(project.cues.values_list("pk", flat=True)),
         )
 
     def tc(self, frames: int | None) -> Json | None:
@@ -111,6 +116,35 @@ class Context:
         return {
             "frames": frames,
             "display": timecode.format_duration(max(frames, 0), self.rate),
+        }
+
+    def written(self, cue: models.Cue) -> Json | None:
+        """The cue's % Written: percent, stage, and text to show."""
+        kind = cue.status.kind if cue.status else ""
+        revising = kind in summaries.REVISE_KINDS
+        music = (
+            float(timecode.seconds(cue.tc_out - cue.tc_in, self.rate))
+            if cue.tc_in is not None and cue.tc_out is not None
+            else None
+        )
+        found = writing.progress(
+            kind, music, self.logged.get((cue.pk, revising), 0)
+        )
+        if found is None:
+            return None
+        if found.stage == "done":
+            title = "Written"
+        else:
+            work = "revised" if found.stage == "revise" else "written"
+            title = (
+                f"{clock(found.written or 0)} of {clock(found.music or 0)} "
+                f"{work}"
+            )
+        return {
+            "percent": found.percent,
+            "stage": found.stage,
+            "display": f"{found.percent}%",
+            "title": title,
         }
 
     def offset(self, frames: int | None) -> Json | None:
@@ -186,6 +220,7 @@ def row(cue: models.Cue, ctx: Context) -> Json:
         "_thumbnail_inherited": not cue.thumbnail
         and bool(cue_thumbnail_url(cue)),
         "status": cue.status_id,
+        "percent_written": ctx.written(cue),
         "number": cue.number,
         "title": cue.title,
         "version": version.label if version else "",
