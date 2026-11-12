@@ -117,6 +117,14 @@ Google Calendar and iCloud's server-side refresh fetch the feed from
 their own servers, so they only work once ReelLife is reachable from
 the internet.
 
+How soon changes show depends on the app. Apple Calendar can refresh a
+subscription every 5 minutes (set **Auto-refresh** on the calendar).
+Google Calendar fetches a feed only every few hours and can't be asked
+to fetch it sooner; for updates every 10 minutes, a small Google Apps
+Script in your own Google account can copy the feed into a calendar
+there. It's in ReelLife's source, under `deploy/google-calendar`, with
+setup steps.
+
 ## Month and Week
 
 Month and week views use the same calendar; the week is a single row.

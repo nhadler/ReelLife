@@ -8,6 +8,10 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- `deploy/google-calendar`: a Google Apps Script, run in your own
+  Google account, that copies the Calendar Feed into a Google calendar
+  every 10 minutes. Google Calendar itself fetches a subscribed feed
+  only every few hours.
 - **% Written** column, after Status in the Standard view: how much of
   each cue is written, from Log Written, as a bar in the status colour.
   Marking a cue composed (or approved) makes it 100%; until then logged
