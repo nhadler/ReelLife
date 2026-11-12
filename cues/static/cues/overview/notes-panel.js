@@ -1,11 +1,21 @@
 /**
  * @fileoverview One cue's notes (Revision Notes, say) in the panel beside
- * the grid: a Markdown text box with a toolbar, a preview whose check
- * boxes can be ticked, and saving as you go. Clicking another row's cell
- * shows that cue's notes; Alt+↑/↓ steps through the shown cues.
+ * the grid, edited as formatted text (TipTap) and stored as Markdown:
+ * a toolbar, check boxes that tick, and saving as you go. Clicking
+ * another row's cell shows that cue's notes; Alt+↑/↓ steps through the
+ * shown cues.
  */
 
-import {checklist, render, toggle} from './markdown.js';
+import {checklist} from './markdown.js';
+import {
+  Editor,
+  Markdown,
+  Marked,
+  Placeholder,
+  StarterKit,
+  TaskItem,
+  TaskList,
+} from '../vendor/tiptap.min.js';
 
 // How long typing pauses before the text is saved.
 const SAVE_DELAY_MS = 800;
@@ -19,8 +29,41 @@ const TOOLS = [
   {name: 'link', label: 'Link', key: 'k', text: '🔗'},
 ];
 
-// A list item's marker, carried on to the next line by Enter.
-const LIST_ITEM = /^(\s*)([-*+] \[[ xX]\] |[-*+] |(\d{1,9})([.)]) )(.*)$/;
+const SAFE_LINK = /^(https?:\/\/|mailto:)/i;
+// A ballot-box line pasted from elsewhere: "☐ item", maybe after a dash.
+const BALLOT = /^(\s*)(?:[-*+]\s+)?([☐☑☒])\s?(.*)$/u;
+// A list item's marker after its indent.
+const LIST_LINE = /^( +)([-*+]|\d{1,9}[.)])\s/;
+const ENTITIES = {'&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"'};
+
+// A [label](address) link's address.
+const LINK_ADDRESS = /^!?\[(?:\\.|[^\]\\])*\]\(\s*<?([^\s)>]*)/;
+
+/**
+ * The editor's Markdown parser, reading notes as the grid does: HTML is
+ * text, never markup (a note saying <img onerror=…> shows those
+ * characters), a link to anything but a web or mail address is text,
+ * and line breaks within a paragraph stay line breaks.
+ * @return {!Object} A marked instance.
+ */
+function parser() {
+  const marked = new Marked({gfm: true, breaks: true});
+  const noMatch = () => undefined;
+  marked.use({
+    tokenizer: {
+      html: noMatch,
+      tag: noMatch,
+      link(src) {
+        const address = LINK_ADDRESS.exec(src)?.[1];
+        // undefined: not a link, so text; false: marked's own reading.
+        return address !== undefined && !SAFE_LINK.test(address)
+          ? undefined
+          : false;
+      },
+    },
+  });
+  return marked;
+}
 
 /**
  * Makes an element.
@@ -41,96 +84,50 @@ function make(tag, className = '', text = '') {
 }
 
 /**
- * Wraps the selection in a marker, or puts the marker either side of the
- * cursor.
- * @param {!HTMLTextAreaElement} box
- * @param {string} before
- * @param {string=} after
- * @param {string=} placeholder Selected when nothing was.
+ * A stored note as the editor reads it. Ballot boxes become check-list
+ * items, and list lines indented under a paragraph (which Markdown would
+ * run into the paragraph) become a list, as the grid shows them.
+ * @param {string} text
+ * @return {string}
  */
-function wrap(box, before, after = before, placeholder = '') {
-  const {selectionStart: start, selectionEnd: end} = box;
-  const chosen = box.value.slice(start, end) || placeholder;
-  box.setRangeText(`${before}${chosen}${after}`, start, end, 'end');
-  box.setSelectionRange(
-    start + before.length,
-    start + before.length + chosen.length,
-  );
-}
-
-/**
- * Puts a prefix at the start of each selected line (or takes it off when
- * every line has it).
- * @param {!HTMLTextAreaElement} box
- * @param {string} prefix
- */
-function prefixLines(box, prefix) {
-  const value = box.value;
-  const start = value.lastIndexOf('\n', box.selectionStart - 1) + 1;
-  const found = value.indexOf('\n', box.selectionEnd);
-  const end = found === -1 ? value.length : found;
-  const lines = value.slice(start, end).split('\n');
-  const all = lines.every((line) => line.startsWith(prefix));
-  const changed = lines
-    .map((line) => (all ? line.slice(prefix.length) : prefix + line))
+export function toEditor(text) {
+  const lines = (text || '').split('\n');
+  let levels = [];
+  return lines
+    .map((line) => {
+      const ballot = BALLOT.exec(line);
+      if (ballot) {
+        const mark = ballot[2] === '☐' ? ' ' : 'x';
+        line = `${ballot[1]}- [${mark}] ${ballot[3]}`;
+      }
+      const list = LIST_LINE.exec(line);
+      if (!list) {
+        if (line.trim()) {
+          levels = [];
+        }
+        return line;
+      }
+      // Each deeper indent in this list is one level in.
+      const indent = list[1].length;
+      levels = levels.filter((level) => level <= indent);
+      if (!levels.includes(indent)) {
+        levels.push(indent);
+      }
+      return '    '.repeat(levels.length - 1) + line.trimStart();
+    })
     .join('\n');
-  box.setRangeText(changed, start, end, 'select');
 }
 
 /**
- * Applies a toolbar action to the text box.
- * @param {!HTMLTextAreaElement} box
- * @param {string} name A TOOLS name.
+ * The editor's Markdown as stored: characters it wrote as HTML entities
+ * go back to themselves, so exports and the grid read plainly.
+ * @param {string} markdown
+ * @return {string}
  */
-function apply(box, name) {
-  if (name === 'bold') {
-    wrap(box, '**', '**', 'bold');
-  } else if (name === 'italic') {
-    wrap(box, '*', '*', 'italic');
-  } else if (name === 'heading') {
-    prefixLines(box, '## ');
-  } else if (name === 'bullets') {
-    prefixLines(box, '- ');
-  } else if (name === 'checks') {
-    prefixLines(box, '- [ ] ');
-  } else if (name === 'link') {
-    const {selectionStart: start, selectionEnd: end} = box;
-    const label = box.value.slice(start, end) || 'link';
-    box.setRangeText(`[${label}](https://)`, start, end, 'end');
-    const url = start + label.length + 3;
-    box.setSelectionRange(url, url + 'https://'.length);
-  }
-  box.dispatchEvent(new Event('input', {bubbles: true}));
-}
-
-/**
- * Enter in a list item starts the next item; on an empty item it ends
- * the list.
- * @param {!HTMLTextAreaElement} box
- * @return {boolean} Whether Enter was handled.
- */
-function continueList(box) {
-  if (box.selectionStart !== box.selectionEnd) {
-    return false;
-  }
-  const at = box.selectionStart;
-  const start = box.value.lastIndexOf('\n', at - 1) + 1;
-  const match = LIST_ITEM.exec(box.value.slice(start, at));
-  if (!match) {
-    return false;
-  }
-  const [line, indent, marker, number, dot, rest] = match;
-  if (!rest.trim()) {
-    box.setRangeText('', start, start + line.length, 'end');
-  } else {
-    let next = marker.replace(/\[[xX]\]/, '[ ]');
-    if (number) {
-      next = `${Number(number) + 1}${dot} `;
-    }
-    box.setRangeText(`\n${indent}${next}`, at, at, 'end');
-  }
-  box.dispatchEvent(new Event('input', {bubbles: true}));
-  return true;
+export function fromEditor(markdown) {
+  return markdown
+    .replace(/&(amp|lt|gt|quot);/g, (entity) => ENTITIES[entity])
+    .replace(/\s+$/, '');
 }
 
 /**
@@ -163,28 +160,39 @@ export function setUpNotesPanel(options) {
   const {onShow, onDone} = options;
   let cueId = null;
   let field = '';
-  let box = null;
-  let preview = null;
+  let editor = null;
   let status = null;
   let count = null;
+  let linkForm = null;
+  // The text the link field applies to, kept while focus is in the field.
+  let linkRange = null;
   let timer = 0;
   let sent = '';
+  // The note as the editor reads it on opening; saved only once edits
+  // change that (TipTap's own tidying on load isn't an edit).
+  let baseline = '';
+  let ready = false;
+  let edited = false;
 
   const showing = () => panel.dataset.showing === 'cue-notes' && !panel.hidden;
+  const current = () => (editor ? fromEditor(editor.getMarkdown()) : sent);
 
-  /** Saves the text if it changed since it was last sent. */
+  /** Saves the text if it was edited and changed since it was last sent. */
   async function flush() {
     clearTimeout(timer);
     const cue = cueId === null ? null : row(cueId);
-    if (!canEdit || !box || !cue || box.value === sent) {
+    if (!canEdit || !editor || !cue || !edited) {
       return;
     }
-    const text = box.value;
+    const text = current();
+    if (text === sent) {
+      return;
+    }
     sent = text;
     status.textContent = 'Saving…';
     await save(cue, field, text);
     const saved = row(cue.id)?.[field] ?? '';
-    if (box && cueId === cue.id) {
+    if (editor && cueId === cue.id) {
       status.textContent =
         saved === text ? 'Saved' : 'Not saved: see the message under the grid';
       status.classList.toggle('notes-panel__status--error', saved !== text);
@@ -193,49 +201,119 @@ export function setUpNotesPanel(options) {
 
   /** Shows how many check-list items are ticked, when there are any. */
   function recount() {
-    const {done, total} = checklist(
-      box ? box.value : (row(cueId)?.[field] ?? ''),
-    );
+    const {done, total} = checklist(edited ? current() : sent);
     count.hidden = !total;
     count.textContent = `${done} of ${total} done`;
   }
 
-  /** Redraws the preview from the text. */
-  function draw() {
-    const text = box ? box.value : (row(cueId)?.[field] ?? '');
-    preview.replaceChildren(render(text, {checkable: canEdit}));
-    if (!preview.childNodes.length) {
-      preview.append(make('p', 'muted', 'No notes yet.'));
+  /** Marks the toolbar's buttons that apply where the cursor is. */
+  function markTools() {
+    for (const button of panel.querySelectorAll('[data-tool]')) {
+      const active = {
+        bold: () => editor.isActive('bold'),
+        italic: () => editor.isActive('italic'),
+        heading: () => editor.isActive('heading'),
+        bullets: () => editor.isActive('bulletList'),
+        checks: () => editor.isActive('taskList'),
+        link: () => editor.isActive('link'),
+      }[button.dataset.tool];
+      button.setAttribute('aria-pressed', String(Boolean(active?.())));
     }
   }
 
   /**
-   * Shows one mode: writing or the preview.
-   * @param {string} mode 'write' or 'preview'.
+   * The selected text's range. Read from the browser: a selection made
+   * with the keyboard reaches the editor's state a moment later, and
+   * Ctrl+K can come first.
+   * @return {{from: number, to: number}}
    */
-  function show(mode) {
-    const writing = mode === 'write' && Boolean(box);
-    const editor = panel.querySelector('.notes-panel__editor');
-    if (editor) {
-      editor.hidden = !writing;
+  function selected() {
+    const dom = window.getSelection();
+    const view = editor.view;
+    if (dom?.anchorNode && view.dom.contains(dom.anchorNode)) {
+      const anchor = view.posAtDOM(dom.anchorNode, dom.anchorOffset);
+      const head = view.posAtDOM(dom.focusNode, dom.focusOffset);
+      return {from: Math.min(anchor, head), to: Math.max(anchor, head)};
     }
-    preview.hidden = writing;
-    for (const button of panel.querySelectorAll('[data-notes-mode]')) {
-      button.setAttribute(
-        'aria-pressed',
-        String(button.dataset.notesMode === mode),
-      );
+    const {from, to} = editor.state.selection;
+    return {from, to};
+  }
+
+  /** Opens the link field, filled with the link at the cursor if any. */
+  function askLink() {
+    linkRange = selected();
+    linkForm.hidden = false;
+    const input = linkForm.querySelector('input');
+    input.value = editor.getAttributes('link').href || '';
+    input.focus();
+    input.select();
+  }
+
+  /** Closes the link field and goes back to the text. */
+  function closeLink() {
+    linkForm.hidden = true;
+    editor.commands.focus();
+  }
+
+  /**
+   * Links the selection (or the word at the cursor's link) to an address;
+   * with nothing selected, adds the address itself as a link.
+   * @param {string} address
+   */
+  function setLink(address) {
+    const href = address.trim();
+    const chain = editor.chain().focus();
+    if (linkRange) {
+      chain.setTextSelection(linkRange);
     }
-    if (!writing) {
-      draw();
+    chain.extendMarkRange('link');
+    if (!href) {
+      chain.unsetLink().run();
+    } else if (!SAFE_LINK.test(href)) {
+      status.textContent = 'Links start with https://, http:// or mailto:';
+      return;
+    } else if (linkRange?.from === linkRange?.to && !editor.isActive('link')) {
+      chain
+        .insertContent({
+          type: 'text',
+          text: href,
+          marks: [{type: 'link', attrs: {href}}],
+        })
+        .run();
+    } else {
+      chain.setLink({href}).run();
+    }
+    linkForm.hidden = true;
+  }
+
+  /**
+   * Applies a toolbar action.
+   * @param {string} name A TOOLS name.
+   */
+  function apply(name) {
+    const chain = editor.chain().focus();
+    if (name === 'bold') {
+      chain.toggleBold().run();
+    } else if (name === 'italic') {
+      chain.toggleItalic().run();
+    } else if (name === 'heading') {
+      chain.toggleHeading({level: 2}).run();
+    } else if (name === 'bullets') {
+      chain.toggleBulletList().run();
+    } else if (name === 'checks') {
+      chain.toggleTaskList().run();
+    } else if (name === 'link') {
+      askLink();
     }
   }
 
   /** Builds the panel for the current cue and field. */
   function build() {
+    editor?.destroy();
+    ready = false;
     const cue = row(cueId);
-    const text = cue?.[field] ?? '';
-    sent = text;
+    sent = cue?.[field] ?? '';
+    edited = false;
     const head = make('div', 'side-panel__head');
     const title = make('h2', 'side-panel__title');
     title.append(
@@ -252,25 +330,9 @@ export function setUpNotesPanel(options) {
     bar.append(make('span', 'notes-panel__field', label(field)));
     count = make('span', 'notes-panel__count');
     bar.append(count);
-    const modes = make('div', 'notes-panel__modes');
-    for (const [mode, name] of [
-      ['write', 'Write'],
-      ['preview', 'Preview'],
-    ]) {
-      const button = make('button', 'notes-panel__mode', name);
-      button.type = 'button';
-      button.dataset.notesMode = mode;
-      modes.append(button);
-    }
-    if (canEdit) {
-      bar.append(modes);
-    }
 
     const body = make('div', 'side-panel__body notes-panel');
-    preview = make('div', 'notes-panel__preview md');
-    box = null;
     if (canEdit) {
-      const editor = make('div', 'notes-panel__editor');
       const tools = make('div', 'notes-panel__tools');
       tools.setAttribute('role', 'toolbar');
       tools.setAttribute('aria-label', 'Formatting');
@@ -283,33 +345,115 @@ export function setUpNotesPanel(options) {
         button.setAttribute('aria-label', tool.label);
         tools.append(button);
       }
-      box = make('textarea', 'notes-panel__text');
-      box.value = text;
-      box.spellcheck = true;
-      box.setAttribute('aria-label', label(field));
-      editor.append(tools, box);
-      body.append(editor);
+      linkForm = make('form', 'notes-panel__link');
+      linkForm.hidden = true;
+      const input = make('input');
+      input.type = 'url';
+      input.placeholder = 'https://';
+      input.setAttribute('aria-label', 'Link Address');
+      const apply = make('button', 'button button--small', 'Link');
+      apply.type = 'submit';
+      const remove = make(
+        'button',
+        'button button--small button--quiet',
+        'Remove',
+      );
+      remove.type = 'button';
+      remove.dataset.linkRemove = '';
+      linkForm.append(input, apply, remove);
+      body.append(tools, linkForm);
     }
-    body.append(preview);
+    const host = make('div', 'notes-panel__editor');
+    body.append(host);
     status = make('p', 'notes-panel__status');
     status.setAttribute('role', 'status');
-    status.textContent = '';
     panel.classList.add('side-panel--notes');
     panel.replaceChildren(head, bar, body, status);
+
+    editor = new Editor({
+      element: host,
+      injectCSS: false,
+      editable: canEdit,
+      extensions: [
+        // Only what the grid's Markdown shows too (overview/markdown.js).
+        StarterKit.configure({
+          codeBlock: false,
+          strike: false,
+          underline: false,
+          heading: {levels: [1, 2, 3]},
+          link: {
+            openOnClick: !canEdit,
+            autolink: true,
+            defaultProtocol: 'https',
+            isAllowedUri: (url) => SAFE_LINK.test(url),
+            HTMLAttributes: {rel: 'noopener noreferrer', target: '_blank'},
+          },
+        }),
+        TaskList,
+        TaskItem.configure({
+          nested: true,
+          a11y: {checkboxLabel: (node) => node.textContent || 'Item'},
+        }),
+        Placeholder.configure({
+          placeholder: canEdit ? 'Write notes…' : 'No notes yet.',
+        }),
+        Markdown.configure({marked: parser()}),
+      ],
+      content: toEditor(sent),
+      contentType: 'markdown',
+      editorProps: {
+        attributes: {
+          class: 'md notes-panel__doc',
+          'aria-label': label(field),
+          'aria-multiline': 'true',
+          role: 'textbox',
+          spellcheck: 'true',
+        },
+      },
+      onUpdate: () => {
+        if (!ready) {
+          return; // TipTap tidying the note while it loads
+        }
+        edited = current() !== baseline;
+        if (!edited) {
+          return;
+        }
+        recount();
+        status.textContent = 'Editing…';
+        status.classList.remove('notes-panel__status--error');
+        clearTimeout(timer);
+        timer = setTimeout(flush, SAVE_DELAY_MS);
+      },
+      onSelectionUpdate: markTools,
+      onTransaction: markTools,
+      onBlur: ({event}) => {
+        // Not when focus moves to the toolbar or link field.
+        if (!panel.contains(event.relatedTarget)) {
+          flush();
+        }
+      },
+    });
+    baseline = current();
+    ready = true;
+    if (!canEdit) {
+      for (const box of host.querySelectorAll('input[type="checkbox"]')) {
+        box.disabled = true;
+      }
+    }
     recount();
-    show(canEdit ? 'write' : 'preview');
+    markTools();
   }
 
   /**
    * Shows a cue's notes.
    * @param {!Object} cue The cue's row.
    * @param {string} name The notes field, e.g. 'revision_notes'.
-   * @param {boolean=} focus Put the cursor in the text box.
+   * @param {boolean=} focus Put the cursor in the notes.
    */
   async function open(cue, name, focus = true) {
     if (showing() && cueId === cue.id && field === name) {
       if (focus) {
-        box?.focus();
+        editor?.commands.focus();
       }
       return;
     }
@@ -320,89 +464,119 @@ export function setUpNotesPanel(options) {
     panel.hidden = false;
     panel.dataset.showing = 'cue-notes';
     build();
-    if (focus) {
-      box?.focus();
+    if (focus && canEdit) {
+      editor.commands.focus('end');
     }
   }
 
+  panel.addEventListener('mousedown', (event) => {
+    // Keep the text's selection when a tool is clicked.
+    if (showing() && event.target.closest('[data-tool]')) {
+      event.preventDefault();
+    }
+  });
+
   panel.addEventListener('click', (event) => {
-    if (!showing()) {
+    if (!showing() || !editor) {
       return;
     }
     const tool = event.target.closest('[data-tool]');
-    const mode = event.target.closest('[data-notes-mode]');
-    const check = event.target.closest('input[type="checkbox"][data-line]');
-    if (tool && box) {
-      apply(box, tool.dataset.tool);
-      box.focus();
-    } else if (mode) {
-      show(mode.dataset.notesMode);
-    } else if (check && canEdit) {
-      const text = toggle(box ? box.value : '', Number(check.dataset.line));
-      if (box) {
-        box.value = text;
-      }
-      draw();
-      recount();
-      flush();
+    if (tool) {
+      apply(tool.dataset.tool);
+    } else if (event.target.closest('[data-link-remove]')) {
+      setLink('');
     }
   });
 
-  panel.addEventListener('input', (event) => {
-    if (event.target !== box) {
-      return;
+  panel.addEventListener('change', (event) => {
+    if (
+      canEdit &&
+      editor?.view.dom.contains(event.target) &&
+      event.target.matches('input[type="checkbox"]')
+    ) {
+      // Ticked: a cursor at the end of the item's text once TipTap has
+      // taken the change, so typing goes on there rather than to the
+      // grid's shortcuts, and Enter doesn't replace the whole item.
+      const text = event.target.closest('li')?.querySelector(':scope > div');
+      setTimeout(() => {
+        if (!editor || !text?.isConnected) {
+          editor?.commands.focus();
+          return;
+        }
+        const end = editor.view.posAtDOM(text, text.childNodes.length) - 1;
+        editor.commands.focus(end);
+      });
     }
-    recount();
-    status.textContent = 'Editing…';
-    status.classList.remove('notes-panel__status--error');
-    clearTimeout(timer);
-    timer = setTimeout(flush, SAVE_DELAY_MS);
+  });
+
+  panel.addEventListener('submit', (event) => {
+    if (event.target === linkForm) {
+      event.preventDefault();
+      setLink(linkForm.querySelector('input').value);
+    }
   });
 
   panel.addEventListener('focusout', (event) => {
-    if (event.target === box) {
+    // Leaving the link field for somewhere outside the panel.
+    if (
+      event.target.closest?.('.notes-panel__link') &&
+      !panel.contains(event.relatedTarget)
+    ) {
       flush();
     }
   });
 
-  panel.addEventListener('keydown', (event) => {
-    if (!showing()) {
-      return;
-    }
-    if (
-      event.altKey &&
-      (event.key === 'ArrowUp' || event.key === 'ArrowDown')
-    ) {
-      event.preventDefault();
-      step(event.key === 'ArrowUp' ? -1 : 1);
-      return;
-    }
-    if (event.target !== box) {
-      return;
-    }
-    const modifier = event.ctrlKey || event.metaKey;
-    const tool = TOOLS.find((t) => t.key && t.key === event.key.toLowerCase());
-    if (modifier && !event.shiftKey && !event.altKey && tool) {
-      event.preventDefault();
-      apply(box, tool.name);
-    } else if (
-      event.key === 'Enter' &&
-      (modifier || (enterSaves() && !event.shiftKey))
-    ) {
-      // Ctrl+Enter, or Enter when App Settings say so: done writing.
-      event.preventDefault();
-      flush();
-      onDone(cueId, field);
-    } else if (event.key === 'Enter' && !event.shiftKey) {
-      if (continueList(box)) {
-        event.preventDefault();
+  // Capture: these keys mean something to the panel before the editor
+  // turns them into new lines.
+  panel.addEventListener(
+    'keydown',
+    (event) => {
+      if (!showing() || !editor) {
+        return;
       }
-    } else if (event.key === 'Escape') {
-      event.preventDefault();
-      flush();
-      onDone(cueId, field);
-    }
-  });
+      if (
+        event.altKey &&
+        (event.key === 'ArrowUp' || event.key === 'ArrowDown')
+      ) {
+        event.preventDefault();
+        event.stopPropagation();
+        step(event.key === 'ArrowUp' ? -1 : 1);
+        return;
+      }
+      if (linkForm && !linkForm.hidden && linkForm.contains(event.target)) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          closeLink();
+        }
+        return;
+      }
+      if (!editor.view.dom.contains(event.target)) {
+        return;
+      }
+      const modifier = event.ctrlKey || event.metaKey;
+      if (modifier && !event.shiftKey && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        event.stopPropagation();
+        askLink();
+      } else if (
+        event.key === 'Enter' &&
+        (modifier || (enterSaves() && !event.shiftKey))
+      ) {
+        // Ctrl+Enter, or Enter when App Settings say so: done writing.
+        event.preventDefault();
+        event.stopPropagation();
+        flush();
+        onDone(cueId, field);
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        flush();
+        onDone(cueId, field);
+      }
+    },
+    true,
+  );
 
   /**
    * Shows the same notes for another cue, once the panel is open.
@@ -421,7 +595,8 @@ export function setUpNotesPanel(options) {
   async function step(delta) {
     const next = cueId === null ? null : neighbour(cueId, delta);
     if (next) {
-      await open(next, field, document.activeElement === box);
+      const focused = editor?.view.dom.contains(document.activeElement);
+      await open(next, field, Boolean(focused));
     }
   }
 

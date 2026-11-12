@@ -6,6 +6,22 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Notes are written as formatted text in the notes panel: no more
+  separate Write and Preview. Bold, headings, lists, check lists,
+  quotes and links show as you type, check boxes tick in place, and
+  notes are still kept as Markdown. The editor is TipTap, bundled into
+  the app; HTML in a note stays text, and links go only to web and mail
+  addresses.
+
+### Fixed
+
+- Check boxes pasted from elsewhere (☐, ☑) count and tick as a check
+  list.
+- The grid shows `---` as a rule and a backslash-escaped character
+  (`\*`) as the character.
+
 ## [1.3.1] - 2026-11-12
 
 ### Fixed

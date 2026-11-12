@@ -2230,7 +2230,11 @@ function isLetter(event, letter) {
  * @param {!KeyboardEvent} event
  */
 function onKey(event) {
-  if (document.querySelector('dialog[open]')) {
+  if (
+    document.querySelector('dialog[open]') ||
+    // The notes editor keeps its keys: Ctrl+I is italic there, not Import.
+    event.target.closest?.('[contenteditable="true"]')
+  ) {
     return;
   }
   const modifier = event.ctrlKey || event.metaKey;

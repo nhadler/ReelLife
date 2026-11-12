@@ -11,3 +11,5 @@ ag-grid-community 36.3.0 MIT ag-grid-community.LICENSE 31636f0472dda16bba11a7b78
 @fontsource/ibm-plex-mono 5.3.0 OFL-1.1 ibm-plex-mono-400.woff2 08949f728dc52d528e69b1667d15c89a5686a4ee9a296ff90983985f99c380f7
 @fontsource/ibm-plex-mono 5.3.0 OFL-1.1 ibm-plex-mono-500.woff2 01d285447409c8a588692162439a038b8cbd7871309ee20267b0d2d91c6e8e22
 @fontsource/ibm-plex-mono 5.3.0 OFL-1.1 ibm-plex-mono.LICENSE 23b0a9d0c6d3f140a0b77e483c5cfa6bba574325ef5cb189ed9f2fec4884533f
+@tiptap/core 3.32.1 MIT tiptap.min.js 3519301ea7c96c6e498378f2e68e230ac9d2454d053a72307df99f091c64c626
+@tiptap/core 3.32.1 MIT tiptap.LICENSE fb59140a15f44e46b1a207dddd3b77b80c12681a5a76cfb6812a40c7d8611ec7

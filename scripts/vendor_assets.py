@@ -4,12 +4,19 @@ JS and fonts are served from our own origin (the CSP allows
 nothing else), pinned by version with checksums in vendor/VERSIONS.
 Versions come from package.json; run `npm ci` first, then
 `uv run python scripts/vendor_assets.py` (or `just vendor`).
+
+The notes editor (TipTap, ProseMirror and marked) ships as many ES
+modules, so it's bundled into one file with esbuild from
+scripts/editor-entry.mjs; the licences of every package in the bundle
+go into one file beside it.
 """
 
 import hashlib
 import json
 import pathlib
+import re
 import shutil
+import subprocess
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 NODE = ROOT / "node_modules"
@@ -56,6 +63,59 @@ FILES = {
 }
 
 
+# name in vendor/ -> (entry, the package whose version the bundle is
+# listed under in VERSIONS)
+BUNDLES = {
+    "tiptap.min.js": (ROOT / "scripts" / "editor-entry.mjs", "@tiptap/core"),
+}
+_LICENCE = re.compile(r"^licen[cs]e(\.md|\.txt)?$", re.IGNORECASE)
+
+
+def _package_of(path: str) -> str:
+    """The npm package a bundled file came from."""
+    parts = path.split("node_modules/")[-1].split("/")
+    return "/".join(parts[:2]) if parts[0].startswith("@") else parts[0]
+
+
+def bundle(name: str, entry: pathlib.Path) -> list[str]:
+    """Bundles `entry` into vendor/`name`; returns the packages in it."""
+    meta = VENDOR / f"{name}.meta.json"
+    # Fixed arguments: this repository's esbuild and paths, no input.
+    subprocess.run(  # noqa: S603  # nosec B603
+        [
+            str(NODE / ".bin" / "esbuild"),
+            str(entry),
+            "--bundle",
+            "--format=esm",
+            "--minify",
+            "--target=es2022",
+            "--legal-comments=none",
+            f"--metafile={meta}",
+            f"--outfile={VENDOR / name}",
+        ],
+        check=True,
+        cwd=ROOT,
+    )
+    inputs = json.loads(meta.read_text())["inputs"]
+    meta.unlink()
+    return sorted({_package_of(p) for p in inputs if "node_modules/" in p})
+
+
+def licences(packages: list[str]) -> str:
+    """Every package's name, version and licence text, one after another."""
+    parts = []
+    for package in packages:
+        folder = NODE / package
+        info = json.loads((folder / "package.json").read_text())
+        found = sorted(p for p in folder.iterdir() if _LICENCE.match(p.name))
+        text = found[0].read_text(encoding="utf-8").strip() if found else ""
+        parts.append(
+            f"{package} {info['version']} ({info.get('license', '?')})\n\n"
+            + (text or f"Licensed under {info.get('license', '?')}.")
+        )
+    return ("\n\n" + "-" * 72 + "\n\n").join(parts) + "\n"
+
+
 def sha256(path: pathlib.Path) -> str:
     """Returns a file's SHA-256 hex digest."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -76,6 +136,16 @@ def main() -> None:
             lines.append(
                 f"{package} {meta['version']} {meta.get('license', '?')} "
                 f"{name} {sha256(target)}"
+            )
+    for name, (entry, package) in BUNDLES.items():
+        meta = json.loads((NODE / package / "package.json").read_text())
+        included = bundle(name, entry)
+        legal = VENDOR / f"{name.split('.')[0]}.LICENSE"
+        legal.write_text(licences(included), encoding="utf-8")
+        for target in (VENDOR / name, legal):
+            lines.append(
+                f"{package} {meta['version']} {meta.get('license', '?')} "
+                f"{target.name} {sha256(target)}"
             )
     (VENDOR / "VERSIONS").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"Vendored {len(lines) - 2} files into {VENDOR.relative_to(ROOT)}")

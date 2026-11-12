@@ -1,18 +1,23 @@
 /**
  * @fileoverview A small Markdown renderer for cue notes: headings,
- * paragraphs, bulleted, numbered and check lists, quotes, bold, italic,
- * code and links. It builds DOM nodes and never parses HTML, so a note's
+ * paragraphs, bulleted, numbered and check lists, quotes, rules, bold,
+ * italic, code and links. It builds DOM nodes and never parses HTML, so a note's
  * text can't become markup; links go only to http(s) and mailto.
  */
 
 const HEADING = /^(#{1,3})\s+(.*)$/;
-const CHECK = /^\s*[-*+]\s+\[([ xX])\]\s?(.*)$/;
+// "- [ ] item" (Markdown), or a ballot box "☐ item" as pasted from
+// elsewhere, with or without the dash. Groups: [ ]'s mark, the box, text.
+const CHECK = /^\s*(?:[-*+]\s+\[([ xX])\]|(?:[-*+]\s+)?([☐☑☒]))\s?(.*)$/u;
+const BOX_FLIP = {'☐': '☑', '☑': '☐', '☒': '☐'};
 const BULLET = /^\s*[-*+]\s+(.*)$/;
 const NUMBER = /^\s*\d{1,9}[.)]\s+(.*)$/;
 const QUOTE = /^>\s?(.*)$/;
-// Code, bold, italic, a [link](url), or a bare URL, in that order.
+const RULE = /^ {0,3}([-*_])( *\1){2,} *$/;
+// A backslash-escaped character (\* is a literal *, as the notes editor
+// writes it), code, bold, italic, a [link](url), or a bare URL.
 const INLINE =
-  /`([^`]+)`|\*\*(.+?)\*\*|__(.+?)__|\*([^*\s][^*]*?)\*|_([^_\s][^_]*?)_|\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/;
+  /\\([!-/:-@[-`{-~])|`([^`]+)`|\*\*(.+?)\*\*|__(.+?)__|\*([^*\s][^*]*?)\*|_([^_\s][^_]*?)_|\[([^\]]+)\]\(([^)\s]+)\)|(https?:\/\/[^\s<>()]+[^\s<>().,;:!?'"])/;
 const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:']);
 
 /**
@@ -33,6 +38,15 @@ function safeUrl(text) {
 }
 
 /**
+ * Whether a check-list line's box is ticked.
+ * @param {!Array<string>} match A CHECK match.
+ * @return {boolean}
+ */
+function ticked(match) {
+  return match[1] === undefined ? match[2] !== '☐' : match[1] !== ' ';
+}
+
+/**
  * A note's check-list items: how many there are and how many are ticked.
  * @param {?string} text
  * @return {{done: number, total: number}}
@@ -44,7 +58,7 @@ export function checklist(text) {
     const match = CHECK.exec(line);
     if (match) {
       total += 1;
-      done += match[1] === ' ' ? 0 : 1;
+      done += ticked(match) ? 1 : 0;
     }
   }
   return {done, total};
@@ -59,9 +73,11 @@ export function checklist(text) {
 export function toggle(text, index) {
   const lines = text.split('\n');
   const match = CHECK.exec(lines[index] ?? '');
-  if (match) {
+  if (match?.[1] !== undefined) {
     const mark = match[1] === ' ' ? 'x' : ' ';
     lines[index] = lines[index].replace(/\[[ xX]\]/, `[${mark}]`);
+  } else if (match) {
+    lines[index] = lines[index].replace(match[2], BOX_FLIP[match[2]]);
   }
   return lines.join('\n');
 }
@@ -80,8 +96,11 @@ function inline(parent, text) {
       return;
     }
     parent.append(rest.slice(0, match.index));
-    const [whole, code, bold, bold2, em, em2, label, href, bare] = match;
-    if (code !== undefined) {
+    const [whole, escaped, code, bold, bold2, em, em2, label, href, bare] =
+      match;
+    if (escaped !== undefined) {
+      parent.append(escaped);
+    } else if (code !== undefined) {
       const node = document.createElement('code');
       node.textContent = code;
       parent.append(node);
@@ -139,6 +158,9 @@ export function render(text, options = {}) {
     let match;
     if (!line.trim()) {
       close();
+    } else if (RULE.test(line)) {
+      close();
+      out.append(document.createElement('hr'));
     } else if ((match = HEADING.exec(line))) {
       close();
       const node = document.createElement('p');
@@ -149,12 +171,12 @@ export function render(text, options = {}) {
       const item = document.createElement('li');
       const box = document.createElement('input');
       box.type = 'checkbox';
-      box.checked = match[1] !== ' ';
+      box.checked = ticked(match);
       box.disabled = !options.checkable;
       box.dataset.line = String(index);
-      box.setAttribute('aria-label', match[2] || 'Item');
+      box.setAttribute('aria-label', match[3] || 'Item');
       const label = document.createElement('span');
-      inline(label, match[2]);
+      inline(label, match[3]);
       item.append(box, label);
       item.classList.toggle('md-check--done', box.checked);
       listOf('ul', 'md-checklist').append(item);

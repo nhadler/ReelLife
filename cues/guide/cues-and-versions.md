@@ -23,27 +23,25 @@ match are kept until you change them.
 
 ## Notes
 
-Notes are written in Markdown, and the grid and the panel show them
-formatted:
-
-- `**bold**` and `*italic*` for **bold** and *italic*
-- `## Heading` for a heading
-- `- item` or `1. item` for a list
-- `- [ ] to do` and `- [x] done` for a check list
-- `[label](https://…)`, or a plain web address, for a link
-- `> quote` for a quote
-
-The panel's toolbar adds these for you; Ctrl+B, Ctrl+I and Ctrl+K
-(⌘ on a Mac) do bold, italic and a link. Enter in a list starts the next
-item, and Enter on an empty item ends the list. **Preview** shows the
-note formatted, and you can tick its check boxes there. A cell with a
+The notes panel shows a note formatted, and you write straight into it:
+bold, italic, headings, lists, check lists, quotes and links. The toolbar
+does each of these, and Ctrl+B, Ctrl+I and Ctrl+K (⌘ on a Mac) do bold,
+italic and a link. Enter in a list starts the next item; Enter on an
+empty item ends the list. Tick a check box to mark it done. A cell with a
 check list shows how many items are done ("3/7").
+
+Typing Markdown works too: `## ` starts a heading, `- ` a list, `[ ] `
+a check list and `> ` a quote. Notes are kept as Markdown, so they read
+the same in exports and to the AI assistant. Check boxes pasted from
+elsewhere (☐ and ☑) work as a check list; ticking one in the panel saves
+the note as a Markdown check list.
 
 - Click another cue's row, or press Alt+↑ and Alt+↓, to move the panel
   to the cue before or after. It keeps showing the same notes.
 - Esc, or Ctrl+Enter (⌘+Enter), goes back to the grid. If App Settings
   say Enter saves, Enter does too and Shift+Enter adds a line.
-- Each save is one change, so **Undo** (Ctrl+Z) takes it back.
+- In the panel, Ctrl+Z undoes your typing. Each save is one change, so
+  **Undo** in the grid takes it back too.
 - Edit several cues at once: select them (tick their boxes; Shift-click
   for a range), then change one cell. ReelLife asks whether to apply it
   to all of them.

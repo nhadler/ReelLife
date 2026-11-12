@@ -3861,6 +3861,12 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   font-size: 0.9em;
 }
 
+.md hr {
+  margin: 0.8em 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
 .md .md-checklist {
   padding-left: 0;
   list-style: none;
@@ -3966,27 +3972,6 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   display: none;
 }
 
-.notes-panel__modes {
-  display: flex;
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-}
-
-.notes-panel__mode {
-  padding: 0.15rem 0.6rem;
-  border: 0;
-  background: none;
-  color: var(--slate);
-  font: inherit;
-  font-size: var(--step--1);
-  cursor: pointer;
-}
-
-.notes-panel__mode[aria-pressed='true'] {
-  background: var(--panel-raised);
-  color: var(--ink);
-}
-
 .side-panel__body.notes-panel {
   display: flex;
   flex-direction: column;
@@ -3996,18 +3981,13 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 0.4rem;
   min-height: 0;
-}
-
-.notes-panel__editor[hidden],
-.notes-panel__preview[hidden] {
-  display: none;
 }
 
 .notes-panel__tools {
   display: flex;
   gap: 0.15rem;
+  margin-bottom: 0.4rem;
 }
 
 .notes-panel__tool {
@@ -4020,6 +4000,11 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+}
+
+.notes-panel__tool[aria-pressed='true'] {
+  background: var(--panel-raised);
+  color: var(--accent);
 }
 
 .notes-panel__tool:hover,
@@ -4036,27 +4021,121 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   font-style: italic;
 }
 
-.notes-panel__text {
+/* The notes as formatted text (TipTap, overview/notes-panel.js). */
+.notes-panel__doc {
   flex: 1;
   min-height: 12rem;
-  padding: 0.6rem 0.7rem;
+  padding: 0.6rem 0.75rem;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   background: var(--bay);
-  color: var(--ink);
-  font-family: var(--mono);
-  font-size: 0.85rem;
   line-height: 1.55;
-  resize: none;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  cursor: text;
 }
 
-.notes-panel__text:focus-visible {
+.notes-panel__doc:focus {
   border-color: var(--accent);
   outline: none;
 }
 
-.notes-panel__preview {
-  line-height: 1.5;
+.notes-panel__doc[contenteditable='false'] {
+  border-color: transparent;
+  background: none;
+  cursor: auto;
+}
+
+.notes-panel__doc p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--slate);
+  pointer-events: none;
+}
+
+.notes-panel__doc :is(h1, h2, h3) {
+  margin: 0.9em 0 0.35em;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.notes-panel__doc h1 {
+  font-size: 1.2em;
+}
+
+.notes-panel__doc h2 {
+  font-size: 1.08em;
+}
+
+.notes-panel__doc h3 {
+  font-size: 1em;
+}
+
+.notes-panel__doc ul[data-type='taskList'] {
+  padding-left: 0;
+  list-style: none;
+}
+
+.notes-panel__doc ul[data-type='taskList'] li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45em;
+}
+
+.notes-panel__doc ul[data-type='taskList'] li > label {
+  flex: none;
+}
+
+.notes-panel__doc ul[data-type='taskList'] li > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.notes-panel__doc ul[data-type='taskList'] li > div > p {
+  margin: 0;
+}
+
+.notes-panel__doc ul[data-type='taskList'] input {
+  margin: 0;
+  accent-color: var(--accent);
+  transform: translateY(0.1em);
+}
+
+.notes-panel__doc li[data-checked='true'] > div {
+  color: var(--slate);
+  text-decoration: line-through;
+}
+
+.notes-panel__doc a {
+  color: var(--accent);
+}
+
+.notes-panel__doc .ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+}
+
+.ProseMirror-hideselection *::selection {
+  background: transparent;
+}
+
+.ProseMirror-gapcursor {
+  display: none;
+}
+
+.notes-panel__link {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.notes-panel__link[hidden] {
+  display: none;
+}
+
+.notes-panel__link input {
+  flex: 1;
+  min-width: 0;
 }
 
 .notes-panel__status {
