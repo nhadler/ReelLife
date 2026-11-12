@@ -15,6 +15,14 @@
     {% endif %}
     <a class="menu__item" href="{% url 'cues:activity' project.pk %}" data-palette="Activity"{% if tab == "activity" %} aria-current="page"{% endif %} title="Every change to the project, with Undo">Activity</a>
     <a class="menu__item" href="{% url 'cues:trash' project.pk %}" data-palette="Trash"{% if tab == "trash" %} aria-current="page"{% endif %} title="Deleted cues, to restore">Trash</a>
+    {% if request.user.role != "viewer" %}
+      <form method="post" action="{% url 'cues:schedule_reset' project.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <button class="menu__item" type="submit" data-palette="Reset Schedule" title="Unpin every cue so the schedule plans them again"
+                data-confirm="Unpin every cue in {{ project.title }}? The schedule plans them again; Undo puts the pins back.">Reset Schedule</button>
+      </form>
+    {% endif %}
     <hr class="menu__rule">
     <p class="project-menu__heading">Cues</p>
     {% if request.user.role != "viewer" %}

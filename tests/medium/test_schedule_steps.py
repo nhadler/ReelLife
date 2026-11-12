@@ -140,6 +140,78 @@ def test_pins_show_on_the_schedule(
     assert reverse("cues:schedule_on", args=[cue.pk]) in page
 
 
+def test_reset_schedule_unpins_the_project_and_undoes(
+    editor: Client, film: models.Project
+) -> None:
+    first = _cue(film, "1m01", 2)
+    second = _cue(film, "1m02", 2)
+    other = factories.ProjectFactory.create(title="Other")
+    elsewhere = factories.CueFactory.create(project=other)
+    for cue in (first, second, elsewhere):
+        models.SchedulePin.objects.create(cue=cue, date=MON + _DAY)
+    models.WritingLog.objects.create(cue=first, date=MON, seconds=30)
+    url = reverse("cues:schedule_reset", args=[film.pk])
+    back = reverse("cues:project", args=[film.pk])
+    response = editor.post(url, {"next": back}, follow=True)
+    assert response.redirect_chain == [(back, 302)]
+    assert "Reset Night Ferry&#x27;s schedule: unpinned 2 cues." in (
+        response.content.decode()
+    )
+    assert list(models.SchedulePin.objects.all()) == [elsewhere.pin]
+    assert models.WritingLog.objects.filter(cue=first).exists()
+    change = models.ChangeSet.objects.filter(project=film).latest("pk")
+    assert change.label == "Reset Schedule"
+    history.undo(change)
+    assert models.SchedulePin.objects.count() == 3
+
+
+def test_reset_schedule_with_nothing_pinned_changes_nothing(
+    editor: Client, film: models.Project
+) -> None:
+    _cue(film, "1m01", 2)
+    count = models.ChangeSet.objects.count()
+    url = reverse("cues:schedule_reset", args=[film.pk])
+    # Another site's address isn't followed; the Schedule shows the film.
+    response = editor.post(url, {"next": "https://evil.example/"})
+    assert response["Location"] == (
+        reverse("cues:schedule") + f"?f=1&p={film.pk}"
+    )
+    page = editor.get(response["Location"]).content.decode()
+    assert "No cues in Night Ferry were pinned." in page
+    assert models.ChangeSet.objects.count() == count
+
+
+def test_reset_schedule_is_for_editors_and_posts_only(
+    editor: Client,
+    film: models.Project,
+    role_client: Callable[[Role], Client],
+) -> None:
+    cue = _cue(film, "1m01", 2)
+    models.SchedulePin.objects.create(cue=cue, date=MON)
+    url = reverse("cues:schedule_reset", args=[film.pk])
+    viewer = role_client(Role.VIEWER)
+    assert viewer.post(url).status_code == 403
+    assert editor.get(url).status_code == 405
+    assert models.SchedulePin.objects.exists()
+    project_page = reverse("cues:project", args=[film.pk])
+    assert url in editor.get(project_page).content.decode()
+    assert url not in viewer.get(project_page).content.decode()
+
+
+def test_the_schedule_offers_reset_for_one_shown_project(
+    editor: Client,
+    film: models.Project,
+    role_client: Callable[[Role], Client],
+) -> None:
+    _cue(film, "1m01", 2)
+    url = reverse("cues:schedule_reset", args=[film.pk])
+    schedule = reverse("cues:schedule")
+    assert url not in editor.get(schedule).content.decode()
+    one = f"{schedule}?f=1&p={film.pk}"
+    assert url in editor.get(one).content.decode()
+    assert url not in role_client(Role.VIEWER).get(one).content.decode()
+
+
 # Saved daily plans
 
 

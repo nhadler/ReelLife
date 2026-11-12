@@ -16,3 +16,11 @@
   </ul>
   <button class="button button--small" type="submit" data-autosubmit-button>Show</button>
 </form>
+{% if reset_project %}
+  <form class="schedule-reset" method="post" action="{% url 'cues:schedule_reset' reset_project.id %}">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button class="button button--quiet button--small" type="submit" title="Unpin every cue in {{ reset_project.title }}"
+            data-confirm="Unpin every cue in {{ reset_project.title }}? The schedule plans them again; Undo puts the pins back.">Reset Schedule</button>
+  </form>
+{% endif %}

@@ -90,6 +90,12 @@ dialog lets it flow again. Pinning is one change, so **Undo** and
 Activity take it back. Once its day has passed, a pinned cue that isn't
 finished rejoins the flow.
 
+**Reset Schedule** unpins every cue in a project at once, so the
+schedule plans them all again. It's in the project's **More** menu, and
+on the Schedule when only that project is ticked in Projects. What you
+logged with **Log Written** stays. Editors only; **Undo** puts the pins
+back.
+
 ## In Your Calendar App
 
 **Calendar Feed** in the profile menu makes a link your calendar app can

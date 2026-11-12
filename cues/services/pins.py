@@ -1,7 +1,7 @@
 """Pinning cues to days of the schedule ("Schedule On…").
 
-Each pin or unpin is one undoable change in the cue's project. Used by
-the Schedule On dialog and the MCP pin_cue tool.
+Each pin, unpin or reset is one undoable change in the project. Used by
+the Schedule On dialog, Reset Schedule and the MCP pin_cue tool.
 """
 
 import datetime
@@ -35,3 +35,20 @@ def unpin(cue: models.Cue, user: User | None) -> bool:
     with history.recording(cue.project, f"Unschedule {cue.number}", user):
         found.delete()
     return True
+
+
+def reset(project: models.Project, user: User | None) -> int:
+    """Unpins every cue in `project`, so its plan is automatic again.
+
+    One undoable change. Logged written work stays.
+
+    Returns:
+        How many cues were unpinned.
+    """
+    found = list(models.SchedulePin.objects.filter(cue__project=project))
+    if not found:
+        return 0
+    with history.recording(project, "Reset Schedule", user):
+        for each in found:
+            each.delete()
+    return len(found)

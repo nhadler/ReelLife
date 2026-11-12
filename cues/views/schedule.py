@@ -6,19 +6,28 @@ import dataclasses
 import datetime
 from typing import Any
 
+from django.contrib import messages
 from django.http import HttpRequest
 from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils import dateformat
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.http import urlencode
 from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST
 
 from accounts import roles
+from accounts.authz import role_required
 from accounts.models import Role
+from accounts.models import User
 from cues import dates
 from cues import models
 from cues.services import agenda as agenda_service
+from cues.services import pins
 from cues.services import scheduler
 from cues.services.summaries import clock
 
@@ -371,6 +380,7 @@ def schedule(request: HttpRequest) -> HttpResponse:
         selected=selected,
     )
     line, risks = summary(agenda, shown, settings.date_formats())
+    can_edit = roles.at_least(getattr(request.user, "role", ""), Role.EDITOR)
 
     def listed(keys: Iterable[int]) -> list[tuple[Any, Any]]:
         return [
@@ -403,8 +413,42 @@ def schedule(request: HttpRequest) -> HttpResponse:
             "risks": risks,
             "unschedulable": listed(c.id for c in agenda.unschedulable),
             "unplaced": listed(agenda.plan.unplaced),
-            "can_edit": roles.at_least(
-                getattr(request.user, "role", ""), Role.EDITOR
+            "can_edit": can_edit,
+            "reset_project": (
+                agenda.projects[next(iter(shown))]
+                if can_edit and shown is not None and len(shown) == 1
+                else None
             ),
         },
     )
+
+
+@role_required(Role.EDITOR)
+@require_POST
+def reset(request: HttpRequest, project_id: int) -> HttpResponse:
+    """Unpins every cue in a project (Reset Schedule); one undoable change.
+
+    Goes back to `next` (the page it was asked from), else the Schedule
+    showing that project.
+    """
+    project = get_object_or_404(models.Project, pk=project_id)
+    user = request.user if isinstance(request.user, User) else None
+    count = pins.reset(project, user)
+    if count:
+        cues = f"{count} cue{'' if count == 1 else 's'}"
+        messages.success(
+            request,
+            f"Reset {project.title}'s schedule: unpinned {cues}. "
+            "Undo puts them back.",
+        )
+    else:
+        messages.info(request, f"No cues in {project.title} were pinned.")
+    target = request.POST.get("next", "")
+    if not url_has_allowed_host_and_scheme(
+        target,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        target = "?" + urlencode([("f", "1"), ("p", str(project.pk))])
+        target = reverse("cues:schedule") + target
+    return redirect(target)

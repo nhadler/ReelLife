@@ -6,6 +6,12 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Reset Schedule** unpins every cue in a project in one undoable
+  change, from the project's More menu or the Schedule when only that
+  project is shown. Logged written work stays.
+
 ### Changed
 
 - Buttons shrink slightly while pressed (not with reduced motion), and

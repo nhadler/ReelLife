@@ -316,6 +316,11 @@ urlpatterns = [
     path("settings/", project_settings.app_settings, name="app_settings"),
     path("days-off/", project_settings.your_days_off, name="days_off"),
     path("schedule/", schedule.schedule, name="schedule"),
+    path(
+        "projects/<int:project_id>/schedule/reset/",
+        schedule.reset,
+        name="schedule_reset",
+    ),
     path("calendar-feed/", calendar_feed.feed_page, name="calendar_feed"),
     path(
         "calendar-feed/schedule.ics",
