@@ -1,6 +1,7 @@
 """Views: add, change, copy on first change, reset and delete."""
 
 from collections.abc import Callable
+import gzip
 import json
 from typing import Any
 
@@ -211,3 +212,15 @@ def test_a_body_that_isnt_json_is_refused(
     )
     assert response.status_code == 400
     assert "JSON object" in response.json()["error"]
+
+
+def test_the_grid_data_is_compressed_when_the_browser_accepts_it(
+    editor: Client, project: models.Project
+) -> None:
+    url = reverse("cues:api_grid", args=[project.pk])
+    plain = editor.get(url)
+    assert "Content-Encoding" not in plain
+    packed = editor.get(url, headers={"Accept-Encoding": "gzip, br"})
+    assert packed["Content-Encoding"] == "gzip"
+    assert "Accept-Encoding" in packed["Vary"]
+    assert json.loads(gzip.decompress(packed.content)) == plain.json()

@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
+from django.views.decorators.gzip import gzip_page
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST
@@ -50,8 +51,14 @@ _limit_writes: Callable[[ViewT], ViewT] = ratelimit(
 
 
 @require_GET
+@gzip_page
 def grid_data(request: HttpRequest, project_id: int) -> JsonResponse:
-    """Everything the grid needs to render a project."""
+    """Everything the grid needs to render a project.
+
+    Compressed: it's the largest reply the app sends, often over a slow
+    upload. It carries no secrets (no CSRF token), so compression can't
+    leak one (BREACH).
+    """
     project = get_object_or_404(models.Project, pk=project_id)
     can_edit = roles.at_least(getattr(request.user, "role", ""), Role.EDITOR)
     return JsonResponse(grid.payload(project, can_edit=can_edit))

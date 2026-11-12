@@ -12,6 +12,13 @@ this project follows [Semantic Versioning](https://semver.org/).
   change, from the project's More menu or the Schedule when only that
   project is shown. Logged written work stays.
 
+### Fixed
+
+- The cue grid no longer stays empty when its cues are slow to arrive. A
+  load that stalls for 20 seconds, can't connect or gets a server error
+  (a proxy's 502 or 524) is tried again, up to three times. The grid's
+  data is also compressed, so it crosses a slow upload faster.
+
 ### Changed
 
 - Buttons shrink slightly while pressed (not with reduced motion), and

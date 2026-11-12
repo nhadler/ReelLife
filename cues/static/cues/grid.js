@@ -2072,13 +2072,58 @@ async function saveOne(id, edit) {
   }
 }
 
+/** How long one try at loading the rows may take, in milliseconds. */
+const DATA_TIMEOUT = 20000;
+
+/** How many times to try loading the rows before giving up. */
+const DATA_TRIES = 3;
+
+/**
+ * Fetches the grid's data. A try that stalls, can't reach the server or
+ * gets a server error (a proxy's 502 or 524, say) is made again after a
+ * pause, so a slow connection doesn't leave the grid empty.
+ * @return {!Promise<!Object>} The data (api.grid_data).
+ */
+async function fetchGridData() {
+  for (let attempt = 1; ; attempt++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), DATA_TIMEOUT);
+    let retry = false;
+    try {
+      const response = await fetch(config.dataUrl, {
+        credentials: 'same-origin',
+        signal: controller.signal,
+      });
+      retry = response.status >= 500;
+      if (!response.ok) {
+        throw new Error(`The server answered ${response.status}.`);
+      }
+      const data = await response.json();
+      if (attempt > 1) {
+        announce('');
+      }
+      return data;
+    } catch (error) {
+      // A stall (abort) or no connection; a reply that isn't JSON (a
+      // sign-in page) or a refusal won't change by asking again.
+      retry ||= error.name === 'AbortError' || error instanceof TypeError;
+      if (!retry || attempt >= DATA_TRIES) {
+        throw error;
+      }
+    } finally {
+      clearTimeout(timer);
+    }
+    announce('Still loading the cues; trying again…');
+    await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+  }
+}
+
 /**
  * Fetches a column's choices again (after the server added one).
  * @param {string} field
  */
 async function refreshOptions(field) {
-  const response = await fetch(config.dataUrl, {credentials: 'same-origin'});
-  const data = await response.json();
+  const data = await fetchGridData();
   const fresh = data.columns.find((c) => c.id === field);
   if (fresh) {
     columnMeta[field].options = fresh.options;
@@ -2116,8 +2161,7 @@ function emptyOverlay() {
  * Reloads every row (after undo).
  */
 async function reload() {
-  const response = await fetch(config.dataUrl, {credentials: 'same-origin'});
-  const data = await response.json();
+  const data = await fetchGridData();
   allRows = data.rows;
   pictures = data.pictures;
   writtenTo = data.written_to;
@@ -2660,8 +2704,7 @@ function headerMenu(event) {
  * Loads the data and creates the grid.
  */
 async function start() {
-  const response = await fetch(config.dataUrl, {credentials: 'same-origin'});
-  const data = await response.json();
+  const data = await fetchGridData();
   columnMeta = Object.fromEntries(data.columns.map((c) => [c.id, c]));
   enterSaves = data.settings.enter_behaviour === 'save';
   views = data.views.length
