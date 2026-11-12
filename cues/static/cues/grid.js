@@ -1040,6 +1040,8 @@ function columnsFor(view) {
       let pinned = layout.pinned;
       if (phone) {
         pinned = layout.id === 'number' ? 'left' : undefined;
+      } else if (pinned === 'none') {
+        pinned = undefined; // the view unpinned it
       } else if (pinned === undefined && PINNED.has(layout.id)) {
         pinned = 'left'; // #, Status, % Written, Cue # and Title stay left
       }
@@ -1824,6 +1826,8 @@ async function saveLayout() {
       }
       if (c.pinned) {
         entry.pinned = c.pinned;
+      } else if (PINNED.has(c.colId)) {
+        entry.pinned = 'none'; // unpinned on purpose: stays unpinned
       }
       return entry;
     });

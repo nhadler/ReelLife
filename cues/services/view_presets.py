@@ -18,7 +18,8 @@ from cues import defaults
 from cues import models
 
 BUILT_IN = frozenset(name for name, _ in defaults.VIEW_PRESETS)
-_PINNED = (None, "left", "right")
+# "none": not pinned, where the grid would pin the column by default.
+_PINNED = (None, "left", "right", "none")
 _DIRECTIONS = ("asc", "desc")
 _WIDTHS = range(30, 2001)
 

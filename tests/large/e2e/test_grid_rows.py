@@ -83,3 +83,29 @@ def test_a_tall_rows_cells_all_start_on_its_first_line(
     assert max(middles.values()) - min(middles.values()) <= SLACK, sorted(
         middles.items(), key=lambda m: m[1]
     )
+
+
+def test_no_pin_sticks_for_a_column_pinned_by_default(
+    page: Any, app: str, sign_in_as: SignInAs, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    project = demo.build_demo().project
+    sign_in_as("Casey Composer")
+    page.goto(f"{app}/projects/{project.pk}/")
+    expect(page.locator("#cue-grid[data-ready=true]")).to_be_attached()
+    header = page.locator(".ag-header-cell[col-id=status]")
+    no_pin = page.get_by_role("menuitem", name="No Pin")
+    # Status is pinned by default, so No Pin is on offer.
+    header.click(button="right")
+    expect(no_pin).to_be_enabled()
+    with page.expect_response(lambda r: "/views/" in r.url and r.ok):
+        no_pin.click()
+    standard = models.View.objects.get(project=project, name="Standard")
+    status = next(c for c in standard.columns if c["id"] == "status")
+    assert status["pinned"] == "none"
+    # After a reload it's still unpinned.
+    page.reload()
+    expect(page.locator("#cue-grid[data-ready=true]")).to_be_attached()
+    header.click(button="right")
+    expect(no_pin).to_be_disabled()
+    expect(page.get_by_role("menuitem", name="Pin Left")).to_be_enabled()

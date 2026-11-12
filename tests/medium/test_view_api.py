@@ -62,6 +62,8 @@ def test_adding_and_duplicating_a_view(
     columns = [
         {"id": "number"},
         {"id": "title", "width": 240, "pinned": "left"},
+        # Unpinned where the grid would pin it by default.
+        {"id": "status", "pinned": "none"},
     ]
     response = _create(
         editor,
