@@ -2095,6 +2095,11 @@ async function fetchGridData() {
         signal: controller.signal,
       });
       retry = response.status >= 500;
+      if (response.status === 401) {
+        // Signed out (the page outlived its session): say so.
+        const body = await response.json();
+        throw Object.assign(new Error(body.error), {name: 'SignedOut'});
+      }
       if (!response.ok) {
         throw new Error(`The server answered ${response.status}.`);
       }
@@ -2982,5 +2987,10 @@ async function start() {
 
 start().catch((error) => {
   console.error(error); // for whoever opens the developer tools
-  announce('The cue grid failed to load. Reload the page.', true);
+  announce(
+    error.name === 'SignedOut'
+      ? error.message
+      : 'The cue grid failed to load. Reload the page.',
+    true,
+  );
 });

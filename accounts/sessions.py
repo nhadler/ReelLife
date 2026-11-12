@@ -13,8 +13,11 @@ from typing import Any
 
 from django.conf import settings
 from django.contrib import auth
+from django.contrib.auth import middleware as auth_middleware
 from django.http import HttpRequest
+from django.http import HttpResponse
 from django.http import HttpResponseBase
+from django.http import JsonResponse
 from django.utils import timezone
 
 from accounts import oidc
@@ -24,6 +27,7 @@ SEEN_AT = "reellife_seen_at"
 CHECKED_AT = "reellife_checked_at"
 # Record activity at most this often, to avoid a session write per request.
 _SEEN_RESOLUTION = 60
+SIGNED_OUT = "You've been signed out. Reload the page to sign in again."
 
 
 def _now() -> int:
@@ -79,3 +83,30 @@ class SessionTimeoutMiddleware:
                 session[CHECKED_AT] = now
             else:
                 auth.logout(request)
+
+
+class LoginRequiredMiddleware(auth_middleware.LoginRequiredMiddleware):
+    """Django's, except where a redirect to the sign-in page can't work.
+
+    A page left open past the session's end still makes requests. The
+    grid's JSON API (/api/) gets a 401 with a message instead of the
+    sign-in page's HTML, so the grid says what happened and an edit isn't
+    silently lost. An htmx request (a dialog) reloads the page, which then
+    goes to sign in, instead of showing the sign-in page in the dialog.
+    """
+
+    # Django's stub promises a redirect; process_view only returns this
+    # as the response, so any response works.
+    def handle_no_permission(  # type: ignore[override]
+        self, request: HttpRequest, view_func: Callable[..., Any]
+    ) -> HttpResponseBase:
+        """See the class docstring; other requests go to sign in."""
+        if request.path_info.startswith("/api/"):
+            return JsonResponse(
+                {"error": SIGNED_OUT, "signed_out": True}, status=401
+            )
+        if request.headers.get("HX-Request") == "true":
+            response = HttpResponse(status=401)
+            response["HX-Refresh"] = "true"
+            return response
+        return super().handle_no_permission(request, view_func)

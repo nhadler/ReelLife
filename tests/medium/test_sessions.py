@@ -4,12 +4,14 @@ from collections.abc import Callable
 import datetime
 
 from django.test import Client
+from django.urls import reverse
 import freezegun
 import pytest
 
 from accounts import oidc
 from accounts import sessions
 from accounts.models import Role
+from tests import factories
 
 # Recent, so the test client's session (saved at START) hasn't expired
 # by the time a test reads it back outside the frozen clock.
@@ -93,3 +95,34 @@ def test_session_without_stamps_starts_counting(
     session.save()
     assert _status_at(client, START + HOUR) == 200
     assert client.session[sessions.AUTH_AT] == int((START + HOUR).timestamp())
+
+
+# A page left open past its session's end
+
+
+def test_the_grid_api_answers_401_once_the_session_has_idled_out(
+    role_client: Callable[[Role], Client],
+) -> None:
+    client = _signed_in(role_client)
+    project = factories.ProjectFactory.create()
+    grid = reverse("cues:api_grid", args=[project.pk])
+    with freezegun.freeze_time(START + 9 * HOUR):
+        response = client.get(grid)
+    assert response.status_code == 401
+    assert response.json() == {"error": sessions.SIGNED_OUT, "signed_out": True}
+    edit = reverse("cues:api_cue", args=[1])
+    response = Client().patch(edit, "{}", content_type="application/json")
+    assert response.status_code == 401
+    assert response.json()["signed_out"] is True
+
+
+@pytest.mark.django_db
+def test_a_dialog_reloads_the_page_and_a_page_goes_to_sign_in() -> None:
+    project = factories.ProjectFactory.create()
+    dialog = reverse("cues:new_cue", args=[project.pk])
+    response = Client().get(dialog, headers={"HX-Request": "true"})
+    assert response.status_code == 401
+    assert response["HX-Refresh"] == "true"
+    page = Client().get(reverse("cues:project", args=[project.pk]))
+    assert page.status_code == 302
+    assert page["Location"].startswith(reverse("accounts:login"))

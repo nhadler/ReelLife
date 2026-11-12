@@ -46,7 +46,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "accounts.sessions.SessionTimeoutMiddleware",
     # Every view needs a signed-in user unless marked login_not_required.
-    "django.contrib.auth.middleware.LoginRequiredMiddleware",
+    "accounts.sessions.LoginRequiredMiddleware",
     # Then every view needs a role; see accounts/authz.py.
     "accounts.authz.RoleMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",

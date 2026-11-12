@@ -6,6 +6,14 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- A page left open after its session ended (8 hours idle, or 7 days)
+  now says "You've been signed out. Reload the page to sign in again."
+  The grid used to stay empty and an edit could be lost without a
+  word; the grid's requests now get a clear answer instead of the
+  sign-in page, and a dialog reloads the page to sign in.
+
 ## [1.3.0] - 2026-11-12
 
 ### Added

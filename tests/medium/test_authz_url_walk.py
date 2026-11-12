@@ -108,9 +108,15 @@ def test_routes_were_found() -> None:
 @pytest.mark.django_db
 @pytest.mark.parametrize("method", ["get", "post"])
 @pytest.mark.parametrize("route", PROTECTED, ids=_ids)
-def test_anonymous_is_sent_to_login(
+def test_anonymous_is_sent_to_login_or_refused(
     client: Client, route: Route, method: str
 ) -> None:
+    if route.url.startswith("/api/"):
+        # The grid's API says so instead; a page left open shows it.
+        response = getattr(client, method)(route.url)
+        assert response.status_code == 401, route.url
+        assert response.json()["signed_out"] is True, route.url
+        return
     # Admin pages hop through /admin/login/, which ReelLife redirects on.
     response = getattr(client, method)(route.url, follow=True)
     assert response.redirect_chain, route.url
