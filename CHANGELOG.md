@@ -6,6 +6,14 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- A long note in the notes panel stays inside its box (the text ran on
+  below the box's border), and the toolbar stays at the top while the
+  note scrolls.
+- **No Pin** on a column the grid pins by default (Status, % Written,
+  Cue #, Title, Thumbnail, #) now sticks after a reload.
+
 ## [1.5.0] - 2026-11-12
 
 ### Added

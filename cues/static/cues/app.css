@@ -4029,17 +4029,25 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
   flex-direction: column;
 }
 
+/* Grows with the note (the panel's body scrolls), filling the panel at
+   least, so the box's border always goes round all of the text. */
 .notes-panel__editor {
   display: flex;
-  flex: 1;
+  flex: 1 0 auto;
   flex-direction: column;
-  min-height: 0;
 }
 
+/* Stays in reach at the top while a long note scrolls (the body's
+   top padding is 1.5 spaces). */
 .notes-panel__tools {
+  position: sticky;
+  z-index: 1;
+  top: calc(var(--space) * -1.5);
   display: flex;
   gap: 0.15rem;
-  margin-bottom: 0.4rem;
+  margin: calc(var(--space) * -1.5) 0 0.4rem;
+  padding: calc(var(--space) * 1.5) 0 0.4rem;
+  background: var(--panel);
 }
 
 .notes-panel__tool {
@@ -4075,7 +4083,7 @@ form:not(:has([name='numbering'][value='custom']:checked)) .numbering-custom {
 
 /* The notes as formatted text (TipTap, overview/notes-panel.js). */
 .notes-panel__doc {
-  flex: 1;
+  flex: 1 0 auto;
   min-height: 12rem;
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--rule);

@@ -229,3 +229,29 @@ def test_viewers_read_notes_without_editing(
     expect(doc).to_have_attribute("contenteditable", "false")
     expect(panel.get_by_role("toolbar")).to_have_count(0)
     expect(panel.get_by_role("checkbox", name="Lower strings")).to_be_disabled()
+
+
+def test_a_long_note_stays_inside_its_box(
+    page: Any, app: str, sign_in_as: SignInAs, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    first, _, _ = _set_up(page, app, sign_in_as, "Casey Composer")
+    long_note = "\n".join(f"- [ ] Item {n}" for n in range(1, 61))
+    assert first.current_version is not None
+    first.current_version.revision_notes = long_note
+    first.current_version.save(update_fields=["revision_notes"])
+    page.reload()
+    expect(page.locator("#cue-grid[data-ready=true]")).to_be_attached()
+    _cell(page, first).click()
+    panel = page.locator("#side-panel")
+    doc = panel.locator(".notes-panel__doc")
+    last = doc.locator("li").last
+    expect(last).to_contain_text("Item 60")
+    # The box goes round all of the text, however long.
+    box = doc.bounding_box()
+    item = last.bounding_box()
+    assert box is not None and item is not None
+    assert item["y"] + item["height"] <= box["y"] + box["height"]
+    # Scrolled to the end, the toolbar is still in reach.
+    last.scroll_into_view_if_needed()
+    expect(panel.get_by_role("button", name="Bold")).to_be_in_viewport()
