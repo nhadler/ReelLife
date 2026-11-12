@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-12
+
 ### Fixed
 
 - The cue grid could stay empty with no message when the browser failed
@@ -214,7 +216,8 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/nhadler/reellife/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/nhadler/reellife/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/nhadler/reellife/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/nhadler/reellife/compare/v1.0.0...v1.1.0
