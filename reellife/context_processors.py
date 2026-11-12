@@ -9,6 +9,15 @@ from cues import models
 from reellife import updates
 
 
+def _user(request: HttpRequest) -> object:
+    """The request's user, or None before sign-in middleware ran.
+
+    A request for a host not in ALLOWED_HOSTS is turned away first, and
+    its 400 page renders with this context too.
+    """
+    return getattr(request, "user", None)
+
+
 def preferences(request: HttpRequest) -> dict[str, str]:
     """The colour theme and date formats from App Settings.
 
@@ -29,7 +38,7 @@ def account(request: HttpRequest) -> dict[str, str]:
     PocketID's is /settings/account under the issuer; OIDC_ACCOUNT_URL
     overrides it for other providers.
     """
-    if not getattr(request.user, "oidc_sub", None):
+    if not getattr(_user(request), "oidc_sub", None):
         return {}
     issuer = settings.OIDC_ISSUER.rstrip("/")
     return {
@@ -44,7 +53,7 @@ def version(request: HttpRequest) -> dict[str, object]:
     install it.
     """
     context: dict[str, object] = {"app_version": updates.installed()}
-    if getattr(request.user, "role", "") == Role.ADMIN:
+    if getattr(_user(request), "role", "") == Role.ADMIN:
         try:
             context["update"] = updates.available()
         except DatabaseError:  # error pages render without the cache

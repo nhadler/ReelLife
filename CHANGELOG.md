@@ -6,6 +6,12 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- A request for a host ReelLife doesn't serve (not in
+  `REELLIFE_ALLOWED_HOSTS`, such as the server's bare IP) gets a 400
+  again, not a 500: its error page no longer expects a signed-in user.
+
 ## [1.5.1] - 2026-11-12
 
 ### Fixed
