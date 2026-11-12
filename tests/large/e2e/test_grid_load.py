@@ -159,7 +159,9 @@ def test_a_dropped_script_reloads_the_page_once(
     loads = _page_loads(page)
     page.goto(f"{app}/projects/{project.pk}/")
     expect(page.locator("#cue-grid[data-ready=true]")).to_be_attached()
-    assert len(seen) == 2 and len(loads) == 2  # dropped, then reloaded
+    # Dropped, then the page reloaded once. Two modules import
+    # confirm.js, so how often it's asked for depends on timing.
+    assert len(loads) == 2 and len(seen) >= 2
     expect(page.locator("#load-guard")).to_have_count(0)
 
 
