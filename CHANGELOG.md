@@ -8,6 +8,12 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- The cue grid could stay empty with no message when the browser failed
+  to fetch one of its scripts (seen in Firefox over HTTP/3): one
+  missing module stops every module that imports it. Scripts now import
+  each other by their cached-for-good names, so a page load fetches far
+  fewer files, and if a script still fails to load the page reloads
+  once, then says "Part of this page didn't load. Reload the page."
 - A page left open after its session ended (8 hours idle, or 7 days)
   now says "You've been signed out. Reload the page to sign in again."
   The grid used to stay empty and an edit could be lost without a

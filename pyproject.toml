@@ -123,6 +123,7 @@ module = [
     "weasyprint.*",
     "mido",
     "mido.*",
+    "whitenoise.*",
 ]
 ignore_missing_imports = true
 

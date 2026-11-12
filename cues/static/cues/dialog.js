@@ -5,8 +5,8 @@
  * a modal and focuses its first field (or the first one with an error),
  * closes it on Cancel or when the server sends a dialog:close event
  * (HX-Trigger), and empties it once closed. A step swapped in inside the
- * dialog (the import preview) gets focus too, and Escape asks before
- * throwing away anything typed.
+ * dialog (the preview of a file being imported) gets focus too, and Escape asks
+ * before throwing away anything typed.
  */
 
 import {actionOf, ask} from './confirm.js';

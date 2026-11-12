@@ -11,6 +11,8 @@
     <link rel="icon" href="{% static 'cues/favicon-32.png' %}" sizes="32x32" type="image/png">
     <link rel="apple-touch-icon" href="{% static 'cues/apple-touch-icon.png' %}">
     <link rel="stylesheet" href="{% static 'cues/app.css' %}">
+    {# First and not deferred: it must be listening before any script can fail to load. #}
+    <script src="{% static 'cues/load-guard.js' %}"></script>
     <script src="{% static 'cues/vendor/htmx.min.js' %}" defer></script>
     {# Rewrites keyboard hints for the computer in use (⌘ on a Mac). #}
     <script src="{% static 'cues/keys.js' %}" type="module"></script>

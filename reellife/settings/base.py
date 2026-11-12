@@ -186,7 +186,7 @@ STORAGES = {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
     },
 }
-MANIFEST_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+MANIFEST_STORAGE = "reellife.storage.StaticStorage"
 
 LOGGING = {
     "version": 1,

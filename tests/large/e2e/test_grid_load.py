@@ -119,3 +119,61 @@ def test_a_grid_that_loads_after_the_session_ended_says_so(
     page.route(f"**/api/projects/{project.pk}/grid/", signed_out)
     page.goto(f"{app}/projects/{project.pk}/")
     expect(page.locator("#grid-status")).to_have_text(SIGNED_OUT)
+
+
+def _drop_confirm_js(page: Any, times: int) -> list[str]:
+    """Drops the first `times` requests for confirm.js (grid.js imports it)."""
+    seen: list[str] = []
+
+    def handle(route: Any) -> None:  # playwright wants a function here
+        seen.append(route.request.url)
+        if len(seen) <= times:
+            route.abort("connectionreset")
+        else:
+            route.continue_()
+
+    confirm = re.compile(r"/static/cues/confirm(\.[0-9a-f]{12})?\.js$")
+    page.route(confirm, handle)
+    return seen
+
+
+def _page_loads(page: Any) -> list[str]:
+    """Records each page the tab loads, reloads included."""
+    loads: list[str] = []
+
+    def record(request: Any) -> None:
+        if request.resource_type == "document":
+            loads.append(request.url)
+
+    page.on("request", record)
+    return loads
+
+
+def test_a_dropped_script_reloads_the_page_once(
+    page: Any, app: str, sign_in_as: SignInAs, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    project = demo.build_demo().project
+    sign_in_as("Casey Composer")
+    seen = _drop_confirm_js(page, times=1)
+    loads = _page_loads(page)
+    page.goto(f"{app}/projects/{project.pk}/")
+    expect(page.locator("#cue-grid[data-ready=true]")).to_be_attached()
+    assert len(seen) == 2 and len(loads) == 2  # dropped, then reloaded
+    expect(page.locator("#load-guard")).to_have_count(0)
+
+
+def test_a_script_that_keeps_failing_says_so(
+    page: Any, app: str, sign_in_as: SignInAs, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    project = demo.build_demo().project
+    sign_in_as("Casey Composer")
+    _drop_confirm_js(page, times=99)
+    loads = _page_loads(page)
+    page.goto(f"{app}/projects/{project.pk}/")
+    expect(page.locator("#load-guard")).to_have_text(
+        "Part of this page didn't load. Reload the page."
+    )
+    page.wait_for_timeout(1000)
+    assert len(loads) == 2  # one reload, then no more
