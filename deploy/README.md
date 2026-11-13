@@ -66,10 +66,10 @@ docker compose ps        # web should become "healthy"
 ```
 
 The image is `ghcr.io/nhadler/reeltime`, for `linux/amd64` and
-`linux/arm64`, tagged by release (`1.6.0`, `1.6`, `1`) and `latest`. Each one
+`linux/arm64`, tagged by release (`2.0.0`, `2.0`, `2`) and `latest`. Each one
 carries an SBOM and build provenance; check it came from this
 repository's release workflow with
-`gh attestation verify oci://ghcr.io/nhadler/reeltime:1.6.0 --repo nhadler/reeltime`.
+`gh attestation verify oci://ghcr.io/nhadler/reeltime:2.0.0 --repo nhadler/reeltime`.
 
 To build from a checkout instead, add the build override:
 `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build`
@@ -100,10 +100,10 @@ To build from a checkout instead, add the build override:
 ## Bare Linux with systemd + uv
 
 Tested on Debian trixie with systemd 257; any recent systemd works.
-Clone a release tag (below, `v1.6.0`) rather than `main`.
+Clone a release tag (below, `v2.0.0`) rather than `main`.
 
 ```sh
-sudo git clone --branch v1.6.0 https://github.com/nhadler/reeltime.git /opt/reeltime
+sudo git clone --branch v2.0.0 https://github.com/nhadler/reeltime.git /opt/reeltime
 sudo sh /opt/reeltime/deploy/systemd/install.sh
 sudo $EDITOR /etc/reeltime/reeltime.env
 echo '<pocketid client secret>' | sudo tee /etc/reeltime/oidc_client_secret
@@ -204,7 +204,7 @@ From a checkout: `git pull`, then `just up`.
 systemd:
 
 ```sh
-cd /opt/reeltime && sudo git fetch --tags && sudo git checkout v1.6.1   # the new release
+cd /opt/reeltime && sudo git fetch --tags && sudo git checkout v2.0.1   # the new release
 sudo sh deploy/systemd/install.sh
 sudo systemctl restart reeltime.service
 ```
