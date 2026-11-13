@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-11-12
+
 ### Changed
 
 - **Log Written** takes the stretch you wrote as timecodes, From and To,
@@ -278,7 +280,8 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/nhadler/reellife/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/nhadler/reellife/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/nhadler/reellife/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/nhadler/reellife/compare/v1.4.0...v1.5.0
