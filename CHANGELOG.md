@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.5.2] - 2026-11-12
+
 ### Fixed
 
 - A request for a host ReelLife doesn't serve (not in
@@ -266,7 +268,8 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/nhadler/reellife/compare/v1.5.2...HEAD
+[1.5.2]: https://github.com/nhadler/reellife/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/nhadler/reellife/compare/v1.5.0...v1.5.1
 [1.5.0]: https://github.com/nhadler/reellife/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/nhadler/reellife/compare/v1.3.1...v1.4.0
