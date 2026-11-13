@@ -26,7 +26,7 @@ cue types count toward progress.
 
 ## Roles
 
-ReelLife signs in through PocketID, and your role comes from your
+ReelTime signs in through PocketID, and your role comes from your
 PocketID groups:
 
 - **Viewers** can read project data but can't edit it.
@@ -34,4 +34,4 @@ PocketID groups:
 - **Admins** also have **Backup** (download a backup, or restore one
   into a new install) and the admin pages.
 
-Someone removed from the ReelLife groups is signed out within minutes.
+Someone removed from the ReelTime groups is signed out within minutes.

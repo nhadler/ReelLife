@@ -53,7 +53,7 @@ def _file(name: str, body: bytes, note: str) -> list[Any]:
         TextContent(text=note),
         EmbeddedResource(
             resource=BlobResourceContents(
-                uri=f"reellife://exports/{name.replace(' ', '%20')}",
+                uri=f"reeltime://exports/{name.replace(' ', '%20')}",
                 mime_type=_TYPES[suffix],
                 blob=base64.b64encode(body).decode(),
             )
@@ -61,7 +61,7 @@ def _file(name: str, body: bytes, note: str) -> list[Any]:
     ]
 
 
-# A file of imports.MAX_BYTES in base64. reellife/asgi.py sizes the MCP
+# A file of imports.MAX_BYTES in base64. reeltime/asgi.py sizes the MCP
 # server's request body limit from this, so such a file always fits.
 MAX_BASE64 = imports.MAX_BYTES * 4 // 3 + 4
 

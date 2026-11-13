@@ -15,5 +15,5 @@ class AccountsConfig(AppConfig):
         from accounts import sessions  # pylint: disable=import-outside-toplevel
 
         signals.user_logged_in.connect(
-            sessions.mark_signed_in, dispatch_uid="reellife.mark_signed_in"
+            sessions.mark_signed_in, dispatch_uid="reeltime.mark_signed_in"
         )

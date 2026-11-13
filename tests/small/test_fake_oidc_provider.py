@@ -85,7 +85,7 @@ def test_code_flow_issues_verifiable_id_token(
     assert claims["iss"] == ISSUER
     assert claims["sub"] == USER.sub
     assert claims["nonce"] == "n0"
-    assert claims["groups"] == ["reellife-editors"]
+    assert claims["groups"] == ["reeltime-editors"]
     assert claims["exp"] == 1_000_300
 
 

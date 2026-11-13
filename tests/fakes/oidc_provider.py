@@ -1,13 +1,13 @@
 """A fake OpenID Connect provider for tests and local development.
 
-Implements the parts of the authorization code flow ReelLife uses:
+Implements the parts of the authorization code flow ReelTime uses:
 discovery, JWKS, authorize (PKCE required), token, userinfo,
 end-session and profile pictures. Tests drive it in-process through the
 `responses` library;
 `python -m tests.fakes.oidc_provider` serves it over HTTP for `just dev`,
 with a page to pick which fake user signs in.
 
-Tests can make it misbehave to check that ReelLife refuses bad tokens:
+Tests can make it misbehave to check that ReelTime refuses bad tokens:
 see `id_token_overrides`, `userinfo_overrides` and `signing`.
 """
 
@@ -57,21 +57,21 @@ DEV_USERS = {
         "1b4e28ba-2fa1-11d2-883f-0016d3cca427",
         "composer@example.test",
         "Casey Composer",
-        ("reellife-editors",),
+        ("reeltime-editors",),
         "#3b6ea8",
     ),
     "nick": FakeUser(
         "6fa459ea-ee8a-3ca4-894e-db77e160355e",
         "nick@example.test",
         "Nick Admin",
-        ("reellife-admins",),
+        ("reeltime-admins",),
         "#a8563b",
     ),
     "viewer": FakeUser(
         "886313e1-3b8a-5372-9b90-0c9aee199e5d",
         "viewer@example.test",
         "Vic Viewer",
-        ("reellife-viewers",),
+        ("reeltime-viewers",),
     ),
     "outsider": FakeUser(
         "a3bb189e-8bf9-3888-9912-ace4e6543002",
@@ -116,12 +116,12 @@ class FakeProvider:  # pylint: disable=too-many-instance-attributes
         client_secret: That client's secret.
         signing: How to sign ID tokens: 'RS256' and 'ES256' are valid;
             'none', 'HS256' (keyed with the client secret) and 'wrong-key'
-            (an unpublished key) are attacks ReelLife must refuse.
+            (an unpublished key) are attacks ReelTime must refuse.
         id_token_overrides: Claims to replace in the next ID tokens.
         userinfo_overrides: Claims to replace in userinfo responses.
         end_session: Whether discovery advertises end_session_endpoint.
         groups_in: Where the groups claim goes: 'id_token', 'userinfo' or
-            'both'. Providers differ, and ReelLife reads either.
+            'both'. Providers differ, and ReelTime reads either.
         issue_refresh_tokens: Whether code exchanges also return a
             refresh token (only when the client asked for offline_access,
             as the OIDC spec has it).
@@ -429,7 +429,7 @@ def _picker(query: Mapping[str, str]) -> bytes:
         )
     return (
         "<!doctype html><title>Fake sign-in</title>"
-        "<h1>Fake OIDC provider</h1><p>Sign in to ReelLife as:</p>"
+        "<h1>Fake OIDC provider</h1><p>Sign in to ReelTime as:</p>"
         f"<ul>{''.join(rows)}</ul>"
     ).encode()
 
@@ -486,7 +486,7 @@ def wsgi_app(
 def main() -> None:
     """Serves the fake provider on 127.0.0.1:8001 for `just dev`."""
     provider = FakeProvider(
-        "http://127.0.0.1:8001", "reellife-dev", "reellife-dev-secret"
+        "http://127.0.0.1:8001", "reeltime-dev", "reeltime-dev-secret"
     )
     with simple_server.make_server(
         "127.0.0.1", 8001, wsgi_app(provider)

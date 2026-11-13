@@ -1,4 +1,4 @@
-"""The Django admin, limited to ReelLife admins."""
+"""The Django admin, limited to ReelTime admins."""
 
 from django.conf import settings
 from django.contrib import admin
@@ -14,11 +14,11 @@ from accounts import views as account_views
 from accounts.models import Role
 
 
-class ReelLifeAdminSite(admin.AdminSite):
-    """Admin site that uses ReelLife sign-in instead of its own."""
+class ReelTimeAdminSite(admin.AdminSite):
+    """Admin site that uses ReelTime sign-in instead of its own."""
 
-    site_header = "ReelLife admin"
-    site_title = "ReelLife admin"
+    site_header = "ReelTime admin"
+    site_title = "ReelTime admin"
 
     def has_permission(self, request: HttpRequest) -> bool:
         """Admins only, by role rather than Django's is_staff flag."""
@@ -48,6 +48,6 @@ class ReelLifeAdminSite(admin.AdminSite):
     def logout(  # type: ignore[override]
         self, request: HttpRequest, extra_context: object = None
     ) -> HttpResponse:
-        """Uses ReelLife's logout, which also ends the provider session."""
+        """Uses ReelTime's logout, which also ends the provider session."""
         del extra_context
         return account_views.logout_view(request)

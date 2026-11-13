@@ -542,7 +542,7 @@ def test_a_composers_day(  # pylint: disable=too-many-arguments
     axe("backup")
     with page.expect_download() as info:
         page.get_by_role("link", name="Download Backup").click()
-    assert info.value.suggested_filename.startswith("reellife-backup-")
+    assert info.value.suggested_filename.startswith("reeltime-backup-")
 
 
 def _profile_menu(page: Any, axe: Check) -> None:

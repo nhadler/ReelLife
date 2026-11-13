@@ -1,6 +1,6 @@
 """The user guide (cues/guide/*.md): Help pages and the MCP server's how-to.
 
-One Markdown file per topic, written for the people using ReelLife; the
+One Markdown file per topic, written for the people using ReelTime; the
 web app renders them (Help), and the MCP server hands the same text to
 an assistant asked how to do something.
 """

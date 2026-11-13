@@ -8,7 +8,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_GET
 
 from cues.services import guide
-from reellife import updates
+from reeltime import updates
 
 
 @require_GET
@@ -26,6 +26,6 @@ def page(request: HttpRequest, slug: str = "") -> HttpResponse:
             "topic": found,
             "body": guide.html(found),
             "version": updates.installed(),
-            "source_url": settings.REELLIFE_SOURCE_URL,
+            "source_url": settings.REELTIME_SOURCE_URL,
         },
     )

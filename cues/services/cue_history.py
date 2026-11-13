@@ -51,7 +51,7 @@ class Entry:
 
     Attributes:
         change_set: The change set, or None for changes made outside
-            ReelLife's screens (e.g. the admin or the demo seed).
+            ReelTime's screens (e.g. the admin or the demo seed).
         label: What was done.
         user: Who did it ("" when unknown).
         when: When.

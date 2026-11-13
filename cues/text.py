@@ -3,7 +3,7 @@
 Headings, buttons, tabs, menu items, column headers and field labels use Title
 Case; sentences (help text, messages) don't. Small joining words stay
 lower case unless first or last, and words with capitals past their
-first letter (IN, OUT, BPM, ReelLife) or with digits (#, 1m01, v2) are
+first letter (IN, OUT, BPM, ReelTime) or with digits (#, 1m01, v2) are
 left as they are. A word in brackets is capitalised inside them.
 """
 
@@ -35,7 +35,7 @@ def title_case(text: str) -> str:
             or any(c.isupper() for c in part[lead + 1 :])
             or _DIGIT.search(part)
         ):
-            out.append(part)  # spaces, '#', '1m01', 'v2', IN, ReelLife
+            out.append(part)  # spaces, '#', '1m01', 'v2', IN, ReelTime
         elif lower.rstrip(".") in SMALL_WORDS and i not in (
             words[0],
             words[-1],

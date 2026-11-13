@@ -46,7 +46,9 @@ from cues import models
 from cues.services import history
 from cues.services import thumbnails
 
-FORMAT = "reellife-backup"
+FORMAT = "reeltime-backup"
+# The same format, from before the rename to ReelTime.
+OLDER_FORMATS = ("reellife-backup",)
 VERSION = 1
 APPS = ("accounts", "cues")
 MAX_UPLOAD = 200 * 1024 * 1024
@@ -241,7 +243,7 @@ def read(data: bytes | IO[bytes]) -> Backup:
             disk), which is read in place rather than copied into memory.
 
     Raises:
-        BackupError: Not a ReelLife backup, made by a different schema,
+        BackupError: Not a ReelTime backup, made by a different schema,
             or with unexpected contents.
     """
     try:
@@ -249,24 +251,27 @@ def read(data: bytes | IO[bytes]) -> Backup:
             io.BytesIO(data) if isinstance(data, bytes) else data
         )
     except zipfile.BadZipFile as exc:
-        raise BackupError("That isn't a ReelLife backup (not a ZIP).") from exc
+        raise BackupError("That isn't a ReelTime backup (not a ZIP).") from exc
     with archive:
         entries = {e.filename for e in _checked_entries(archive)}
         if not {"manifest.json", "data.json"} <= entries:
-            raise BackupError("That isn't a ReelLife backup (no manifest).")
+            raise BackupError("That isn't a ReelTime backup (no manifest).")
         try:
             manifest = json.loads(archive.read("manifest.json"))
             text = archive.read("data.json").decode("utf-8")
             rows = json.loads(text)
         except (ValueError, UnicodeDecodeError) as exc:
             raise BackupError("The backup's data can't be read.") from exc
-        if not isinstance(manifest, dict) or manifest.get("format") != FORMAT:
-            raise BackupError("That isn't a ReelLife backup.")
+        if not isinstance(manifest, dict) or manifest.get("format") not in (
+            FORMAT,
+            *OLDER_FORMATS,
+        ):
+            raise BackupError("That isn't a ReelTime backup.")
         if manifest.get("version") != VERSION:
-            raise BackupError("This backup format is newer than this ReelLife.")
+            raise BackupError("This backup format is newer than this ReelTime.")
         if manifest.get("schema") != schema():
             raise BackupError(
-                "This backup was made by a different ReelLife version "
+                "This backup was made by a different ReelTime version "
                 f"(schema {manifest.get('schema')}). Restore it on that "
                 "version, then upgrade."
             )
@@ -275,7 +280,7 @@ def read(data: bytes | IO[bytes]) -> Backup:
             not isinstance(r, dict) or r.get("model") not in allowed
             for r in rows
         ):
-            raise BackupError("The backup holds rows ReelLife doesn't restore.")
+            raise BackupError("The backup holds rows ReelTime doesn't restore.")
         images = {
             name: archive.read(name)
             for name in entries
@@ -380,7 +385,7 @@ def restore(backup: Backup) -> dict[str, int]:
     """
     if models.Project.objects.exists():
         raise BackupError(
-            "This ReelLife already has projects. Restore into a fresh "
+            "This ReelTime already has projects. Restore into a fresh "
             "install, so nothing here is overwritten."
         )
     try:

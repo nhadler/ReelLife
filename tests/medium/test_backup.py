@@ -28,7 +28,7 @@ from accounts.models import Role
 from cues import models
 from cues.exporters import backup
 from cues.services import demo
-from reellife import maintenance
+from reeltime import maintenance
 from tests import factories
 
 pytestmark = pytest.mark.django_db
@@ -195,11 +195,11 @@ def test_restore_needs_a_fresh_install() -> None:
         (_zip({"manifest.json": "{", "data.json": "[]"}), "can't be read"),
         (
             _zip({"manifest.json": "[]", "data.json": "[]"}),
-            "isn't a ReelLife backup",
+            "isn't a ReelTime backup",
         ),
         (
             _zip({"manifest.json": '{"format": "other"}', "data.json": "[]"}),
-            "isn't a ReelLife backup",
+            "isn't a ReelTime backup",
         ),
         (
             _zip(
@@ -210,7 +210,7 @@ def test_restore_needs_a_fresh_install() -> None:
                     "data.json": "[]",
                 }
             ),
-            "newer than this ReelLife",
+            "newer than this ReelTime",
         ),
         (
             _zip(
@@ -225,7 +225,7 @@ def test_restore_needs_a_fresh_install() -> None:
                     "data.json": "[]",
                 }
             ),
-            "different ReelLife version",
+            "different ReelTime version",
         ),
         (
             _zip({"manifest.json": "{}", "data.json": "[]", "../evil.py": "x"}),
@@ -360,12 +360,12 @@ def test_nightly_writes_and_prunes_backups(
     folder = tmp_path / "backups"
     folder.mkdir()
     for day in ("20261001", "20261002", "20261003"):
-        (folder / f"reellife-{day}.zip").write_bytes(b"old")
+        (folder / f"reeltime-{day}.zip").write_bytes(b"old")
     result = maintenance.nightly(NOW)
-    assert result.backup == folder / "reellife-20261030.zip"
+    assert result.backup == folder / "reeltime-20261030.zip"
     assert sorted(p.name for p in folder.iterdir()) == [
-        "reellife-20261003.zip",
-        "reellife-20261030.zip",
+        "reeltime-20261003.zip",
+        "reeltime-20261030.zip",
     ]
     assert (
         backup.read(result.backup.read_bytes()).manifest["format"]
@@ -413,7 +413,7 @@ def test_page_and_download(admin: Client) -> None:
     assert 'pattern="RESTORE"' in html
     response = admin.get(reverse("cues:backup_download"))
     assert response["Content-Type"] == "application/zip"
-    assert 'filename="reellife-backup-' in response["Content-Disposition"]
+    assert 'filename="reeltime-backup-' in response["Content-Disposition"]
     assert backup.read(response.content)
     assert AuditEvent.objects.filter(
         action=AuditAction.BACKUP_DOWNLOAD
@@ -467,3 +467,17 @@ def test_restore_refusals_show_on_the_page(admin: Client) -> None:
     html = _restore(admin, b"not a zip").content.decode()
     assert "not a ZIP" in html
     assert models.Project.objects.count() == 0
+
+
+def test_a_backup_from_before_the_rename_still_reads() -> None:
+    demo.build_demo()
+    made = _made()
+    with zipfile.ZipFile(io.BytesIO(made)) as archive:
+        entries: dict[str, bytes | str] = {
+            name: archive.read(name) for name in archive.namelist()
+        }
+    manifest = json.loads(entries["manifest.json"])
+    assert manifest["format"] == "reeltime-backup"
+    manifest["format"] = "reellife-backup"  # as ReelTime 1.x wrote it
+    entries["manifest.json"] = json.dumps(manifest)
+    assert backup.read(_zip(entries)).manifest["format"] == "reellife-backup"

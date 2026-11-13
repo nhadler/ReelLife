@@ -18,7 +18,7 @@ from cues import models
 from cues.services import demo
 from cues.services import history
 from cues.services import summaries
-from reellife import context_processors
+from reeltime import context_processors
 from tests import factories
 
 pytestmark = pytest.mark.django_db

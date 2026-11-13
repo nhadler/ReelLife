@@ -1,6 +1,6 @@
 # Undo and History
 
-Nearly every change in ReelLife is one **change set**: a cell edit, a
+Nearly every change in ReelTime is one **change set**: a cell edit, a
 tool run, an import, a turnover, a conform step, a save of a settings
 page or of Credits.
 

@@ -1,4 +1,4 @@
-"""Container health probe: `python -m reellife.healthcheck`.
+"""Container health probe: `python -m reeltime.healthcheck`.
 
 The slim image has no curl, so Docker's HEALTHCHECK runs this. It asks
 gunicorn for /healthz on loopback, using a configured host name so
@@ -16,7 +16,7 @@ def probe_host(allowed_hosts: str) -> str:
     """Returns a Host header ALLOWED_HOSTS accepts.
 
     Args:
-        allowed_hosts: The REELLIFE_ALLOWED_HOSTS value.
+        allowed_hosts: The REELTIME_ALLOWED_HOSTS value.
 
     Returns:
         The first entry, without a leading '.' wildcard dot; 'localhost'
@@ -44,7 +44,7 @@ def check(host: str, port: int = _PORT) -> bool:
 
 def main() -> int:
     """Exits 0 when healthy, 1 otherwise."""
-    host = probe_host(os.environ.get("REELLIFE_ALLOWED_HOSTS", ""))
+    host = probe_host(os.environ.get("REELTIME_ALLOWED_HOSTS", ""))
     return 0 if check(host) else 1
 
 

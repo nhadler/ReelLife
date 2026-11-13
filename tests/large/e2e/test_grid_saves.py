@@ -74,7 +74,7 @@ def test_a_save_without_a_network_says_it_wasnt_saved(
     page.context.set_offline(True)
     _type_title(page, cue, "Lost Signal")
     status = page.locator("#grid-status")
-    expect(status).to_contain_text("Couldn't reach ReelLife")
+    expect(status).to_contain_text("Couldn't reach ReelTime")
     expect(status).to_contain_text("you typed “Lost Signal”")
     expect(status).to_have_class(re.compile("grid-status--error"))
     page.context.set_offline(False)

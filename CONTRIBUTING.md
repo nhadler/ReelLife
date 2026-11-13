@@ -1,4 +1,4 @@
-# Contributing to ReelLife
+# Contributing to ReelTime
 
 This page covers development setup and the requirements for a pull
 request.
@@ -35,7 +35,7 @@ The backend is organised into these packages:
 - `accounts`: OIDC authentication and user roles
 - `mcp_server`: MCP endpoint
 
-The `reellife` package contains the Django project settings, URLs,
+The `reeltime` package contains the Django project settings, URLs,
 middleware, and entry points.
 
 ## Make the change
@@ -80,5 +80,5 @@ just test-container   # the image, Compose and systemd (needs Docker)
 
 ## Licence
 
-ReelLife is licensed under the [GNU AGPL v3.0 or later](LICENSE). By
+ReelTime is licensed under the [GNU AGPL v3.0 or later](LICENSE). By
 contributing you agree that your contribution is licensed the same way.

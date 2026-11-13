@@ -117,7 +117,7 @@ def test_anonymous_is_sent_to_login_or_refused(
         assert response.status_code == 401, route.url
         assert response.json()["signed_out"] is True, route.url
         return
-    # Admin pages hop through /admin/login/, which ReelLife redirects on.
+    # Admin pages hop through /admin/login/, which ReelTime redirects on.
     response = getattr(client, method)(route.url, follow=True)
     assert response.redirect_chain, route.url
     final, _ = response.redirect_chain[-1]
@@ -172,7 +172,7 @@ def test_admin_login_sends_anonymous_users_to_pocketid(client: Client) -> None:
     assert response["Location"].startswith("/auth/login/?next=")
 
 
-def test_admin_logout_uses_reellife_logout(
+def test_admin_logout_uses_reeltime_logout(
     role_client: Callable[[Role], Client],
 ) -> None:
     client = role_client(Role.ADMIN)

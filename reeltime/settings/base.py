@@ -10,15 +10,16 @@ from typing import Any
 import urllib.parse
 
 from csp import constants as csp
+from django.core.exceptions import ImproperlyConfigured
 
-from reellife import env
+from reeltime import env
 
 BASE_DIR = pathlib.Path(__file__).resolve().parent.parent.parent
 
 DEBUG = False
 
 INSTALLED_APPS = [
-    "reellife.apps.ReelLifeAdminConfig",
+    "reeltime.apps.ReelTimeAdminConfig",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -29,7 +30,7 @@ INSTALLED_APPS = [
     "django_otp",
     "django_otp.plugins.otp_totp",
     "simple_history",
-    "reellife",
+    "reeltime",
     "accounts",
     "cues",
 ]
@@ -39,7 +40,7 @@ MIDDLEWARE = [
     # Serves collected static files with far-future caching.
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "csp.middleware.CSPMiddleware",
-    "reellife.middleware.PermissionsPolicyMiddleware",
+    "reeltime.middleware.PermissionsPolicyMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -56,8 +57,8 @@ MIDDLEWARE = [
     "django_ratelimit.middleware.RatelimitMiddleware",
 ]
 
-ROOT_URLCONF = "reellife.urls"
-WSGI_APPLICATION = "reellife.wsgi.application"
+ROOT_URLCONF = "reeltime.urls"
+WSGI_APPLICATION = "reeltime.wsgi.application"
 
 TEMPLATES = [
     {
@@ -70,13 +71,33 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "csp.context_processors.nonce",
-                "reellife.context_processors.preferences",
-                "reellife.context_processors.account",
-                "reellife.context_processors.version",
+                "reeltime.context_processors.preferences",
+                "reeltime.context_processors.account",
+                "reeltime.context_processors.version",
             ],
         },
     },
 ]
+
+
+def database_file(data_dir: pathlib.Path) -> pathlib.Path:
+    """The SQLite file in the data directory: reeltime.sqlite3.
+
+    Before ReelTime was renamed it was reellife.sqlite3. Finding only that
+    one, ReelTime stops rather than start an empty database beside it.
+
+    Raises:
+        ImproperlyConfigured: The data directory holds only the old file.
+    """
+    path = data_dir / "reeltime.sqlite3"
+    old = data_dir / "reellife.sqlite3"
+    if old.exists() and not path.exists():
+        raise ImproperlyConfigured(
+            f"{old} is from before the rename to ReelTime. Stop ReelTime "
+            "and rename it (and any reellife.sqlite3-wal and -shm files "
+            "beside it) to reeltime.sqlite3, then start it again."
+        )
+    return path
 
 
 def sqlite_database(path: pathlib.Path | str) -> dict[str, object]:
@@ -104,13 +125,13 @@ def sqlite_database(path: pathlib.Path | str) -> dict[str, object]:
 
 
 # Whether a reverse proxy in front sets X-Forwarded-For/-Proto. Production
-# reads REELLIFE_TRUST_PROXY; everywhere else nothing sits in front.
+# reads REELTIME_TRUST_PROXY; everywhere else nothing sits in front.
 TRUST_PROXY = False
 
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = [
     "accounts.oidc.Backend",
-    # Inert unless REELLIFE_BREAKGLASS_ENABLED is true.
+    # Inert unless REELTIME_BREAKGLASS_ENABLED is true.
     "accounts.breakglass.Backend",
 ]
 BREAKGLASS_ENABLED = False
@@ -144,9 +165,9 @@ OIDC_USE_NONCE = True
 OIDC_STORE_ID_TOKEN = True
 OIDC_STORE_ACCESS_TOKEN = True
 OIDC_TIMEOUT = 10
-OIDC_GROUP_ADMIN = env.get("OIDC_GROUP_ADMIN", "reellife-admins")
-OIDC_GROUP_EDITOR = env.get("OIDC_GROUP_EDITOR", "reellife-editors")
-OIDC_GROUP_VIEWER = env.get("OIDC_GROUP_VIEWER", "reellife-viewers")
+OIDC_GROUP_ADMIN = env.get("OIDC_GROUP_ADMIN", "reeltime-admins")
+OIDC_GROUP_EDITOR = env.get("OIDC_GROUP_EDITOR", "reeltime-editors")
+OIDC_GROUP_VIEWER = env.get("OIDC_GROUP_VIEWER", "reeltime-viewers")
 # Where the profile menu's Account item goes; blank means PocketID's own
 # account page under OIDC_ISSUER.
 OIDC_ACCOUNT_URL = env.get("OIDC_ACCOUNT_URL", "")
@@ -154,12 +175,12 @@ OIDC_ACCOUNT_URL = env.get("OIDC_ACCOUNT_URL", "")
 # Where Help links to this instance's source code. The AGPL asks anyone
 # who runs a modified copy for others to offer them its source, so a
 # fork points this at its own repository.
-REELLIFE_SOURCE_URL = env.get(
-    "REELLIFE_SOURCE_URL", "https://github.com/nhadler/reellife"
+REELTIME_SOURCE_URL = env.get(
+    "REELTIME_SOURCE_URL", "https://github.com/nhadler/reeltime"
 )
-# Whether the scheduler asks GitHub (REELLIFE_SOURCE_URL's repository)
+# Whether the scheduler asks GitHub (REELTIME_SOURCE_URL's repository)
 # for the latest release, so the profile menu can tell admins about it.
-UPDATE_CHECK = env.get_bool("REELLIFE_UPDATE_CHECK", default=True)
+UPDATE_CHECK = env.get_bool("REELTIME_UPDATE_CHECK", default=True)
 
 
 def origin(url: str) -> str:
@@ -172,26 +193,26 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LANGUAGE_CODE = "en-us"
 # Times are stored in UTC and shown in this zone.
-TIME_ZONE = env.get_time_zone("REELLIFE_TIME_ZONE", "UTC")
+TIME_ZONE = env.get_time_zone("REELTIME_TIME_ZONE", "UTC")
 USE_I18N = False
 USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # Production and image builds use WhiteNoise's hashed, compressed files
-# (reellife.settings.build); elsewhere plain files, no collectstatic.
+# (reeltime.settings.build); elsewhere plain files, no collectstatic.
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
     },
 }
-MANIFEST_STORAGE = "reellife.storage.StaticStorage"
+MANIFEST_STORAGE = "reeltime.storage.StaticStorage"
 
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {"json": {"()": "reellife.logs.JsonFormatter"}},
+    "formatters": {"json": {"()": "reeltime.logs.JsonFormatter"}},
     "handlers": {
         "stdout": {
             "class": "logging.StreamHandler",
@@ -199,12 +220,12 @@ LOGGING = {
             "formatter": "json",
         },
     },
-    "filters": {"brief": {"()": "reellife.logs.BriefWarning"}},
+    "filters": {"brief": {"()": "reeltime.logs.BriefWarning"}},
     "root": {"handlers": ["stdout"], "level": "INFO"},
     "loggers": {
         # PDF rendering logs every font subset at INFO; warnings show.
         **{name: {"level": "WARNING"} for name in ("weasyprint", "fontTools")},
-        # A request for a host ReelLife doesn't serve: one line, no trace.
+        # A request for a host ReelTime doesn't serve: one line, no trace.
         "django.security.DisallowedHost": {"filters": ["brief"]},
     },
 }
@@ -215,7 +236,7 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 # cue ticked; 1,000 (Django's default) is the project size we plan for.
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5_000
 FILE_UPLOAD_MAX_MEMORY_SIZE = DATA_UPLOAD_MAX_MEMORY_SIZE
-# The largest request body the web app reads at all (reellife/asgi.py):
+# The largest request body the web app reads at all (reeltime/asgi.py):
 # a 10 MB import plus its multipart framing. Restoring a backup, as an
 # admin, allows that page's own limit instead.
 REQUEST_BODY_MAX = DATA_UPLOAD_MAX_MEMORY_SIZE + 2 * 1024 * 1024
@@ -258,7 +279,7 @@ CONTENT_SECURITY_POLICY: dict[str, dict[str, list[Any]]] = {
     },
 }
 
-# Nightly maintenance (reellife.maintenance): snapshots kept, audit log
+# Nightly maintenance (reeltime.maintenance): snapshots kept, audit log
 # retention, and the hour (UTC) the scheduler runs it.
 SNAPSHOT_KEEP = 14
 AUDIT_RETENTION_DAYS = 365
@@ -269,12 +290,12 @@ NIGHTLY_HOUR_UTC = 3
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "reellife_cache",
+        "LOCATION": "reeltime_cache",
     },
 }
 
-# Rate limits, per client IP (reellife.net.client_ip).
-RATELIMIT_VIEW = "reellife.views.rate_limited"
+# Rate limits, per client IP (reeltime.net.client_ip).
+RATELIMIT_VIEW = "reeltime.views.rate_limited"
 RATELIMIT_LOGIN = "30/m"
 RATELIMIT_BREAKGLASS = "5/h"
 # Grid edits and other API writes, per signed-in user.
@@ -282,10 +303,10 @@ RATELIMIT_API_WRITES = "300/m"
 # Each import step re-reads the uploaded file, so allow fewer.
 RATELIMIT_IMPORTS = "30/m"
 RATELIMIT_EXPORTS = "60/m"
-# MCP requests per minute (reellife/asgi.py): for one signed-in user's
+# MCP requests per minute (reeltime/asgi.py): for one signed-in user's
 # client (PocketID subject and OAuth client, whichever token it sends),
-# and for one client address (reellife.net) before any token is checked,
-# counting every request. Behind a proxy without REELLIFE_TRUST_PROXY
+# and for one client address (reeltime.net) before any token is checked,
+# counting every request. Behind a proxy without REELTIME_TRUST_PROXY
 # every client shares the proxy's address and so the second limit.
 RATELIMIT_MCP_PER_MINUTE = 120
 RATELIMIT_MCP_PER_ADDRESS_PER_MINUTE = 300

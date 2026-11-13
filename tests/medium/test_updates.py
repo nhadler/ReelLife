@@ -16,12 +16,12 @@ import requests
 import responses
 
 from accounts.models import Role
-from reellife import context_processors
-from reellife import maintenance
-from reellife import updates
+from reeltime import context_processors
+from reeltime import maintenance
+from reeltime import updates
 
-API = "https://api.github.com/repos/nhadler/reellife/releases/latest"
-PAGE = "https://github.com/nhadler/ReelLife/releases/tag/v9.0.0"
+API = "https://api.github.com/repos/nhadler/reeltime/releases/latest"
+PAGE = "https://github.com/nhadler/ReelTime/releases/tag/v9.0.0"
 
 pytestmark = pytest.mark.django_db
 
@@ -67,13 +67,13 @@ def test_parse(given: str, expected: tuple[int, int, int] | None) -> None:
 @pytest.mark.parametrize(
     ("source", "expected"),
     [
-        ("https://github.com/nhadler/reellife", API),
+        ("https://github.com/nhadler/reeltime", API),
         (
             "https://github.com/someone/fork.git/",
-            API.replace("nhadler/reellife", "someone/fork"),
+            API.replace("nhadler/reeltime", "someone/fork"),
         ),
-        ("https://gitlab.com/nhadler/reellife", None),
-        ("http://github.com/nhadler/reellife", None),
+        ("https://gitlab.com/nhadler/reeltime", None),
+        ("http://github.com/nhadler/reeltime", None),
         ("https://github.com/nhadler", None),
     ],
 )
@@ -96,7 +96,7 @@ def test_check_remembers_a_newer_release(
     _installed(monkeypatch, "1.0.0")
     _release(github)
     assert updates.check() == updates.Release("9.0.0", PAGE)
-    assert github.calls[0].request.headers["User-Agent"] == "ReelLife/1.0.0"
+    assert github.calls[0].request.headers["User-Agent"] == "ReelTime/1.0.0"
     assert updates.available() == updates.Release("9.0.0", PAGE)
     _installed(monkeypatch, "9.0.0")  # once installed, nothing to show
     assert updates.available() is None
@@ -126,7 +126,7 @@ def test_a_failed_check_keeps_the_last_answer(
 
 
 @override_settings(
-    UPDATE_CHECK=True, REELLIFE_SOURCE_URL="https://example.com/src"
+    UPDATE_CHECK=True, REELTIME_SOURCE_URL="https://example.com/src"
 )
 def test_no_check_for_source_off_github(github: responses.RequestsMock) -> None:
     assert updates.check() is None

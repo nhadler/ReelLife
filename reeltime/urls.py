@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_not_required
 from django.urls import include
 from django.urls import path
 
-from reellife import health
+from reeltime import health
 
 urlpatterns = [
     path("healthz", login_not_required(health.healthz), name="healthz"),

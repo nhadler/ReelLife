@@ -15,7 +15,7 @@ On a cue's page, **Credits** lists its writers and publishers with
 their roles (C composer, A author, CA, AR arranger, E publisher...) and
 shares. Writer shares must total 100%. Publisher shares must also total
 100% when present. Use **Add Row** for another entry. If someone else
-edits the same credits before you save, ReelLife shows their saved
+edits the same credits before you save, ReelTime shows their saved
 values alongside your attempted changes instead of overwriting them.
 
 ## Default Shares

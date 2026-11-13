@@ -9,23 +9,24 @@ import urllib.parse
 
 from django.core.exceptions import ImproperlyConfigured
 
-from reellife import env
-from reellife.settings.base import *  # noqa: F403 pylint: disable=wildcard-import,unused-wildcard-import
-from reellife.settings.base import CONTENT_SECURITY_POLICY
-from reellife.settings.base import MANIFEST_STORAGE
-from reellife.settings.base import SILENCED_SYSTEM_CHECKS
-from reellife.settings.base import STORAGES
-from reellife.settings.base import origin
-from reellife.settings.base import sqlite_database
+from reeltime import env
+from reeltime.settings.base import *  # noqa: F403 pylint: disable=wildcard-import,unused-wildcard-import
+from reeltime.settings.base import CONTENT_SECURITY_POLICY
+from reeltime.settings.base import MANIFEST_STORAGE
+from reeltime.settings.base import SILENCED_SYSTEM_CHECKS
+from reeltime.settings.base import STORAGES
+from reeltime.settings.base import database_file
+from reeltime.settings.base import origin
+from reeltime.settings.base import sqlite_database
 
 DEBUG = False
 
-SECRET_KEY = env.get("REELLIFE_SECRET_KEY")
-ALLOWED_HOSTS = env.get_list("REELLIFE_ALLOWED_HOSTS")
+SECRET_KEY = env.get("REELTIME_SECRET_KEY")
+ALLOWED_HOSTS = env.get_list("REELTIME_ALLOWED_HOSTS")
 
-BASE_URL = env.get("REELLIFE_BASE_URL").rstrip("/")
+BASE_URL = env.get("REELTIME_BASE_URL").rstrip("/")
 if urllib.parse.urlsplit(BASE_URL).scheme != "https":
-    raise ImproperlyConfigured("REELLIFE_BASE_URL must be an https:// URL")
+    raise ImproperlyConfigured("REELTIME_BASE_URL must be an https:// URL")
 CSRF_TRUSTED_ORIGINS = [BASE_URL]
 
 OIDC_ISSUER = env.get("OIDC_ISSUER").rstrip("/")
@@ -37,17 +38,17 @@ OIDC_RP_CLIENT_SECRET = env.get("OIDC_CLIENT_SECRET")
 # endpoint, so the issuer must be an allowed form-action.
 CONTENT_SECURITY_POLICY["DIRECTIVES"]["form-action"].append(origin(OIDC_ISSUER))
 
-BREAKGLASS_ENABLED = env.get_bool("REELLIFE_BREAKGLASS_ENABLED", default=False)
+BREAKGLASS_ENABLED = env.get_bool("REELTIME_BREAKGLASS_ENABLED", default=False)
 
-# STATIC_ROOT is collected at install time (reellife.settings.build).
+# STATIC_ROOT is collected at install time (reeltime.settings.build).
 STORAGES = {**STORAGES, "staticfiles": {"BACKEND": MANIFEST_STORAGE}}
 
-DATA_DIR = pathlib.Path(env.get("REELLIFE_DATA_DIR", "/var/lib/reellife"))
-DATABASES = {"default": sqlite_database(DATA_DIR / "reellife.sqlite3")}
+DATA_DIR = pathlib.Path(env.get("REELTIME_DATA_DIR", "/var/lib/reeltime"))
+DATABASES = {"default": sqlite_database(database_file(DATA_DIR))}
 
 # Only trust X-Forwarded-Proto when a proxy in front sets it; otherwise a
 # client could claim HTTPS.
-TRUST_PROXY = env.get_bool("REELLIFE_TRUST_PROXY", default=False)
+TRUST_PROXY = env.get_bool("REELTIME_TRUST_PROXY", default=False)
 if TRUST_PROXY:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     USE_X_FORWARDED_HOST = False

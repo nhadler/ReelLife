@@ -1,6 +1,6 @@
 """Profile pictures from the identity provider (profile menu).
 
-At sign-in ReelLife fetches the `picture` claim's image once, shrinks it
+At sign-in ReelTime fetches the `picture` claim's image once, shrinks it
 to a small PNG and keeps it on the user, so the strict CSP stays as it
 is and pages load nothing from the provider. Only pictures the provider
 itself serves are fetched (same origin as OIDC_ISSUER): a claim pointing

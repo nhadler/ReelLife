@@ -1,7 +1,7 @@
 {
-  "name": "reellife-frontend-tooling",
+  "name": "reeltime-frontend-tooling",
   "private": true,
-  "description": "Lint and format tooling for ReelLife's small amount of JS and CSS.",
+  "description": "Lint and format tooling for ReelTime's small amount of JS and CSS.",
   "type": "module",
   "scripts": {
     "lint": "eslint .",

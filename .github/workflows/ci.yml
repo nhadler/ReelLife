@@ -30,23 +30,23 @@ jobs:
       - name: ruff format
         run: uv run ruff format --check .
       - name: pylint
-        run: uv run pylint accounts cues mcp_server reellife tests manage.py
+        run: uv run pylint accounts cues mcp_server reeltime tests manage.py
       - name: mypy
         run: uv run mypy
       - name: bandit
-        run: uv run bandit -q -r accounts cues mcp_server reellife -x tests
+        run: uv run bandit -q -r accounts cues mcp_server reeltime -x tests
       - name: makemigrations --check
         run: uv run python manage.py makemigrations --check --dry-run
       - name: check --deploy
         env:
-          REELLIFE_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-padding-to-fifty-chars
-          REELLIFE_ALLOWED_HOSTS: reellife.example.com
-          REELLIFE_BASE_URL: https://reellife.example.com
-          REELLIFE_DATA_DIR: ${{ runner.temp }}
+          REELTIME_SECRET_KEY: ci-only-${{ github.run_id }}-not-a-real-secret-key-padding-to-fifty-chars
+          REELTIME_ALLOWED_HOSTS: reeltime.example.com
+          REELTIME_BASE_URL: https://reeltime.example.com
+          REELTIME_DATA_DIR: ${{ runner.temp }}
           OIDC_ISSUER: https://id.example.com
-          OIDC_CLIENT_ID: reellife
+          OIDC_CLIENT_ID: reeltime
           OIDC_CLIENT_SECRET: ci-only-not-a-real-client-secret
-          DJANGO_SETTINGS_MODULE: reellife.settings.prod
+          DJANGO_SETTINGS_MODULE: reeltime.settings.prod
         run: uv run python manage.py check --deploy --fail-level WARNING
       - name: pip-audit
         run: >-

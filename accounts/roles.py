@@ -1,4 +1,4 @@
-"""Maps identity-provider groups to ReelLife roles."""
+"""Maps identity-provider groups to ReelTime roles."""
 
 from collections.abc import Iterable
 

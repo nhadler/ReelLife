@@ -243,7 +243,7 @@ def your_days_off(request: HttpRequest) -> HttpResponse:
 
 @require_http_methods(["GET", "POST"])
 def app_settings(request: HttpRequest) -> HttpResponse:
-    """How ReelLife looks and behaves for everyone (App Settings)."""
+    """How ReelTime looks and behaves for everyone (App Settings)."""
     settings = models.AppSettings.load()
     form = settings_forms.AppSettingsForm(
         request.POST if request.method == "POST" else None, instance=settings

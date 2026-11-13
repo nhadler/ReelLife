@@ -11,7 +11,7 @@
  */
 
 (() => {
-  const KEY = 'reellife.reloadedForScript';
+  const KEY = 'reeltime.reloadedForScript';
   const RETRY_WINDOW = 30000;
   const MESSAGE = "Part of this page didn't load. Reload the page.";
   // How long the page may take to run its scripts before one counts as

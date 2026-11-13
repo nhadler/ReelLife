@@ -1,9 +1,9 @@
 #!/bin/sh
-# Entry point for the ReelLife image.
+# Entry point for the ReelTime image.
 #   web        snapshot the database, migrate, then serve with gunicorn
 #              (its ASGI worker: Django plus the MCP server at /mcp)
 #   scheduler  run nightly maintenance until stopped
-#   <other>    any reellife (manage.py) command, e.g. create_breakglass
+#   <other>    any reeltime (manage.py) command, e.g. create_breakglass
 set -eu
 
 # Request bodies and uploads are spooled here (see the Dockerfile).
@@ -16,13 +16,13 @@ case "${1:-web}" in
   web)
     # Snapshot before migrating so an upgrade can be rolled back
     # (only when migrations are pending; kept apart from nightly ones).
-    reellife snapshot --before-migrate
-    reellife migrate --noinput
-    reellife createcachetable
-    exec gunicorn reellife.asgi:application \
+    reeltime snapshot --before-migrate
+    reeltime migrate --noinput
+    reeltime createcachetable
+    exec gunicorn reeltime.asgi:application \
       --worker-class asgi \
       --bind 0.0.0.0:8000 \
-      --workers "${REELLIFE_WORKERS:-2}" \
+      --workers "${REELTIME_WORKERS:-2}" \
       --worker-tmp-dir /dev/shm \
       --max-requests 1000 \
       --max-requests-jitter 100 \
@@ -32,9 +32,9 @@ case "${1:-web}" in
       --no-control-socket
     ;;
   scheduler)
-    exec reellife run_scheduler
+    exec reeltime run_scheduler
     ;;
   *)
-    exec reellife "$@"
+    exec reeltime "$@"
     ;;
 esac

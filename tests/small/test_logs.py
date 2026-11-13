@@ -1,15 +1,15 @@
-"""Tests for reellife.logs.JsonFormatter."""
+"""Tests for reeltime.logs.JsonFormatter."""
 
 import json
 import logging
 import sys
 
-from reellife import logs
+from reeltime import logs
 
 
 def _record(message: str, **extra: object) -> logging.LogRecord:
     record = logging.LogRecord(
-        "reellife.test", logging.INFO, "f.py", 1, message, (), None
+        "reeltime.test", logging.INFO, "f.py", 1, message, (), None
     )
     record.__dict__.update(extra)
     record.created = 0.0
@@ -21,7 +21,7 @@ def test_formats_one_json_object() -> None:
     assert json.loads(line) == {
         "time": "1970-01-01T00:00:00.000+00:00",
         "level": "INFO",
-        "logger": "reellife.test",
+        "logger": "reeltime.test",
         "message": "hello %s",
     }
 

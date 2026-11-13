@@ -1,0 +1,26 @@
+#!/bin/sh
+# Runs a `reeltime` management command the way the service runs: as its
+# dynamic user, with its state directory, settings and secrets. Running
+# commands as root instead could leave root-owned database files behind.
+#   sudo /opt/reeltime/deploy/systemd/reeltime-manage create_breakglass
+set -eu
+
+UNIT="reeltime-manage-$$"
+CREDENTIALS="/run/credentials/$UNIT.service"
+
+exec systemd-run --quiet --wait --pipe --collect --unit="$UNIT" \
+  --property=User=reeltime \
+  --property=DynamicUser=yes \
+  --property=StateDirectory=reeltime \
+  --property=StateDirectoryMode=0700 \
+  --property=WorkingDirectory=/opt/reeltime \
+  --property=UMask=0077 \
+  --property=EnvironmentFile=/etc/reeltime/reeltime.env \
+  --property=Environment=DJANGO_SETTINGS_MODULE=reeltime.settings.prod \
+  --property=Environment=REELTIME_DATA_DIR=/var/lib/reeltime \
+  --property=Environment=PYTHONDONTWRITEBYTECODE=1 \
+  --property=LoadCredential=secret_key:/etc/reeltime/secret_key \
+  --property=LoadCredential=oidc_client_secret:/etc/reeltime/oidc_client_secret \
+  --property=Environment=REELTIME_SECRET_KEY_FILE="$CREDENTIALS/secret_key" \
+  --property=Environment=OIDC_CLIENT_SECRET_FILE="$CREDENTIALS/oidc_client_secret" \
+  /opt/reeltime/.venv/bin/reeltime "$@"

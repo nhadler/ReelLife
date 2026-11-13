@@ -9,7 +9,7 @@ from django.core.management import execute_from_command_line
 
 def main() -> None:
     """Runs a management command."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "reellife.settings.dev")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "reeltime.settings.dev")
     execute_from_command_line(sys.argv)
 
 

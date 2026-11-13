@@ -1,14 +1,14 @@
 # The AI Assistant
 
-ReelLife works with AI assistants such as Claude (desktop, web or Claude
-Code) through MCP, at your ReelLife address plus `/mcp`. The assistant
+ReelTime works with AI assistants such as Claude (desktop, web or Claude
+Code) through MCP, at your ReelTime address plus `/mcp`. The assistant
 signs in through PocketID as you and has your role: a viewer's
 assistant can only read.
 
 The assistant can read and edit projects, cues, versions, turnovers,
 deadlines, credits, default shares and notes. It can also run cue tools
 and Conform, import files, export cue logs, PDFs and cue sheets, and
-undo changes. It uses this guide to answer questions about ReelLife.
+undo changes. It uses this guide to answer questions about ReelTime.
 
 For bulk changes (tools, conform shifts and imports), the assistant gets
 a preview and a confirmation code. It must show you the preview and ask

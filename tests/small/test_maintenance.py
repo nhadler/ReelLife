@@ -1,4 +1,4 @@
-"""Snapshots, pruning and scheduling (reellife.maintenance)."""
+"""Snapshots, pruning and scheduling (reeltime.maintenance)."""
 
 import datetime
 import pathlib
@@ -7,7 +7,7 @@ import stat
 
 import pytest
 
-from reellife import maintenance
+from reeltime import maintenance
 
 UTC = datetime.UTC
 
@@ -27,7 +27,7 @@ def test_snapshot_is_a_consistent_copy(tmp_path: pathlib.Path) -> None:
     path = maintenance.take_snapshot(
         source, tmp_path / "snaps", datetime.date(2026, 11, 2), keep=14
     )
-    assert path == tmp_path / "snaps" / "reellife-20261102.sqlite3"
+    assert path == tmp_path / "snaps" / "reeltime-20261102.sqlite3"
     with sqlite3.connect(path) as copy:
         assert copy.execute("SELECT count(*) FROM cue").fetchone() == (3,)
     assert stat.S_IMODE(path.stat().st_mode) == 0o600
@@ -60,15 +60,15 @@ def test_no_snapshot_before_the_database_exists(tmp_path: pathlib.Path) -> None:
 
 def test_prune_keeps_the_newest(tmp_path: pathlib.Path) -> None:
     for day in range(1, 18):
-        (tmp_path / f"reellife-202611{day:02d}.sqlite3").touch()
+        (tmp_path / f"reeltime-202611{day:02d}.sqlite3").touch()
     (tmp_path / "notes.txt").touch()
     deleted = maintenance.prune_snapshots(tmp_path, keep=14)
     assert sorted(p.name for p in deleted) == [
-        "reellife-20261101.sqlite3",
-        "reellife-20261102.sqlite3",
-        "reellife-20261103.sqlite3",
+        "reeltime-20261101.sqlite3",
+        "reeltime-20261102.sqlite3",
+        "reeltime-20261103.sqlite3",
     ]
-    assert len(list(tmp_path.glob("reellife-*"))) == 14
+    assert len(list(tmp_path.glob("reeltime-*"))) == 14
     assert (tmp_path / "notes.txt").exists()
 
 

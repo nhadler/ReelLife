@@ -7,7 +7,7 @@ what **Remains**, the daily pace, the next deadline and how many cues
 are on older picture. **Breakdown** shows the detailed totals:
 total music and how much is Score, Source and Song, music to license,
 time in each status (Approved, Composed, Revisions, In Progress,
-Rewrite, To Write), what remains, and the daily pace. ReelLife remembers
+Rewrite, To Write), what remains, and the daily pace. ReelTime remembers
 whether you leave it open or closed. The bar under the header shows the
 same statuses.
 

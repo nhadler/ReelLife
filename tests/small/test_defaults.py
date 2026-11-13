@@ -73,7 +73,7 @@ def test_view_columns_come_from_the_presets(view: str, preset: str) -> None:
         for label in labels
         if (column := defaults.PRESET_COLUMNS[label]) is not None
     ]
-    # Plus ReelLife's own additions, each after its column.
+    # Plus ReelTime's own additions, each after its column.
     for column, after in defaults.VIEW_EXTRAS.get(view, ()):
         derived.insert(derived.index(after) + 1, column)
     assert defaults.VIEW_COLUMNS[view] == tuple(derived)

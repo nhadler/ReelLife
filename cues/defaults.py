@@ -249,7 +249,7 @@ VIEW_PRESETS: tuple[tuple[str, str], ...] = (
     ("Cue Sheet", "Cue Sheet"),
 )
 
-# Columns ReelLife adds to a seeded view: Revision Notes after Notes,
+# Columns ReelTime adds to a seeded view: Revision Notes after Notes,
 # and in Standard % Written after Status and Difficulty next to Priority.
 VIEW_EXTRAS: dict[str, tuple[tuple[str, str], ...]] = {
     "Standard": (

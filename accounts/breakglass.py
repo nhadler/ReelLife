@@ -1,6 +1,6 @@
 """Emergency local admin sign-in for when PocketID is down.
 
-Off unless REELLIFE_BREAKGLASS_ENABLED is true. One local admin, created
+Off unless REELTIME_BREAKGLASS_ENABLED is true. One local admin, created
 with `manage.py create_breakglass`, signs in with an Argon2-hashed
 password plus a TOTP code. Turning the flag off also ends any break-glass
 session, because get_user stops returning the user.

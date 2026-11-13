@@ -14,7 +14,7 @@ from accounts.models import Role
 from accounts.models import User
 from cues.services import guide
 from mcp_server import server
-from reellife import updates
+from reeltime import updates
 from tests import factories
 
 pytestmark = pytest.mark.django_db
@@ -30,8 +30,8 @@ def test_every_guide_file_is_a_listed_topic() -> None:
 def test_help_pages(role_client: Callable[[Role], Client]) -> None:
     viewer = role_client(Role.VIEWER)
     first = viewer.get(reverse("cues:help")).content.decode()
-    assert f"ReelLife {updates.installed()}" in first
-    assert 'href="https://github.com/nhadler/reellife">Source Code</a>' in first
+    assert f"ReelTime {updates.installed()}" in first
+    assert 'href="https://github.com/nhadler/reeltime">Source Code</a>' in first
     assert '<h1 class="page-title help__title">Getting Started</h1>' in first
     assert "<li>On <strong>Projects</strong>, choose" in first
     page = viewer.get(reverse("cues:help_topic", args=["conform"]))

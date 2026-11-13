@@ -31,7 +31,7 @@ from mcp_server import transfers
 from mcp_server import writes
 
 INSTRUCTIONS = """\
-ReelLife tracks a film or TV composer's music cues. A project is a film
+ReelTime tracks a film or TV composer's music cues. A project is a film
 or an episode; its picture comes in reels, delivered as turnovers. A cue
 is a moment in the picture (number like 1m01, title, IN and OUT
 timecodes); a version is one delivery of that cue. Find things with
@@ -48,12 +48,12 @@ days), `pin_cue` fixes a cue to a day, the rest flowing around it, and
 `log_written` records a stretch of a cue written (from and to
 timecodes) or an amount, which the schedule counts as done.
 
-When someone asks how to do something in ReelLife, read `user_guide`
+When someone asks how to do something in ReelTime, read `user_guide`
 (the topic list first, then the relevant topic). Use the app's field and
 menu names in your answer; offer to use the tools when appropriate.
 
 Projects, their cue lists and cue sheets are also resources:
-reellife://projects, reellife://projects/{id}, .../{id}/cues and
+reeltime://projects, reeltime://projects/{id}, .../{id}/cues and
 .../{id}/cue-sheet."""
 
 READ = ToolAnnotations(read_only_hint=True, open_world_hint=False)
@@ -183,7 +183,7 @@ def get_cue(cue_id: int) -> dict[str, Any]:
 
 
 def user_guide(topic: str = "") -> dict[str, Any]:
-    """ReelLife's user guide, organised by topic.
+    """ReelTime's user guide, organised by topic.
 
     With no topic (or an unknown one), lists the topics; with a topic's
     name, returns that page as Markdown. "all" returns every page.
@@ -249,22 +249,22 @@ def cue_sheet_resource(project_id: str) -> str:
 
 # (URI, function, title, MIME type)
 RESOURCES: tuple[tuple[str, Callable[..., Any], str, str], ...] = (
-    ("reellife://projects", projects_resource, "Projects", "application/json"),
-    ("reellife://guide", guide_resource, "User Guide", "text/markdown"),
+    ("reeltime://projects", projects_resource, "Projects", "application/json"),
+    ("reeltime://guide", guide_resource, "User Guide", "text/markdown"),
     (
-        "reellife://projects/{project_id}",
+        "reeltime://projects/{project_id}",
         project_resource,
         "Project",
         "application/json",
     ),
     (
-        "reellife://projects/{project_id}/cues",
+        "reeltime://projects/{project_id}/cues",
         cues_resource,
         "Cue List",
         "application/json",
     ),
     (
-        "reellife://projects/{project_id}/cue-sheet",
+        "reeltime://projects/{project_id}/cue-sheet",
         cue_sheet_resource,
         "Cue Sheet",
         "text/csv",
@@ -275,7 +275,7 @@ RESOURCES: tuple[tuple[str, Callable[..., Any], str, str], ...] = (
 def build() -> MCPServer:
     """The server, configured from settings."""
     server = MCPServer(
-        name="ReelLife",
+        name="ReelTime",
         instructions=INSTRUCTIONS,
         token_verifier=auth.TokenVerifier(),
         auth=AuthSettings(

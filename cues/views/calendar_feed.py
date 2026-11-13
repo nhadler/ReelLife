@@ -25,7 +25,7 @@ from accounts.models import User
 from cues import models
 from cues.services import agenda as agenda_service
 from cues.services import feed as feed_service
-from reellife import net
+from reeltime import net
 
 ViewT = TypeVar("ViewT", bound=Callable[..., Any])
 
@@ -47,7 +47,7 @@ def _ics(content: bytes, *, attachment: bool) -> HttpResponse:
     )
     if attachment:
         response["Content-Disposition"] = (
-            'attachment; filename="reellife-schedule.ics"'
+            'attachment; filename="reeltime-schedule.ics"'
         )
     return response
 

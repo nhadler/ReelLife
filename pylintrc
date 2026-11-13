@@ -6,7 +6,7 @@
 jobs = 0
 ignore = migrations
 load-plugins = pylint_django
-django-settings-module = reellife.settings.test
+django-settings-module = reeltime.settings.test
 py-version = 3.12
 
 [MESSAGES CONTROL]

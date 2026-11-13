@@ -1,4 +1,4 @@
-"""MCP tokens: checked in ReelLife, role from PocketID."""
+"""MCP tokens: checked in ReelTime, role from PocketID."""
 
 import asyncio
 from collections.abc import Callable, Iterator
@@ -19,7 +19,7 @@ pytestmark = pytest.mark.django_db
 
 ISSUER = "https://id.example.test"
 KEY = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-GROUPS = {"editor": ["reellife-editors"], "none": ["other"]}
+GROUPS = {"editor": ["reeltime-editors"], "none": ["other"]}
 
 
 class _Userinfo:
@@ -126,7 +126,7 @@ def test_bad_tokens_are_refused(
     assert not account_models.AuditEvent.objects.exists()
 
 
-def test_no_reellife_group_is_refused_and_audited(
+def test_no_reeltime_group_is_refused_and_audited(
     userinfo: _Userinfo,
 ) -> None:
     userinfo.body["groups"] = GROUPS["none"]
@@ -176,7 +176,7 @@ def test_signing_keys_come_from_one_cached_client(
     class Client:  # pylint: disable=too-few-public-methods
         def __init__(self, uri: str, **kwargs: Any) -> None:
             assert not kwargs["cache_keys"]
-            assert kwargs["headers"]["User-Agent"].startswith("ReelLife/")
+            assert kwargs["headers"]["User-Agent"].startswith("ReelTime/")
             made.append(uri)
 
         def get_signing_key_from_jwt(self, token: str) -> Any:

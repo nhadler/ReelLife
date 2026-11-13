@@ -1,6 +1,6 @@
 # Code of conduct
 
-ReelLife follows the [Contributor Covenant, version
+ReelTime follows the [Contributor Covenant, version
 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
 In short: be welcoming and respectful, assume good faith, accept
 feedback gracefully, and keep criticism about the work, not the person.

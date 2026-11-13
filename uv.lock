@@ -1539,7 +1539,7 @@ wheels = [
 ]
 
 [[package]]
-name = "reellife"
+name = "reeltime"
 version = "1.6.0"
 source = { editable = "." }
 dependencies = [

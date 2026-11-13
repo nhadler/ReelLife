@@ -1,8 +1,8 @@
 """A real MCP client against the running server.
 
-gunicorn serves reellife.asgi with its ASGI worker on a fresh database;
+gunicorn serves reeltime.asgi with its ASGI worker on a fresh database;
 the official SDK's client signs in with an access token from the fake
-OIDC provider (as PocketID issues one for ReelLife's /mcp) and works
+OIDC provider (as PocketID issues one for ReelTime's /mcp) and works
 through the tools (create a project, add a cue, read it back, undo),
 a resource and a prompt.
 """
@@ -31,7 +31,7 @@ from tests.fakes import oidc_provider
 pytestmark = pytest.mark.large
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-# reellife.settings.dev's BASE_URL; tokens are issued for its /mcp.
+# reeltime.settings.dev's BASE_URL; tokens are issued for its /mcp.
 RESOURCE = "http://127.0.0.1:8000/mcp"
 
 
@@ -46,7 +46,7 @@ def fixture_provider() -> Iterator[oidc_provider.FakeProvider]:
         "127.0.0.1", 0, lambda e, s: [], handler_class=_Quiet
     )
     provider = oidc_provider.FakeProvider(
-        f"http://127.0.0.1:{server.server_port}", "reellife", "secret"
+        f"http://127.0.0.1:{server.server_port}", "reeltime", "secret"
     )
     server.set_app(oidc_provider.wsgi_app(provider))
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -68,8 +68,8 @@ def fixture_mcp_url(
     data = tmp_path_factory.mktemp("data")
     env = {
         **os.environ,
-        "DJANGO_SETTINGS_MODULE": "reellife.settings.dev",
-        "REELLIFE_DATA_DIR": str(data),
+        "DJANGO_SETTINGS_MODULE": "reeltime.settings.dev",
+        "REELTIME_DATA_DIR": str(data),
         "OIDC_ISSUER": provider.issuer,
     }
     for command in (["migrate", "--noinput"], ["createcachetable"]):
@@ -91,7 +91,7 @@ def fixture_mcp_url(
         "1",
         "--bind",
         f"127.0.0.1:{port}",
-        "reellife.asgi:application",
+        "reeltime.asgi:application",
     ]
     base = f"http://127.0.0.1:{port}"
     with subprocess.Popen(  # noqa: S603
@@ -172,7 +172,7 @@ async def _session_calls(url: str, token: str) -> dict[str, Any]:
                 )
                 after = await call("get_cue", cue_id=cue["created"]["id"])
                 sheet = await session.read_resource(
-                    f"reellife://projects/{project['id']}/cue-sheet"
+                    f"reeltime://projects/{project['id']}/cue-sheet"
                 )
                 prompt = await session.get_prompt(
                     "whats_left", {"project_id": str(project["id"])}

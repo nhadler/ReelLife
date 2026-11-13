@@ -9,8 +9,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from reellife import maintenance
-from reellife import updates
+from reeltime import maintenance
+from reeltime import updates
 
 
 class Command(BaseCommand):

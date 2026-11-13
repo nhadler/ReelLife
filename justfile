@@ -24,9 +24,9 @@ cov:
 lint:
     uv run ruff check .
     uv run ruff format --check .
-    uv run pylint accounts cues mcp_server reellife tests manage.py
+    uv run pylint accounts cues mcp_server reeltime tests manage.py
     uv run mypy
-    uv run bandit -q -r accounts cues mcp_server reellife -x tests
+    uv run bandit -q -r accounts cues mcp_server reeltime -x tests
     uv run python manage.py makemigrations --check --dry-run
     just check-deploy
     npx --no-install eslint .
@@ -34,19 +34,19 @@ lint:
 
 # `check --deploy` against production settings with placeholder values.
 check-deploy:
-    REELLIFE_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))') \
-    REELLIFE_ALLOWED_HOSTS=reellife.example.com \
-    REELLIFE_BASE_URL=https://reellife.example.com \
-    REELLIFE_DATA_DIR=$(mktemp -d) \
+    REELTIME_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(50))') \
+    REELTIME_ALLOWED_HOSTS=reeltime.example.com \
+    REELTIME_BASE_URL=https://reeltime.example.com \
+    REELTIME_DATA_DIR=$(mktemp -d) \
     OIDC_ISSUER=https://id.example.com \
-    OIDC_CLIENT_ID=reellife \
+    OIDC_CLIENT_ID=reeltime \
     OIDC_CLIENT_SECRET=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))') \
-    DJANGO_SETTINGS_MODULE=reellife.settings.prod \
+    DJANGO_SETTINGS_MODULE=reeltime.settings.prod \
     uv run python manage.py check --deploy --fail-level WARNING
 
-# Build the image (Dockerfile) as reellife:local.
+# Build the image (Dockerfile) as reeltime:local.
 build:
-    docker build -t reellife:local .
+    docker build -t reeltime:local .
 
 # Start the Compose deployment from this checkout (needs deploy/.env).
 up:

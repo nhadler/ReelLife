@@ -12,8 +12,8 @@
  * only while something is ticked.
  */
 
-const SORT_KEY = 'reellife.projectSort';
-const DIRECTION_KEY = 'reellife.projectSortDirection';
+const SORT_KEY = 'reeltime.projectSort';
+const DIRECTION_KEY = 'reeltime.projectSortDirection';
 
 /**
  * @param {string} key

@@ -3,7 +3,7 @@
 Each user can have one feed link. Its token is 32 random bytes, shown
 once when it's made; only its SHA-256 is kept, and it's looked up by
 that. Making a new link revokes the old. A feed stops working once its
-user is inactive or loses every ReelLife role.
+user is inactive or loses every ReelTime role.
 
 The feed has an all-day event for each cue on each day it's planned:
 the last 30 days as they were planned, and the next 90.
@@ -90,7 +90,7 @@ def _events(
             "Revision" if cue.revise else "",
         ]
         event = icalendar.Event()
-        event.add("uid", f"reellife-{date:%Y%m%d}-cue-{cue.id}@{host}")
+        event.add("uid", f"reeltime-{date:%Y%m%d}-cue-{cue.id}@{host}")
         event.add("dtstamp", timezone.now())
         event.add("dtstart", date)
         event.add("dtend", date + datetime.timedelta(days=1))
@@ -106,11 +106,11 @@ def _events(
 
 def ics(agenda: agenda_service.Agenda, base_url: str) -> bytes:
     """The schedule around `agenda.today` as an iCalendar file."""
-    host = base_url.split("://", 1)[-1].split("/", 1)[0] or "reellife"
+    host = base_url.split("://", 1)[-1].split("/", 1)[0] or "reeltime"
     calendar = icalendar.Calendar()
-    calendar.add("prodid", "-//ReelLife//Schedule//EN")
+    calendar.add("prodid", "-//ReelTime//Schedule//EN")
     calendar.add("version", "2.0")
-    calendar.add("x-wr-calname", "ReelLife Schedule")
+    calendar.add("x-wr-calname", "ReelTime Schedule")
     calendar.add("x-published-ttl", "PT1H")
     first = agenda.today - datetime.timedelta(days=PAST_DAYS)
     for date in sorted(agenda.past):

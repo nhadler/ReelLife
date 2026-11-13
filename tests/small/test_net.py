@@ -1,9 +1,9 @@
-"""Tests for reellife.net.client_ip."""
+"""Tests for reeltime.net.client_ip."""
 
 from django.test import RequestFactory
 from django.test import override_settings
 
-from reellife import net
+from reeltime import net
 
 
 def test_uses_remote_addr_without_proxy() -> None:

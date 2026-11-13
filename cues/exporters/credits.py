@@ -101,5 +101,5 @@ def to_xlsx() -> bytes:
 
 
 def filename(today: datetime.date, suffix: str) -> str:
-    """e.g. 'ReelLife Credits 2026-10-31.csv'."""
-    return f"ReelLife Credits {today:%Y-%m-%d}{suffix}"
+    """e.g. 'ReelTime Credits 2026-10-31.csv'."""
+    return f"ReelTime Credits {today:%Y-%m-%d}{suffix}"

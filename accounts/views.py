@@ -23,7 +23,7 @@ from accounts import audit
 from accounts import forms
 from accounts import models
 from accounts import oidc
-from reellife import net
+from reeltime import net
 
 ViewT = TypeVar("ViewT", bound=Callable[..., Any])
 
@@ -97,7 +97,7 @@ class LoginStartView(oidc_views.OIDCAuthenticationRequestView):  # type: ignore[
         return response
 
     def get_extra_params(self, request: HttpRequest) -> dict[str, str]:
-        """Uses REELLIFE_BASE_URL for redirect_uri, not the Host header."""
+        """Uses REELTIME_BASE_URL for redirect_uri, not the Host header."""
         del request
         return {"redirect_uri": oidc.callback_url()}
 
@@ -129,7 +129,7 @@ class CallbackView(oidc_views.OIDCAuthenticationCallbackView):  # type: ignore[m
 
     def login_failure(self) -> HttpResponse:
         """Shows why sign-in didn't complete, without internal detail."""
-        reason = getattr(self.request, "reellife_login_refused", None)
+        reason = getattr(self.request, "reeltime_login_refused", None)
         if reason:
             return render(
                 self.request,

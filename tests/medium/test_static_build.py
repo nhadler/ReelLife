@@ -8,7 +8,7 @@ from django.core.management import call_command
 from django.test import override_settings
 import pytest
 
-from reellife.settings.base import MANIFEST_STORAGE
+from reeltime.settings.base import MANIFEST_STORAGE
 
 HASHED = re.compile(r"\.[0-9a-f]{12}\.js$")
 RELATIVE_IMPORT = re.compile(r"""from\s*["'](\.{1,2}/[^"']+)["']""")

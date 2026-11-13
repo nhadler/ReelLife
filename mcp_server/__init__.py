@@ -1,1 +1,1 @@
-"""ReelLife's MCP server: AI assistants work through it."""
+"""ReelTime's MCP server: AI assistants work through it."""

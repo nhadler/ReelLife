@@ -6,7 +6,7 @@ from django.http import HttpRequest
 
 from accounts.models import Role
 from cues import models
-from reellife import updates
+from reeltime import updates
 
 
 def _user(request: HttpRequest) -> object:
@@ -49,7 +49,7 @@ def account(request: HttpRequest) -> dict[str, str]:
 def version(request: HttpRequest) -> dict[str, object]:
     """The installed version for the profile menu.
 
-    Admins also get any newer release (reellife.updates): only they can
+    Admins also get any newer release (reeltime.updates): only they can
     install it.
     """
     context: dict[str, object] = {"app_version": updates.installed()}

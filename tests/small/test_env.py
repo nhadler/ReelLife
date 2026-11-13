@@ -1,11 +1,11 @@
-"""Tests for reellife.env."""
+"""Tests for reeltime.env."""
 
 import pathlib
 
 from django.core.exceptions import ImproperlyConfigured
 import pytest
 
-from reellife import env
+from reeltime import env
 
 
 def test_get_reads_variable() -> None:

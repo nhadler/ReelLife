@@ -30,7 +30,7 @@ from mcp_server import server
 from mcp_server import setup
 from mcp_server import transfers
 from mcp_server import writes
-from reellife import asgi
+from reeltime import asgi
 from tests import factories
 
 pytestmark = pytest.mark.django_db
@@ -65,7 +65,7 @@ def fixture_project() -> models.Project:
     return demo.build_demo().project
 
 
-def test_tools_need_a_reellife_user(acting_as: Any) -> None:
+def test_tools_need_a_reeltime_user(acting_as: Any) -> None:
     with pytest.raises(ToolError, match="viewer role"):
         server.list_projects()
     acting_as(None)
@@ -206,7 +206,7 @@ def test_resources_and_prompts_over_http(
 ) -> None:
     project = demo.build_demo().project
     user = factories.UserFactory.create(role=Role.VIEWER)
-    cues_uri = f"reellife://projects/{project.pk}/cues"
+    cues_uri = f"reeltime://projects/{project.pk}/cues"
     whats_left = {
         "name": "whats_left",
         "arguments": {"project_id": str(project.pk)},
@@ -226,8 +226,8 @@ def test_resources_and_prompts_over_http(
         r.json()["result"] for r in replies
     )
     assert [r["uri"] for r in resources["resources"]] == [
-        "reellife://projects",
-        "reellife://guide",
+        "reeltime://projects",
+        "reeltime://guide",
     ]
     assert {t["title"] for t in templates["resourceTemplates"]} == {
         "Project",

@@ -81,7 +81,7 @@ def test_a_new_role_applies_mid_session(
     client: Client, sign_in: SignIn, oidc: oidc_provider.FakeProvider
 ) -> None:
     start = _sign_in(client, sign_in)
-    oidc.userinfo_overrides = {"groups": ["reellife-admins"]}
+    oidc.userinfo_overrides = {"groups": ["reeltime-admins"]}
     assert _status_at(client, start + 6 * MINUTE) == 200
     assert models.User.objects.get(oidc_sub=COMPOSER.sub).role == "admin"
     assert _audit() == [("role_changed", {"old": "editor", "new": "admin"})]

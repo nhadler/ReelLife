@@ -63,11 +63,11 @@ const FPS = Math.round(Number(config.frameRate) || 24);
 const DURATION_FPS = Number(config.durationFps) || FPS;
 // Row fields the find field looks in: cue #, title, scene and notes.
 const SEARCH_FIELDS = config.searchFields || ['number', 'title'];
-const COLLAPSED_KEY = `reellife.collapsed.${config.projectId}`;
-const TIMELINE_KEY = 'reellife.timelineCollapsed';
+const COLLAPSED_KEY = `reeltime.collapsed.${config.projectId}`;
+const TIMELINE_KEY = 'reeltime.timelineCollapsed';
 const timelineElement = document.getElementById('timeline');
-const VIEW_KEY = `reellife.view.${config.projectId}`;
-const ROW_SIZE_KEY = 'reellife.rowSize';
+const VIEW_KEY = `reeltime.view.${config.projectId}`;
+const ROW_SIZE_KEY = 'reeltime.rowSize';
 // The most cues Copy JSON sends (cues/api/views.py MAX_JSON_CUES).
 const MAX_JSON_CUES = 500;
 // Row sizes for the View menu; 'auto' fits each row's text.
@@ -1116,7 +1116,7 @@ function emptyFilters() {
  * @return {string}
  */
 function filterKey() {
-  return `reellife.filter.${config.projectId}.${currentView.id}`;
+  return `reeltime.filter.${config.projectId}.${currentView.id}`;
 }
 
 /**
@@ -1942,7 +1942,7 @@ async function send(url, init) {
     return {
       ok: false,
       status: 0,
-      body: {error: "Couldn't reach ReelLife, so this wasn't saved."},
+      body: {error: "Couldn't reach ReelTime, so this wasn't saved."},
     };
   }
   const body = await response

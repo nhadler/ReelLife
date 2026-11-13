@@ -31,7 +31,7 @@ from django.http.cookie import parse_cookie
 from django.urls import reverse
 from starlette.responses import PlainTextResponse
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "reellife.settings.prod")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "reeltime.settings.prod")
 django.setup(set_prefix=False)
 django_app = get_asgi_application()
 
@@ -44,7 +44,7 @@ from cues.exporters import backup  # noqa: E402
 from mcp_server import auth as mcp_auth  # noqa: E402
 from mcp_server import server as mcp_server  # noqa: E402
 from mcp_server import transfers  # noqa: E402
-from reellife import net  # noqa: E402
+from reeltime import net  # noqa: E402
 
 MCP_PATH = "/mcp"
 METADATA_PREFIX = "/.well-known/oauth-protected-resource"
@@ -115,7 +115,7 @@ def _count(key: str) -> int:
     """Adds one to a counter in the shared cache and returns it.
 
     Django's database cache increments with a read then a write. In a
-    transaction they are atomic: SQLite runs ReelLife's transactions as
+    transaction they are atomic: SQLite runs ReelTime's transactions as
     BEGIN IMMEDIATE (settings.base.sqlite_database), which takes the
     database's write lock first, so workers count one at a time.
     """

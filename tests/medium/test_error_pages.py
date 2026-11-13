@@ -1,5 +1,5 @@
 """Error pages: a 404 inside the app when signed in, alone otherwise,
-and a 400 for a host ReelLife doesn't serve."""
+and a 400 for a host ReelTime doesn't serve."""
 
 from collections.abc import Callable
 import logging
@@ -19,7 +19,7 @@ def test_not_found_keeps_the_app_around_a_signed_in_user(
     response = role_client(Role.VIEWER).get("/no/such/page/")
     assert response.status_code == 404
     html = response.content.decode()
-    assert "<title>Page Not Found · ReelLife</title>" in html
+    assert "<title>Page Not Found · ReelTime</title>" in html
     assert 'class="topbar' in html
     assert ">Go to Overview</a>" in html
 

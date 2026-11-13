@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand
 from django.core.management.base import CommandParser
 from django.utils import timezone
 
-from reellife import maintenance
+from reeltime import maintenance
 
 
 class Command(BaseCommand):

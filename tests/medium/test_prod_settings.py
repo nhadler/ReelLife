@@ -18,13 +18,13 @@ _ROOT = pathlib.Path(__file__).resolve().parents[2]
 def _prod_env(tmp_path: pathlib.Path, **overrides: str) -> dict[str, str]:
     env = {
         "PATH": os.environ["PATH"],
-        "DJANGO_SETTINGS_MODULE": "reellife.settings.prod",
-        "REELLIFE_SECRET_KEY": secrets.token_urlsafe(50),
-        "REELLIFE_ALLOWED_HOSTS": "reellife.example.com",
-        "REELLIFE_BASE_URL": "https://reellife.example.com",
-        "REELLIFE_DATA_DIR": str(tmp_path),
+        "DJANGO_SETTINGS_MODULE": "reeltime.settings.prod",
+        "REELTIME_SECRET_KEY": secrets.token_urlsafe(50),
+        "REELTIME_ALLOWED_HOSTS": "reeltime.example.com",
+        "REELTIME_BASE_URL": "https://reeltime.example.com",
+        "REELTIME_DATA_DIR": str(tmp_path),
         "OIDC_ISSUER": "https://id.example.com",
-        "OIDC_CLIENT_ID": "reellife",
+        "OIDC_CLIENT_ID": "reeltime",
         "OIDC_CLIENT_SECRET": secrets.token_urlsafe(32),
     }
     env.update(overrides)
@@ -54,8 +54,8 @@ def test_check_deploy_has_no_warnings(tmp_path: pathlib.Path) -> None:
 def test_secret_key_can_come_from_file(tmp_path: pathlib.Path) -> None:
     secret = tmp_path / "secret_key"
     secret.write_text(secrets.token_urlsafe(50), encoding="utf-8")
-    env = _prod_env(tmp_path, REELLIFE_SECRET_KEY_FILE=str(secret))
-    del env["REELLIFE_SECRET_KEY"]
+    env = _prod_env(tmp_path, REELTIME_SECRET_KEY_FILE=str(secret))
+    del env["REELTIME_SECRET_KEY"]
     result = _manage(env, "check", "--deploy", "--fail-level", "WARNING")
     assert result.returncode == 0, result.stderr
 
@@ -63,9 +63,9 @@ def test_secret_key_can_come_from_file(tmp_path: pathlib.Path) -> None:
 @pytest.mark.parametrize(
     "missing",
     [
-        "REELLIFE_SECRET_KEY",
-        "REELLIFE_ALLOWED_HOSTS",
-        "REELLIFE_BASE_URL",
+        "REELTIME_SECRET_KEY",
+        "REELTIME_ALLOWED_HOSTS",
+        "REELTIME_BASE_URL",
         "OIDC_ISSUER",
         "OIDC_CLIENT_ID",
         "OIDC_CLIENT_SECRET",
@@ -82,7 +82,7 @@ def test_required_settings_must_be_set(
 
 
 def test_base_url_must_be_https(tmp_path: pathlib.Path) -> None:
-    env = _prod_env(tmp_path, REELLIFE_BASE_URL="http://reellife.example.com")
+    env = _prod_env(tmp_path, REELTIME_BASE_URL="http://reeltime.example.com")
     result = _manage(env, "check")
     assert result.returncode != 0
     assert "must be an https:// URL" in result.stderr

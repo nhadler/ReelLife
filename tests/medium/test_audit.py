@@ -43,7 +43,7 @@ def test_record_ignores_unparseable_ip() -> None:
 
 @pytest.mark.django_db
 def test_record_emits_structured_log(caplog: pytest.LogCaptureFixture) -> None:
-    with caplog.at_level(logging.INFO, logger="reellife.audit"):
+    with caplog.at_level(logging.INFO, logger="reeltime.audit"):
         audit.record(models.AuditAction.LOGOUT, actor="ada")
     (log,) = caplog.records
     assert log.audit == {  # type: ignore[attr-defined]

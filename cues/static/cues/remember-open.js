@@ -5,7 +5,7 @@
  * edits).
  */
 
-const PREFIX = 'reellife.open.';
+const PREFIX = 'reeltime.open.';
 
 /**
  * @param {string} name

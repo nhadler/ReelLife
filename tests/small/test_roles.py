@@ -6,25 +6,25 @@ from accounts import roles
 from accounts.models import Role
 
 GROUPS = {
-    "admin_group": "reellife-admins",
-    "editor_group": "reellife-editors",
-    "viewer_group": "reellife-viewers",
+    "admin_group": "reeltime-admins",
+    "editor_group": "reeltime-editors",
+    "viewer_group": "reeltime-viewers",
 }
 
 
 @pytest.mark.parametrize(
     ("groups", "role"),
     [
-        (["reellife-admins", "reellife-editors"], Role.ADMIN),
-        (["reellife-editors"], Role.EDITOR),
-        (["other", "reellife-viewers"], Role.VIEWER),
+        (["reeltime-admins", "reeltime-editors"], Role.ADMIN),
+        (["reeltime-editors"], Role.EDITOR),
+        (["other", "reeltime-viewers"], Role.VIEWER),
         (["other"], Role.NONE),
         ([], Role.NONE),
-        ("reellife-editors", Role.EDITOR),
+        ("reeltime-editors", Role.EDITOR),
         (None, Role.NONE),
-        ({"reellife-admins": True}, Role.NONE),
-        ([1, None, "reellife-viewers"], Role.VIEWER),
-        (["REELLIFE-ADMINS"], Role.NONE),
+        ({"reeltime-admins": True}, Role.NONE),
+        ([1, None, "reeltime-viewers"], Role.VIEWER),
+        (["REELTIME-ADMINS"], Role.NONE),
     ],
 )
 def test_role_from_groups(groups: object, role: Role) -> None:

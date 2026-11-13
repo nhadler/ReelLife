@@ -1,42 +1,42 @@
-# ReelLife web service. Install steps: deploy/README.md.
+# ReelTime web service. Install steps: deploy/README.md.
 [Unit]
-Description=ReelLife cue tracking (gunicorn)
-Documentation=file:///opt/reellife/deploy/README.md
+Description=ReelTime cue tracking (gunicorn)
+Documentation=file:///opt/reeltime/deploy/README.md
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=exec
-User=reellife
+User=reeltime
 DynamicUser=yes
-StateDirectory=reellife
+StateDirectory=reeltime
 StateDirectoryMode=0700
 # Request bodies and uploads (up to 200 MB for a backup being restored)
 # are spooled to TMPDIR: on disk, not in a /tmp that may be a tmpfs
 # counted against MemoryMax.
-CacheDirectory=reellife
+CacheDirectory=reeltime
 CacheDirectoryMode=0700
-WorkingDirectory=/opt/reellife
-EnvironmentFile=/etc/reellife/reellife.env
-Environment=DJANGO_SETTINGS_MODULE=reellife.settings.prod
-Environment=REELLIFE_DATA_DIR=%S/reellife
+WorkingDirectory=/opt/reeltime
+EnvironmentFile=/etc/reeltime/reeltime.env
+Environment=DJANGO_SETTINGS_MODULE=reeltime.settings.prod
+Environment=REELTIME_DATA_DIR=%S/reeltime
 Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-Environment=TMPDIR=%C/reellife
+Environment=TMPDIR=%C/reeltime
 # Fontconfig's cache (PDF exports), in the service's own cache directory.
-Environment=XDG_CACHE_HOME=%C/reellife
+Environment=XDG_CACHE_HOME=%C/reeltime
 # Secrets arrive as files readable only by this service.
-LoadCredential=secret_key:/etc/reellife/secret_key
-LoadCredential=oidc_client_secret:/etc/reellife/oidc_client_secret
-Environment=REELLIFE_SECRET_KEY_FILE=%d/secret_key
+LoadCredential=secret_key:/etc/reeltime/secret_key
+LoadCredential=oidc_client_secret:/etc/reeltime/oidc_client_secret
+Environment=REELTIME_SECRET_KEY_FILE=%d/secret_key
 Environment=OIDC_CLIENT_SECRET_FILE=%d/oidc_client_secret
 
 # Snapshot before migrating so an upgrade can be rolled back (only when
 # migrations are pending; kept apart from the nightly snapshots).
-ExecStartPre=/opt/reellife/.venv/bin/reellife snapshot --before-migrate
-ExecStartPre=/opt/reellife/.venv/bin/reellife migrate --noinput
-ExecStartPre=/opt/reellife/.venv/bin/reellife createcachetable
+ExecStartPre=/opt/reeltime/.venv/bin/reeltime snapshot --before-migrate
+ExecStartPre=/opt/reeltime/.venv/bin/reeltime migrate --noinput
+ExecStartPre=/opt/reeltime/.venv/bin/reeltime createcachetable
 # The ASGI worker serves Django and the MCP server at /mcp.
-ExecStart=/opt/reellife/.venv/bin/gunicorn reellife.asgi:application \
+ExecStart=/opt/reeltime/.venv/bin/gunicorn reeltime.asgi:application \
     --worker-class asgi \
     --bind 127.0.0.1:8000 \
     --workers 2 \

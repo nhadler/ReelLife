@@ -1,7 +1,7 @@
 """Golden-file checks for importers.
 
 Each fixture's expected output lives next to it as JSON. To regenerate
-after a deliberate change, run the tests with REELLIFE_UPDATE_GOLDEN=1 and
+after a deliberate change, run the tests with REELTIME_UPDATE_GOLDEN=1 and
 review the diff.
 """
 
@@ -54,14 +54,14 @@ def check(fixture: pathlib.Path, variant: str, actual: dict[str, Any]) -> None:
         AssertionError: On a difference, or if the golden file is missing.
     """
     golden = fixture.with_name(f"{fixture.name}.{variant}.json")
-    if os.environ.get("REELLIFE_UPDATE_GOLDEN") == "1":
+    if os.environ.get("REELTIME_UPDATE_GOLDEN") == "1":
         golden.write_text(
             json.dumps(actual, indent=2, ensure_ascii=False) + "\n",
             encoding="utf-8",
         )
     assert golden.exists(), (
         f"no golden file {golden.relative_to(ROOT)}; run with "
-        "REELLIFE_UPDATE_GOLDEN=1 and review it"
+        "REELTIME_UPDATE_GOLDEN=1 and review it"
     )
     expected = json.loads(golden.read_text(encoding="utf-8"))
     assert actual == expected

@@ -1,4 +1,4 @@
-"""Users deactivated in ReelLife lose access everywhere at once."""
+"""Users deactivated in ReelTime lose access everywhere at once."""
 
 from collections.abc import Callable, Iterator
 from typing import Any

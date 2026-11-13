@@ -1,7 +1,7 @@
 {% extends "app.html" %}
 {# Admins: download a full backup, or restore one. #}
 
-{% block title %}Backup · ReelLife{% endblock %}
+{% block title %}Backup · ReelTime{% endblock %}
 
 {% block content %}
   <div class="page-head">{% include "cues/includes/page_title.html" with title="Backup" slug="settings-and-roles" %}</div>
@@ -24,7 +24,7 @@
     </form>
     <details class="backup__details">
       <summary>Technical Details</summary>
-      <p class="muted">Includes all projects, cues, settings, history and thumbnails. Excludes emergency sign-in credentials. Restoring requires an install with no projects and a backup from the same ReelLife version, and signs everyone out.</p>
+      <p class="muted">Includes all projects, cues, settings, history and thumbnails. Excludes emergency sign-in credentials. Restoring requires an install with no projects and a backup from the same ReelTime version, and signs everyone out.</p>
       <p class="muted">Schema: {% for app, name in schema.items %}{{ app }} {{ name }}{% if not forloop.last %}, {% endif %}{% endfor %}. A database snapshot is also written every night to the data directory's <code>snapshots</code> folder, keeping 14.</p>
     </details>
   </section>

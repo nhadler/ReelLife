@@ -1,15 +1,15 @@
 {% extends "accounts/sign_in_base.html" %}
 
-{% block title %}No Access · ReelLife{% endblock %}
+{% block title %}No Access · ReelTime{% endblock %}
 
 {% block sign_in %}
-  <h1>No Access to ReelLife</h1>
+  <h1>No Access to ReelTime</h1>
   <p>
     {% if reason == "inactive" %}
-      You signed in, but your ReelLife account is turned off. Ask the
+      You signed in, but your ReelTime account is turned off. Ask the
       administrator to turn it back on.
     {% else %}
-      You signed in, but your account isn't in a ReelLife group. Ask the
+      You signed in, but your account isn't in a ReelTime group. Ask the
       administrator to add you in PocketID, then sign in again.
     {% endif %}
   </p>

@@ -1,6 +1,6 @@
-# Runs reellife-snapshot.service every night (host local time).
+# Runs reeltime-snapshot.service every night (host local time).
 [Unit]
-Description=Nightly ReelLife snapshot and housekeeping
+Description=Nightly ReelTime snapshot and housekeeping
 
 [Timer]
 OnCalendar=*-*-* 03:00:00

@@ -1,8 +1,8 @@
-# ReelLife
+# ReelTime
 
-[![CI](https://github.com/nhadler/reellife/actions/workflows/ci.yml/badge.svg)](https://github.com/nhadler/reellife/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/nhadler/reellife?sort=semver)](https://github.com/nhadler/reellife/releases)
-[![Image](https://img.shields.io/badge/image-ghcr.io%2Fnhadler%2Freellife-blue)](https://github.com/nhadler/reellife/pkgs/container/reellife)
+[![CI](https://github.com/nhadler/reeltime/actions/workflows/ci.yml/badge.svg)](https://github.com/nhadler/reeltime/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/nhadler/reeltime?sort=semver)](https://github.com/nhadler/reeltime/releases)
+[![Image](https://img.shields.io/badge/image-ghcr.io%2Fnhadler%2Freeltime-blue)](https://github.com/nhadler/reeltime/pkgs/container/reeltime)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0--or--later-blue)](LICENSE)
 
 Self-hosted cue tracking and project management for film and TV composers.
@@ -26,25 +26,25 @@ Self-hosted cue tracking and project management for film and TV composers.
 
 ## Installation
 
-ReelLife runs with Docker Compose and requires an OIDC identity provider. It's tested with [PocketID](https://pocket-id.org), but other providers that include a `groups` claim should work.
+ReelTime runs with Docker Compose and requires an OIDC identity provider. It's tested with [PocketID](https://pocket-id.org), but other providers that include a `groups` claim should work.
 
 ```bash
-mkdir reellife && cd reellife
-curl -fsSLO https://raw.githubusercontent.com/nhadler/reellife/main/deploy/docker-compose.yml
-curl -fsSL https://raw.githubusercontent.com/nhadler/reellife/main/deploy/.env.example -o .env
+mkdir reeltime && cd reeltime
+curl -fsSLO https://raw.githubusercontent.com/nhadler/reeltime/main/deploy/docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/nhadler/reeltime/main/deploy/.env.example -o .env
 
 # Configure .env with your secret key, hostname, and OIDC settings
 docker compose up -d
 ```
 
-By default, ReelLife listens on `127.0.0.1:8000`. You'll need a reverse proxy with TLS, such as Caddy, Traefik, or Tailscale Serve.
+By default, ReelTime listens on `127.0.0.1:8000`. You'll need a reverse proxy with TLS, such as Caddy, Traefik, or Tailscale Serve.
 
-Container images are available for `linux/amd64` and `linux/arm64` at [ghcr.io/nhadler/reellife](https://github.com/nhadler/reellife/pkgs/container/reellife). Images are tagged with their release version (`1.6.0`, `1.6`, `1`) and `latest`.
+Container images are available for `linux/amd64` and `linux/arm64` at [ghcr.io/nhadler/reeltime](https://github.com/nhadler/reeltime/pkgs/container/reeltime). Images are tagged with their release version (`1.6.0`, `1.6`, `1`) and `latest`.
 
 To pin a specific version, set the following in `.env`:
 
 ```env
-REELLIFE_IMAGE=ghcr.io/nhadler/reellife:1.6.0
+REELTIME_IMAGE=ghcr.io/nhadler/reeltime:1.6.0
 ```
 
 See [deploy/README.md](deploy/README.md) for OIDC configuration, environment variables, backups, upgrades, and installation without Docker (systemd + uv).
@@ -65,7 +65,7 @@ The development server uses a mock identity provider, so you don't need to confi
 
 ### Stack
 
-ReelLife uses Django 6.1 with server-rendered templates, HTMX, Alpine.js (CSP build), AG Grid Community for the cue grid, and TipTap for writing notes. SQLite handles storage.
+ReelTime uses Django 6.1 with server-rendered templates, HTMX, Alpine.js (CSP build), AG Grid Community for the cue grid, and TipTap for writing notes. SQLite handles storage.
 
 Timecodes are stored as integer frame counts at the project's nominal frame rate rather than as formatted strings.
 
@@ -73,7 +73,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 
 ## Status
 
-ReelLife is under active development.
+ReelTime is under active development.
 
 Releases and changes are documented in [CHANGELOG.md](CHANGELOG.md). Until 1.0, minor releases may include breaking changes. Database migrations run automatically during upgrades, with any required manual steps noted in the changelog.
 
@@ -83,8 +83,8 @@ Please report vulnerabilities privately following [SECURITY.md](SECURITY.md).
 
 ## License
 
-ReelLife is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
+ReelTime is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE) (AGPL-3.0-or-later).
 
-If you run a modified version as a network service, the AGPL requires you to make the corresponding source code available to its users. Set `REELLIFE_SOURCE_URL` to link to your source from the application's Help page.
+If you run a modified version as a network service, the AGPL requires you to make the corresponding source code available to its users. Set `REELTIME_SOURCE_URL` to link to your source from the application's Help page.
 
 Third-party licenses are listed in [NOTICE.md](NOTICE.md).

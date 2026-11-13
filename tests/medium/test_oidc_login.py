@@ -66,7 +66,7 @@ def test_viewer_signs_in_as_viewer(client: Client, sign_in: SignIn) -> None:
 def test_user_in_no_group_is_refused(client: Client, sign_in: SignIn) -> None:
     response = sign_in(client, OUTSIDER)
     assert response.status_code == 403
-    assert b"isn't in a ReelLife group" in response.content
+    assert b"isn't in a ReelTime group" in response.content
     assert not models.User.objects.filter(oidc_sub=OUTSIDER.sub).exists()
     assert _signed_in_user(client) is None
     event = models.AuditEvent.objects.get()
@@ -105,7 +105,7 @@ def test_returning_user_is_updated_and_role_change_audited(
     client.logout()
     oidc.userinfo_overrides = {
         "email": "new@example.test",
-        "groups": ["reellife-admins"],
+        "groups": ["reeltime-admins"],
     }
     sign_in(client, COMPOSER)
     user = models.User.objects.get(oidc_sub=COMPOSER.sub)
@@ -142,7 +142,7 @@ def test_removal_found_at_sign_in_ends_other_sessions(
     assert sign_in(phone, NICK).status_code == 403
     assert models.AuditEvent.objects.filter(action="role_changed").count() == 1
     # Back in a group, they sign in with the new role.
-    oidc.userinfo_overrides = {"groups": ["reellife-viewers"]}
+    oidc.userinfo_overrides = {"groups": ["reeltime-viewers"]}
     sign_in(phone, NICK)
     assert models.User.objects.get(oidc_sub=NICK.sub).role == "viewer"
 
@@ -173,7 +173,7 @@ def test_bad_signatures_are_rejected(
     [
         {"iss": "https://evil.example.test"},
         {"aud": "someone-else"},
-        {"aud": ["reellife-test", "someone-else"]},
+        {"aud": ["reeltime-test", "someone-else"]},
         {"exp": int(time.time()) - 3600},
         {"exp": None},
         {"nonce": "replayed"},
@@ -209,8 +209,8 @@ def test_multi_audience_with_matching_azp_is_accepted(
     client: Client, sign_in: SignIn, oidc: oidc_provider.FakeProvider
 ) -> None:
     oidc.id_token_overrides = {
-        "aud": ["reellife-test", "other"],
-        "azp": "reellife-test",
+        "aud": ["reeltime-test", "other"],
+        "azp": "reeltime-test",
     }
     assert sign_in(client, COMPOSER)["Location"] == "/"
 
@@ -341,7 +341,7 @@ def test_logout_ends_provider_session(
     assert query["post_logout_redirect_uri"] == (
         "http://testserver/auth/login/"
     )
-    assert query["client_id"] == "reellife-test"
+    assert query["client_id"] == "reeltime-test"
     assert query["id_token_hint"]
     assert _signed_in_user(client) is None
     assert _actions() == ["login", "logout"]

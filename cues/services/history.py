@@ -99,7 +99,7 @@ class _Recording:
 
 
 _CURRENT: contextvars.ContextVar[_Recording | None] = contextvars.ContextVar(
-    "reellife_change_set", default=None
+    "reeltime_change_set", default=None
 )
 
 
@@ -452,7 +452,7 @@ def keep_ids_unique(using: str = "default", **kwargs: Any) -> None:
     del kwargs
     connection = connections[using]
     if connection.vendor != "sqlite":
-        return  # pragma: no cover - ReelLife runs on SQLite
+        return  # pragma: no cover - ReelTime runs on SQLite
     existing = set(connection.introspection.table_names())
     with connection.cursor() as cursor:
         for model in TRACKED:

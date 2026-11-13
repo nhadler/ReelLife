@@ -1,6 +1,6 @@
 # Security policy
 
-ReelLife stores unreleased project data and collaborator details. Report
+ReelTime stores unreleased project data and collaborator details. Report
 security issues privately so they can be fixed before disclosure.
 
 ## Reporting a vulnerability
@@ -17,7 +17,7 @@ named.
 ## Supported versions
 
 Only the latest release gets security fixes. Run a tagged image
-(`ghcr.io/nhadler/reellife:<version>`) and update when a release notes a
+(`ghcr.io/nhadler/reeltime:<version>`) and update when a release notes a
 security fix.
 
 ## What's in scope
@@ -33,4 +33,4 @@ a read-only container running as an unprivileged user, and weekly
 dependency and vulnerability checks in CI.
 
 Out of scope: the OIDC provider itself, the reverse proxy in front of
-ReelLife, and attacks that need an admin account.
+ReelTime, and attacks that need an admin account.

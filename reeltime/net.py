@@ -1,4 +1,4 @@
-"""Client address handling that respects REELLIFE_TRUST_PROXY."""
+"""Client address handling that respects REELTIME_TRUST_PROXY."""
 
 from django.conf import settings
 from django.http import HttpRequest

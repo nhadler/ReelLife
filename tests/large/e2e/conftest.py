@@ -1,4 +1,4 @@
-"""End-to-end fixtures: ReelLife, a fake OIDC server and axe.
+"""End-to-end fixtures: ReelTime, a fake OIDC server and axe.
 
 Runs the app with Django's live server (test settings, every middleware,
 the strict CSP) and signs in through the fake OIDC provider served over
@@ -25,8 +25,8 @@ os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 AXE = ROOT / "node_modules" / "axe-core" / "axe.min.js"
-CLIENT_ID = "reellife-e2e"
-CLIENT_SECRET = "reellife-e2e-secret-long-enough-for-hs256"  # noqa: S105  # nosec B105
+CLIENT_ID = "reeltime-e2e"
+CLIENT_SECRET = "reeltime-e2e-secret-long-enough-for-hs256"  # noqa: S105  # nosec B105
 
 
 @pytest.fixture(scope="session")
@@ -39,7 +39,7 @@ def django_db_modify_db_settings(
     connection between them for an in-memory database, so two requests at
     once (a grid reload and a header refresh) would collide.
     """
-    path = tmp_path_factory.mktemp("e2e-db") / "reellife.sqlite3"
+    path = tmp_path_factory.mktemp("e2e-db") / "reeltime.sqlite3"
     test_settings = cast(
         dict[str, Any], django_settings.DATABASES["default"]["TEST"]
     )

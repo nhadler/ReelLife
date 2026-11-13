@@ -6,6 +6,34 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **ReelLife is now ReelTime**, everywhere: the app, the image
+  (`ghcr.io/nhadler/reeltime`), the repository (`nhadler/ReelTime`;
+  GitHub forwards the old address), the `reeltime` command and Python
+  package, `REELTIME_*` settings, paths, service names, the default
+  PocketID groups and the AI assistant's `reeltime://` resources. The
+  old names don't work any more. To upgrade an install:
+  1. Stop it.
+  2. Rename every `REELLIFE_*` setting in `.env` (or
+     `/etc/reellife/reellife.env`) to `REELTIME_*`, and point
+     `REELTIME_IMAGE` at `ghcr.io/nhadler/reeltime`.
+  3. In the data directory, rename `reellife.sqlite3` (and any
+     `-wal` and `-shm` files beside it) to `reeltime.sqlite3`. ReelTime
+     won't start while only the old file is there.
+  4. Docker Compose: the project is `reeltime` and its volume
+     `reeltime-data`; copy the old volume across, e.g.
+     `docker run --rm -v reellife_reellife-data:/from -v reeltime_reeltime-data:/to alpine cp -a /from/. /to/`
+     (or keep your own bind mount). systemd: the units are
+     `reeltime.service` and `reeltime-snapshot.timer`, the checkout
+     `/opt/reeltime`, settings `/etc/reeltime/reeltime.env` and data
+     `/var/lib/reeltime`; move those across and run `install.sh` again.
+  5. PocketID: rename the groups to `reeltime-admins`, `reeltime-editors`
+     and `reeltime-viewers`, or set `OIDC_GROUP_*` to the old names.
+  6. Start it. The grid's remembered views, filters and row size reset
+     once in each browser. Backups made before the rename still
+     restore.
+
 ### Fixed
 
 - Quieter logs: a request for a host the server doesn't serve is logged
@@ -287,7 +315,7 @@ The first public release.
   `ghcr.io/nhadler/reellife` with an SBOM and build provenance, Docker
   Compose, and a systemd + uv install.
 
-[Unreleased]: https://github.com/nhadler/reellife/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/nhadler/reeltime/compare/v1.6.0...HEAD
 [1.6.0]: https://github.com/nhadler/reellife/compare/v1.5.2...v1.6.0
 [1.5.2]: https://github.com/nhadler/reellife/compare/v1.5.1...v1.5.2
 [1.5.1]: https://github.com/nhadler/reellife/compare/v1.5.0...v1.5.1

@@ -35,7 +35,7 @@ def _duration(
 def _offset(frames: int | None, rate: timecode.Rate) -> str:
     """A signed offset, '-' only when negative: '00:00:02:12'.
 
-    A zero offset is commonly written '00:00:00' (no frames); ReelLife
+    A zero offset is commonly written '00:00:00' (no frames); ReelTime
     keeps the frames for nonzero ones.
     """
     if frames is None:

@@ -12,7 +12,7 @@ import responses
 
 from accounts import models
 from accounts import oidc as accounts_oidc
-from reellife.settings import base
+from reeltime.settings import base
 from tests.fakes import oidc_provider
 
 pytestmark = pytest.mark.django_db

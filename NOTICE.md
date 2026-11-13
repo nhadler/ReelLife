@@ -1,6 +1,6 @@
 # Third-party notices
 
-ReelLife is © Nicholas Hadler and contributors, licensed under the
+ReelTime is © Nicholas Hadler and contributors, licensed under the
 [GNU Affero General Public License v3.0 or later](LICENSE).
 
 The following third-party files are included unmodified under their own

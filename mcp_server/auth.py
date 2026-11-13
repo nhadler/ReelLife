@@ -1,14 +1,14 @@
 """Token verification and role checks for MCP clients.
 
 MCP clients sign in through PocketID and send its access token. Each
-token is checked here, in ReelLife: signed by a key from PocketID's
-JWKS, issued by OIDC_ISSUER, unexpired, and issued for ReelLife's MCP
+token is checked here, in ReelTime: signed by a key from PocketID's
+JWKS, issued by OIDC_ISSUER, unexpired, and issued for ReelTime's MCP
 resource (its `aud` is `resource_url()`, which PocketID sets when the
 resource is registered under its APIs). The user's groups come from
 PocketID's userinfo and become their role exactly as at a web sign-in;
 userinfo is asked again after ROLE_TTL seconds, so a change in PocketID
-reaches MCP within that time; a user deactivated in ReelLife, or found
-without a group at a web sign-in, is refused at once. No ReelLife group,
+reaches MCP within that time; a user deactivated in ReelTime, or found
+without a group at a web sign-in, is refused at once. No ReelTime group,
 no access.
 """
 
@@ -32,7 +32,7 @@ import requests
 from accounts import audit
 from accounts import models as account_models
 from accounts import oidc
-from reellife import updates
+from reeltime import updates
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -47,13 +47,13 @@ _verified: contextvars.ContextVar[tuple[str, AccessToken | None] | None] = (
 
 
 def resource_url() -> str:
-    """ReelLife's MCP endpoint, which tokens must be issued for."""
+    """ReelTime's MCP endpoint, which tokens must be issued for."""
     return f"{settings.BASE_URL.rstrip('/')}/mcp"
 
 
 @dataclasses.dataclass(frozen=True)
 class Caller:
-    """The ReelLife user an MCP request acts for."""
+    """The ReelTime user an MCP request acts for."""
 
     user_id: int
     role: str
@@ -63,7 +63,7 @@ def _signing_key(token: str, jwks_uri: str) -> Any:
     # The key set is cached for _JWKS_TTL, then fetched again; keys are
     # looked up in it each time (cache_keys=False), so a key PocketID
     # retires stops verifying tokens once the set is refreshed. It names
-    # ReelLife as the User-Agent: Cloudflare's Browser Integrity Check
+    # ReelTime as the User-Agent: Cloudflare's Browser Integrity Check
     # refuses Python's default one.
     client = _jwks.get(jwks_uri)
     if client is None:
@@ -71,7 +71,7 @@ def _signing_key(token: str, jwks_uri: str) -> Any:
             jwks_uri,
             cache_keys=False,
             lifespan=_JWKS_TTL,
-            headers={"User-Agent": f"ReelLife/{updates.installed()}"},
+            headers={"User-Agent": f"ReelTime/{updates.installed()}"},
         )
         _jwks[jwks_uri] = client
     return client.get_signing_key_from_jwt(token).key
@@ -81,7 +81,7 @@ def _claims(token: str) -> dict[str, Any]:
     """The token's claims, once its signature and claims check out.
 
     Raises:
-        jwt.PyJWTError: The token isn't one PocketID issued for ReelLife.
+        jwt.PyJWTError: The token isn't one PocketID issued for ReelTime.
     """
     alg = jwt.get_unverified_header(token).get("alg")
     if alg not in oidc.ALLOWED_ALGORITHMS:
@@ -105,7 +105,7 @@ def _caller(token: str, sub: str) -> Caller:
     """The user and role for `sub`, from cache or PocketID's userinfo.
 
     Raises:
-        oidc.LoginRefusedError: The user is in no ReelLife group, or
+        oidc.LoginRefusedError: The user is in no ReelTime group, or
             is inactive.
         SuspiciousOperation: Userinfo describes someone else.
         requests.RequestException: PocketID couldn't be asked.
@@ -206,7 +206,7 @@ async def verify(token: str) -> AccessToken | None:
     """`check` for this request, run off the event loop (it uses the ORM).
 
     The answer is remembered for the rest of the request, so the router
-    (reellife/asgi.py, which rate-limits by the verified user) and the
+    (reeltime/asgi.py, which rate-limits by the verified user) and the
     SDK's TokenVerifier check each token once.
     """
     known = _verified.get()

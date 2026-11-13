@@ -7,15 +7,15 @@ from unittest import mock
 
 import pytest
 
-from reellife import healthcheck
+from reeltime import healthcheck
 
 
 @pytest.mark.parametrize(
     ("allowed", "host"),
     [
-        ("reellife.example.com,other", "reellife.example.com"),
+        ("reeltime.example.com,other", "reeltime.example.com"),
         (" .example.com", "example.com"),
-        ("*, reellife.ts.net", "reellife.ts.net"),
+        ("*, reeltime.ts.net", "reeltime.ts.net"),
         ("", "localhost"),
     ],
 )
@@ -59,7 +59,7 @@ def test_check_fails_when_nothing_listens() -> None:
 
 
 def test_main_exit_codes() -> None:
-    env = {"REELLIFE_ALLOWED_HOSTS": "app.test"}
+    env = {"REELTIME_ALLOWED_HOSTS": "app.test"}
     with (
         mock.patch.dict("os.environ", env),
         mock.patch.object(healthcheck, "check", return_value=True) as check,

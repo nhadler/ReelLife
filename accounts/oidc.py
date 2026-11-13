@@ -8,7 +8,7 @@ Uses mozilla-django-oidc with the following checks:
   JWKS, with matching `iss`, `aud`, `nonce` and an unexpired `exp`.
 - PKCE is required.
 - Users are keyed on `sub`, never email, and get their role from the
-  `groups` claim at every sign-in. No ReelLife group means no access.
+  `groups` claim at every sign-in. No ReelTime group means no access.
 """
 
 import dataclasses
@@ -36,7 +36,7 @@ from accounts import roles
 _LOGGER = logging.getLogger(__name__)
 
 ALLOWED_ALGORITHMS = ("RS256", "ES256")
-# Tolerated clock difference between ReelLife and the provider, seconds.
+# Tolerated clock difference between ReelTime and the provider, seconds.
 CLOCK_LEEWAY = 60
 _DISCOVERY_CACHE_KEY = "accounts.oidc.discovery"
 _DISCOVERY_TTL = 60 * 60
@@ -55,7 +55,7 @@ class DiscoveryError(Exception):
 
 
 class LoginRefusedError(Exception):
-    """A valid identity that may not use ReelLife.
+    """A valid identity that may not use ReelTime.
 
     Attributes:
         reason: Machine-readable reason for the audit log.
@@ -71,7 +71,7 @@ class LoginRefusedError(Exception):
 
 @dataclasses.dataclass(frozen=True)
 class ProviderConfig:
-    """The parts of the discovery document ReelLife uses."""
+    """The parts of the discovery document ReelTime uses."""
 
     issuer: str
     authorization_endpoint: str
@@ -190,7 +190,7 @@ class Backend(oidc_auth.OIDCAuthenticationBackend):  # type: ignore[misc]
         Returns:
             The signed-in user, or None if this isn't an OIDC callback or
             the sign-in failed or was refused (both are audit-logged; a
-            refusal also sets `request.reellife_login_refused`).
+            refusal also sets `request.reeltime_login_refused`).
         """
         if request is None:
             return None
@@ -212,7 +212,7 @@ class Backend(oidc_auth.OIDCAuthenticationBackend):  # type: ignore[misc]
                 actor=exc.sub,
                 reason=exc.reason,
             )
-            setattr(request, "reellife_login_refused", exc.reason)  # noqa: B010
+            setattr(request, "reeltime_login_refused", exc.reason)  # noqa: B010
             return None
         except (
             SuspiciousOperation,
@@ -412,7 +412,7 @@ class Backend(oidc_auth.OIDCAuthenticationBackend):  # type: ignore[misc]
 
         Raises:
             SuspiciousOperation: No usable `sub`.
-            LoginRefusedError: No ReelLife group (a known user's role is
+            LoginRefusedError: No ReelTime group (a known user's role is
                 then cleared and stays cleared), or an inactive user.
         """
         sub = claims["sub"]
@@ -433,7 +433,7 @@ class Backend(oidc_auth.OIDCAuthenticationBackend):  # type: ignore[misc]
         with transaction.atomic():
             user = models.User.objects.filter(oidc_sub=sub).first()
             if user is not None and not user.is_active:
-                # Deactivated in ReelLife's admin: stays out whatever
+                # Deactivated in ReelTime's admin: stays out whatever
                 # PocketID says, until an admin turns the account back on.
                 raise LoginRefusedError("inactive", sub)
             previous_role = None if user is None else user.role
@@ -509,7 +509,7 @@ def check_session(request: HttpRequest) -> bool:
     Uses the access token from sign-in (refreshed with the refresh token
     when the provider issued one and the access token has expired) to
     fetch userinfo, then applies the same rules as a sign-in: a user in
-    no ReelLife group loses their role, a role change is saved and
+    no ReelTime group loses their role, a role change is saved and
     audited. Called every SESSION_CHECK_INTERVAL by
     accounts.sessions.SessionTimeoutMiddleware.
 
@@ -519,7 +519,7 @@ def check_session(request: HttpRequest) -> bool:
     Returns:
         False to sign the session out: the provider refused the tokens
         (expired with no way to refresh, or revoked), describes someone
-        else, or the user may no longer use ReelLife. True otherwise,
+        else, or the user may no longer use ReelTime. True otherwise,
         including when the provider can't be reached: an outage only
         blocks new sign-ins, and the check is tried again later.
         Break-glass sessions aren't OIDC sessions and are always kept.

@@ -546,7 +546,7 @@ def test_credits_export(
     viewer = role_client(Role.VIEWER)
     response = viewer.get(reverse("cues:credits_export", args=["csv"]))
     assert response["Content-Type"].startswith("text/csv")
-    assert 'filename="ReelLife Credits ' in response["Content-Disposition"]
+    assert 'filename="ReelTime Credits ' in response["Content-Disposition"]
     rows = list(csv.reader(io.StringIO(response.content.decode("utf-8-sig"))))
     assert rows[0][:4] == ["Kind", "First Name", "Last Name", "Company Name"]
     assert rows[1] == [

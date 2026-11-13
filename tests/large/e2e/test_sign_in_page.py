@@ -15,7 +15,7 @@ def test_sign_in_and_a_failed_sign_in_read_well(
 ) -> None:
     del csp_violations
     page.goto(f"{app}/auth/login/")
-    expect(page.get_by_role("heading", level=1)).to_have_text("ReelLife")
+    expect(page.get_by_role("heading", level=1)).to_have_text("ReelTime")
     expect(
         page.get_by_role("link", name="Sign In with PocketID")
     ).to_be_visible()

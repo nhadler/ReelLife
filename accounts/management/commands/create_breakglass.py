@@ -19,7 +19,7 @@ class Command(BaseCommand):
     help = (
         "Create the break-glass local admin and print its password and "
         "TOTP setup URI once. Sign-in also needs "
-        "REELLIFE_BREAKGLASS_ENABLED=true."
+        "REELTIME_BREAKGLASS_ENABLED=true."
     )
 
     def add_arguments(self, parser: CommandParser) -> None:
@@ -63,6 +63,6 @@ class Command(BaseCommand):
             f"  password: {password}\n"
             f"  TOTP URI: {device.config_url}\n"
             "Add the TOTP URI to an authenticator app. Enable sign-in at "
-            "/auth/local/ with REELLIFE_BREAKGLASS_ENABLED=true, and turn "
+            "/auth/local/ with REELTIME_BREAKGLASS_ENABLED=true, and turn "
             "it off again once PocketID is back."
         )

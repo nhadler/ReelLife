@@ -8,9 +8,9 @@ from typing import Any
 from django.http import HttpRequest
 
 from accounts import models
-from reellife import net
+from reeltime import net
 
-_LOGGER = logging.getLogger("reellife.audit")
+_LOGGER = logging.getLogger("reeltime.audit")
 
 
 def _valid_ip(text: str) -> str | None:

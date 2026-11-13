@@ -2,7 +2,7 @@
 #   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 
 x-build: &build
-  image: ${REELLIFE_IMAGE:-reellife:local}
+  image: ${REELTIME_IMAGE:-reeltime:local}
   build:
     context: ..
     dockerfile: Dockerfile

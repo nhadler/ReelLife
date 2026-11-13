@@ -20,7 +20,7 @@ import pytest
 
 from accounts import audit
 from accounts import models
-from reellife import maintenance
+from reeltime import maintenance
 
 pytestmark = pytest.mark.django_db
 
@@ -32,7 +32,7 @@ def fixture_live_db(
     tmp_path: pathlib.Path, settings: Any
 ) -> Iterator[pathlib.Path]:
     """Points maintenance at a real SQLite file and a temp DATA_DIR."""
-    source = tmp_path / "reellife.sqlite3"
+    source = tmp_path / "reeltime.sqlite3"
     with sqlite3.connect(source) as db:
         db.execute("CREATE TABLE t (x)")
     settings.DATA_DIR = tmp_path
@@ -56,7 +56,7 @@ def test_nightly_snapshots_and_purges(live_db: pathlib.Path) -> None:
 
     assert (
         result.snapshot
-        == live_db.parent / "snapshots" / "reellife-20261102.sqlite3"
+        == live_db.parent / "snapshots" / "reeltime-20261102.sqlite3"
     )
     assert result.snapshot.exists()
     assert result.audit_events_purged == 1
@@ -74,7 +74,7 @@ def test_nightly_skips_snapshot_for_in_memory_database() -> None:
 @pytest.mark.parametrize(
     ("name", "path"),
     [
-        ("/data/reellife.sqlite3", pathlib.Path("/data/reellife.sqlite3")),
+        ("/data/reeltime.sqlite3", pathlib.Path("/data/reeltime.sqlite3")),
         (":memory:", None),
         ("file:memorydb_default?mode=memory&cache=shared", None),
     ],
@@ -91,8 +91,8 @@ def test_snapshot_dir_is_under_data_dir(settings: Any) -> None:
 def test_snapshot_command(live_db: pathlib.Path) -> None:
     out = io.StringIO()
     call_command("snapshot", stdout=out)
-    assert "reellife-" in out.getvalue()
-    assert list((live_db.parent / "snapshots").glob("reellife-*.sqlite3"))
+    assert "reeltime-" in out.getvalue()
+    assert list((live_db.parent / "snapshots").glob("reeltime-*.sqlite3"))
 
 
 def test_snapshot_command_before_first_migrate() -> None:
@@ -125,7 +125,7 @@ def test_snapshot_before_migrate_command(live_db: pathlib.Path) -> None:
     assert [p.name for p in snapshots.iterdir()][0].startswith(
         "before-migrate-"
     )
-    assert not list(snapshots.glob("reellife-*"))
+    assert not list(snapshots.glob("reeltime-*"))
 
 
 def test_snapshot_before_migrate_only_when_pending(
@@ -140,7 +140,7 @@ def test_snapshot_before_migrate_only_when_pending(
 def test_snapshot_before_migrate_before_first_migrate(
     tmp_path: pathlib.Path,
 ) -> None:
-    missing = tmp_path / "reellife.sqlite3"
+    missing = tmp_path / "reeltime.sqlite3"
     out = io.StringIO()
     with mock.patch.object(maintenance, "database_path", return_value=missing):
         call_command("snapshot", "--before-migrate", stdout=out)

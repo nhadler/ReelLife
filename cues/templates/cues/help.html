@@ -1,7 +1,7 @@
 {% extends "app.html" %}
 {# The user guide, a topic a page (cues/guide/*.md). body is rendered from those files, which are ours, so it's marked safe. #}
 
-{% block title %}{{ topic.title }} · Help · ReelLife{% endblock %}
+{% block title %}{{ topic.title }} · Help · ReelTime{% endblock %}
 
 {% block content %}
   <div class="settings help">
@@ -16,7 +16,7 @@
       <h1 class="page-title help__title">{{ topic.title }}</h1>
       {{ body|safe }}
       <footer class="help__about">
-        <p>ReelLife {{ version }} · Free software under the GNU AGPL v3 · <a href="{{ source_url }}">Source Code</a></p>
+        <p>ReelTime {{ version }} · Free software under the GNU AGPL v3 · <a href="{{ source_url }}">Source Code</a></p>
       </footer>
     </article>
   </div>

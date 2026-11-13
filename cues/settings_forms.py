@@ -9,7 +9,7 @@ from cues import models
 
 
 class AppSettingsForm(forms.ModelForm):  # type: ignore[type-arg]
-    """How ReelLife looks and behaves for everyone (App Settings).
+    """How ReelTime looks and behaves for everyone (App Settings).
 
     The schedule's daily maximum and smallest share are stored in
     weighted seconds and edited in minutes of Easy music.

@@ -1,5 +1,5 @@
 [project]
-name = "reellife"
+name = "reeltime"
 version = "1.6.0"
 description = "Self-hosted music cue tracking for film and TV composers."
 readme = "README.md"
@@ -39,21 +39,21 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/nhadler/reellife"
-Documentation = "https://github.com/nhadler/reellife/tree/main/docs"
-Changelog = "https://github.com/nhadler/reellife/blob/main/CHANGELOG.md"
-Issues = "https://github.com/nhadler/reellife/issues"
+Homepage = "https://github.com/nhadler/reeltime"
+Documentation = "https://github.com/nhadler/reeltime/tree/main/docs"
+Changelog = "https://github.com/nhadler/reeltime/blob/main/CHANGELOG.md"
+Issues = "https://github.com/nhadler/reeltime/issues"
 
 [project.scripts]
-# Bare-metal entry point: `reellife migrate`, `reellife nightly`, ...
-reellife = "reellife.cli:main"
+# Bare-metal entry point: `reeltime migrate`, `reeltime nightly`, ...
+reeltime = "reeltime.cli:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["accounts", "cues", "mcp_server", "reellife"]
+packages = ["accounts", "cues", "mcp_server", "reeltime"]
 
 [dependency-groups]
 dev = [
@@ -109,7 +109,7 @@ single-line-exclusions = ["typing", "collections.abc"]
 [tool.mypy]
 strict = true
 python_version = "3.12"
-files = ["accounts", "cues", "mcp_server", "reellife", "tests", "scripts", "manage.py"]
+files = ["accounts", "cues", "mcp_server", "reeltime", "tests", "scripts", "manage.py"]
 plugins = ["mypy_django_plugin.main"]
 
 [[tool.mypy.overrides]]
@@ -144,12 +144,12 @@ module = ["tests.factories"]
 disallow_untyped_calls = false
 
 [tool.django-stubs]
-django_settings_module = "reellife.settings.test"
+django_settings_module = "reeltime.settings.test"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
-DJANGO_SETTINGS_MODULE = "reellife.settings.test"
+DJANGO_SETTINGS_MODULE = "reeltime.settings.test"
 # Large tests need Docker or a browser: `just test-container`, `just e2e`.
 addopts = "-ra --strict-markers -m 'not large'"
 markers = [
@@ -164,15 +164,15 @@ filterwarnings = [
 
 [tool.coverage.run]
 branch = true
-source = ["accounts", "cues", "mcp_server", "reellife"]
+source = ["accounts", "cues", "mcp_server", "reeltime"]
 # Production and dev settings load in subprocesses (tests/medium/
 # test_prod_settings.py) or not at all under test, so coverage can't see them.
 omit = [
     "*/migrations/*",
-    "reellife/wsgi.py",
-    "reellife/settings/dev.py",
-    "reellife/settings/prod.py",
-    "reellife/settings/build.py",
+    "reeltime/wsgi.py",
+    "reeltime/settings/dev.py",
+    "reeltime/settings/prod.py",
+    "reeltime/settings/build.py",
 ]
 
 [tool.coverage.report]

@@ -2,7 +2,7 @@
 
 The scheduler asks GitHub for the latest release when it starts and each
 night (`check`), and keeps the answer in the cache. Pages only read that
-answer (`available`), so none waits on GitHub. REELLIFE_UPDATE_CHECK=false
+answer (`available`), so none waits on GitHub. REELTIME_UPDATE_CHECK=false
 turns the check off. Only the release's version and page are read; nothing
 about this instance is sent beyond an ordinary HTTPS request.
 """
@@ -20,7 +20,7 @@ from django.core.cache import cache
 import requests
 
 _LOGGER = logging.getLogger(__name__)
-CACHE_KEY = "reellife:latest-release"
+CACHE_KEY = "reeltime:latest-release"
 # Longer than a day, so one failed check keeps the last answer.
 CACHE_SECONDS = 7 * 24 * 60 * 60
 TIMEOUT = 5
@@ -39,10 +39,10 @@ class Release:
 
 @functools.cache
 def installed() -> str:
-    """ReelLife's installed version, e.g. '1.0.0'."""
+    """ReelTime's installed version, e.g. '1.0.0'."""
     try:
         # None when the installed metadata is damaged.
-        return metadata.version("reellife") or "development"
+        return metadata.version("reeltime") or "development"
     except metadata.PackageNotFoundError:  # a checkout that was never installed
         return "development"
 
@@ -60,7 +60,7 @@ def api_url(source_url: str) -> str | None:
     """GitHub's latest-release address for a repository's page, else None.
 
     Args:
-        source_url: REELLIFE_SOURCE_URL, e.g. https://github.com/nhadler/reellife.
+        source_url: REELTIME_SOURCE_URL, e.g. https://github.com/nhadler/reeltime.
     """
     parts = urllib.parse.urlsplit(source_url)
     match = _REPOSITORY.match(parts.path)
@@ -76,7 +76,7 @@ def api_url(source_url: str) -> str | None:
 
 def fetch() -> Release | None:
     """The latest release on GitHub, or None if it can't be read."""
-    url = api_url(settings.REELLIFE_SOURCE_URL)
+    url = api_url(settings.REELTIME_SOURCE_URL)
     if url is None:
         return None
     try:
@@ -84,7 +84,7 @@ def fetch() -> Release | None:
             url,
             headers={
                 "Accept": "application/vnd.github+json",
-                "User-Agent": f"ReelLife/{installed()}",
+                "User-Agent": f"ReelTime/{installed()}",
             },
             timeout=TIMEOUT,
             stream=True,

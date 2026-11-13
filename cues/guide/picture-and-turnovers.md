@@ -10,7 +10,7 @@ Chosen when you make a project, and changeable in Settings, Picture:
 - **Long Play**: one continuous picture with no reels. Its turnovers
   ask only for IN and OUT.
 
-Labels across ReelLife follow the type: *Reel 1*, *Act 2*, *Clip A12*,
+Labels across ReelTime follow the type: *Reel 1*, *Act 2*, *Clip A12*,
 or just *Picture*. You can't switch to a type that doesn't accept the
 existing picture names, such as Reels when a clip is named A12.
 
@@ -26,7 +26,7 @@ When a new cut arrives:
 5. Choose **Log Turnover**.
 
 Each reel's *current picture* is the newest turnover that includes it.
-If a reel's IN moved, ReelLife opens **Conform** next (see *Conform*).
+If a reel's IN moved, ReelTime opens **Conform** next (see *Conform*).
 
 Click a turnover's name on the Picture page to change it, or to delete
 it. You can't remove a reel or delete a turnover if cue versions

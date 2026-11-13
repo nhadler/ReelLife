@@ -1,6 +1,6 @@
 # Getting Started
 
-ReelLife tracks the music for a film or an episode, from spotting to the
+ReelTime tracks the music for a film or an episode, from spotting to the
 PRO cue sheet. Each **project** is one film or episode. Its picture
 arrives in **turnovers** (cuts), each covering one or more reels. A
 **cue** is a moment in the picture (a number like `1m01`, a title, IN and

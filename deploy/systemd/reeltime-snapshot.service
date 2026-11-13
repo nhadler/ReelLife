@@ -1,26 +1,26 @@
 # Nightly snapshot and housekeeping; started by
-# reellife-snapshot.timer. Runs as the same dynamic user as the web
+# reeltime-snapshot.timer. Runs as the same dynamic user as the web
 # service so it can read and write the same state directory.
 [Unit]
-Description=ReelLife nightly snapshot and housekeeping
-Documentation=file:///opt/reellife/deploy/README.md
+Description=ReelTime nightly snapshot and housekeeping
+Documentation=file:///opt/reeltime/deploy/README.md
 
 [Service]
 Type=oneshot
-User=reellife
+User=reeltime
 DynamicUser=yes
-StateDirectory=reellife
+StateDirectory=reeltime
 StateDirectoryMode=0700
-WorkingDirectory=/opt/reellife
-EnvironmentFile=/etc/reellife/reellife.env
-Environment=DJANGO_SETTINGS_MODULE=reellife.settings.prod
-Environment=REELLIFE_DATA_DIR=%S/reellife
+WorkingDirectory=/opt/reeltime
+EnvironmentFile=/etc/reeltime/reeltime.env
+Environment=DJANGO_SETTINGS_MODULE=reeltime.settings.prod
+Environment=REELTIME_DATA_DIR=%S/reeltime
 Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
-LoadCredential=secret_key:/etc/reellife/secret_key
-LoadCredential=oidc_client_secret:/etc/reellife/oidc_client_secret
-Environment=REELLIFE_SECRET_KEY_FILE=%d/secret_key
+LoadCredential=secret_key:/etc/reeltime/secret_key
+LoadCredential=oidc_client_secret:/etc/reeltime/oidc_client_secret
+Environment=REELTIME_SECRET_KEY_FILE=%d/secret_key
 Environment=OIDC_CLIENT_SECRET_FILE=%d/oidc_client_secret
-ExecStart=/opt/reellife/.venv/bin/reellife nightly
+ExecStart=/opt/reeltime/.venv/bin/reeltime nightly
 
 NoNewPrivileges=yes
 ProtectSystem=strict

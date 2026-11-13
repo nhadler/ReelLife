@@ -7,7 +7,7 @@
 !manage.py
 !accounts/
 !cues/
-!reellife/
+!reeltime/
 !mcp_server/
 !templates/
 !deploy/docker-entrypoint.sh

@@ -22,7 +22,7 @@ from accounts.models import AuditAction
 from accounts.models import Role
 from accounts.models import User
 from cues.exporters import backup
-from reellife import maintenance
+from reeltime import maintenance
 
 CONFIRM_WORD = "RESTORE"
 
@@ -143,7 +143,7 @@ def backup_download(request: HttpRequest) -> HttpResponse:
         rows=sum(counts.values()),
     )
     response = HttpResponse(out.getvalue(), content_type="application/zip")
-    name = f"reellife-backup-{timezone.localtime(now):%Y%m%d-%H%M}.zip"
+    name = f"reeltime-backup-{timezone.localtime(now):%Y%m%d-%H%M}.zip"
     response["Content-Disposition"] = content_disposition_header(
         as_attachment=True, filename=name
     )

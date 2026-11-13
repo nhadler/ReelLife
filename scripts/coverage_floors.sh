@@ -10,7 +10,7 @@ FILES="$FILES,cues/importers/*"
 FILES="$FILES,cues/exporters/cue_sheet/*"
 FILES="$FILES,accounts/authz.py"
 FILES="$FILES,accounts/roles.py"
-FILES="$FILES,reellife/admin.py"
+FILES="$FILES,reeltime/admin.py"
 FILES="$FILES,mcp_server/auth.py"
 
 exec uv run coverage report --fail-under=100 --include="$FILES"

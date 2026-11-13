@@ -43,7 +43,7 @@ the note as a Markdown check list.
 - In the panel, Ctrl+Z undoes your typing. Each save is one change, so
   **Undo** in the grid takes it back too.
 - Edit several cues at once: select them (tick their boxes; Shift-click
-  for a range), then change one cell. ReelLife asks whether to apply it
+  for a range), then change one cell. ReelTime asks whether to apply it
   to all of them.
 - Select all shown: Ctrl+Shift+A. Deselect: Ctrl+Shift+D. Invert:
   Ctrl+Shift+I. Copy selected cells: Ctrl+C.

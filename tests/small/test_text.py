@@ -32,7 +32,7 @@ _AS_GIVEN = {"Play-off Sport", "Team vs. Team Sport"}
         ("first cue # in the reel", "First Cue # in the Reel"),
         ("start at", "Start At"),  # the last word is capitalised
         ("a new IN for one cue", "A New IN for One Cue"),
-        ("The ReelLife app", "The ReelLife App"),
+        ("The ReelTime app", "The ReelTime App"),
         ("Sign-in is unavailable", "Sign-In Is Unavailable"),
         ("Rewrite/revisions", "Rewrite/Revisions"),
         ("Keep each cue's suffix", "Keep Each Cue's Suffix"),

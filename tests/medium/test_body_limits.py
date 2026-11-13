@@ -1,4 +1,4 @@
-"""Request bodies are capped before Django reads them (reellife/asgi.py).
+"""Request bodies are capped before Django reads them (reeltime/asgi.py).
 
 Django's ASGI handler spools a whole body to disk before middleware
 runs, so the router refuses oversized ones first.
@@ -18,7 +18,7 @@ from accounts.models import Role
 from accounts.models import User
 from mcp_server import auth
 from mcp_server import transfers
-from reellife import asgi
+from reeltime import asgi
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

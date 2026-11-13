@@ -28,17 +28,17 @@ class CuesConfig(AppConfig):
         from cues.services import history
 
         signals.pre_create_historical_record.connect(
-            history.tag_history_row, dispatch_uid="reellife.tag_history_row"
+            history.tag_history_row, dispatch_uid="reeltime.tag_history_row"
         )
         post_migrate.connect(
             history.keep_ids_unique,
             sender=self,
-            dispatch_uid="reellife.keep_ids_unique",
+            dispatch_uid="reeltime.keep_ids_unique",
         )
         post_delete.connect(
             _delete_thumbnail_file,
             sender="cues.Project",
-            dispatch_uid="reellife.delete_thumbnail_file",
+            dispatch_uid="reeltime.delete_thumbnail_file",
         )
         # Blank choices in every select show a dash, not Django's
         # "- Select an option -" (Django reads this setting at runtime).

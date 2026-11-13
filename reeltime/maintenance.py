@@ -2,7 +2,7 @@
 
 The host backs up the data directory, but a live SQLite file in WAL mode
 can be copied mid-write. Each night SQLite's online backup API writes a
-consistent copy to DATA_DIR/snapshots/reellife-YYYYMMDD.sqlite3 (keeping
+consistent copy to DATA_DIR/snapshots/reeltime-YYYYMMDD.sqlite3 (keeping
 the newest 14), which host backups pick up safely, and a full backup ZIP
 (the same as an admin downloads) to DATA_DIR/backups, also keeping 14.
 
@@ -31,11 +31,11 @@ from django.utils import timezone
 from accounts import audit
 from cues.exporters import backup
 from cues.services import agenda
-from reellife import updates
+from reeltime import updates
 
 _LOGGER = logging.getLogger(__name__)
-_SNAPSHOT_GLOB = "reellife-[0-9]*.sqlite3"
-_BACKUP_GLOB = "reellife-[0-9]*.zip"
+_SNAPSHOT_GLOB = "reeltime-[0-9]*.sqlite3"
+_BACKUP_GLOB = "reeltime-[0-9]*.zip"
 _MIGRATE_SNAPSHOT_GLOB = "before-migrate-[0-9]*.sqlite3"
 MIGRATE_SNAPSHOT_KEEP = 5
 
@@ -83,7 +83,7 @@ def take_snapshot(
     """
     if not source.exists():
         return None
-    target = directory / f"reellife-{today:%Y%m%d}.sqlite3"
+    target = directory / f"reeltime-{today:%Y%m%d}.sqlite3"
     _copy_database(source, target)
     prune_snapshots(directory, keep=keep)
     return target
@@ -180,7 +180,7 @@ def write_backup(
         The backup's path.
     """
     directory.mkdir(mode=0o700, parents=True, exist_ok=True)
-    target = directory / f"reellife-{now:%Y%m%d}.zip"
+    target = directory / f"reeltime-{now:%Y%m%d}.zip"
     partial = target.with_suffix(".partial")
     with partial.open("wb") as out:
         backup.write(out, now)

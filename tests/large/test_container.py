@@ -20,8 +20,8 @@ import uuid
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-IMAGE = "reellife:test"
-HOST = "reellife.example.com"
+IMAGE = "reeltime:test"
+HOST = "reeltime.example.com"
 DOCKER = shutil.which("docker") or "/usr/local/bin/docker"
 
 
@@ -58,12 +58,12 @@ def _run(*args: str, check: bool = True) -> subprocess.CompletedProcess[str]:
 
 def _env() -> dict[str, str]:
     return {
-        "REELLIFE_SECRET_KEY": secrets.token_urlsafe(50),
-        "REELLIFE_ALLOWED_HOSTS": HOST,
-        "REELLIFE_BASE_URL": f"https://{HOST}",
-        "REELLIFE_TRUST_PROXY": "true",
+        "REELTIME_SECRET_KEY": secrets.token_urlsafe(50),
+        "REELTIME_ALLOWED_HOSTS": HOST,
+        "REELTIME_BASE_URL": f"https://{HOST}",
+        "REELTIME_TRUST_PROXY": "true",
         "OIDC_ISSUER": "https://id.example.com",
-        "OIDC_CLIENT_ID": "reellife",
+        "OIDC_CLIENT_ID": "reeltime",
         "OIDC_CLIENT_SECRET": secrets.token_urlsafe(32),
     }
 
@@ -167,7 +167,7 @@ def test_pdfs_render_with_the_app_fonts(image: str) -> None:
         "run",
         "--rm",
         "-e",
-        "DJANGO_SETTINGS_MODULE=reellife.settings.build",
+        "DJANGO_SETTINGS_MODULE=reeltime.settings.build",
         "--entrypoint",
         "python",
         image,
@@ -180,7 +180,7 @@ def test_pdfs_render_with_the_app_fonts(image: str) -> None:
 @pytest.fixture(name="hardened")
 def fixture_hardened(image: str) -> Iterator[int]:
     """The web container with Compose's hardening; yields its port."""
-    name = f"reellife-test-{uuid.uuid4().hex[:8]}"
+    name = f"reeltime-test-{uuid.uuid4().hex[:8]}"
     port = _free_port()
     env_args = [arg for k, v in _env().items() for arg in ("-e", f"{k}={v}")]
     _run(
@@ -275,7 +275,7 @@ def test_compose_up_from_a_clean_checkout(
         "".join(f"{k}={v}\n" for k, v in _env().items()), encoding="utf-8"
     )
     port = _free_port()
-    project = f"reellife-test-{uuid.uuid4().hex[:8]}"
+    project = f"reeltime-test-{uuid.uuid4().hex[:8]}"
     compose = [
         "compose",
         "-f",
@@ -284,9 +284,9 @@ def test_compose_up_from_a_clean_checkout(
         project,
     ]
     overrides = {
-        "REELLIFE_ENV_FILE": str(env_file),
-        "REELLIFE_PORT": str(port),
-        "REELLIFE_IMAGE": image,
+        "REELTIME_ENV_FILE": str(env_file),
+        "REELTIME_PORT": str(port),
+        "REELTIME_IMAGE": image,
     }
     env = {**os.environ, **overrides}
 
@@ -322,7 +322,7 @@ def test_compose_up_from_a_clean_checkout(
         assert "snapshots" not in data
         # ... but one with migrations pending (unapplying one stands in
         # for an upgrade that adds it) snapshots the database first.
-        compose_run("exec", "web", "reellife", "migrate", "sessions", "zero")
+        compose_run("exec", "web", "reeltime", "migrate", "sessions", "zero")
         compose_run("restart", "web")
         wait_for_web()
         listing = compose_run("exec", "web", "ls", "/data/snapshots").stdout

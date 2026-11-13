@@ -114,7 +114,7 @@ def test_the_feed_lists_each_days_cues(
     )
     body = role_client(Role.VIEWER).get(reverse("cues:calendar_download"))
     assert body["Content-Disposition"] == (
-        'attachment; filename="reellife-schedule.ics"'
+        'attachment; filename="reeltime-schedule.ics"'
     )
     calendar = icalendar.Calendar.from_ical(body.content)
     events = list(calendar.walk("VEVENT"))
@@ -123,7 +123,7 @@ def test_the_feed_lists_each_days_cues(
     assert len(today) > 1  # one event per cue
     first = next(e for e in today if "1m01" in str(e["summary"]))
     assert str(first["summary"]).startswith("1m01 Main Title (")
-    assert str(first["uid"]) == f"reellife-20261102-cue-{cue.pk}@testserver"
+    assert str(first["uid"]) == f"reeltime-20261102-cue-{cue.pk}@testserver"
     assert str(first["url"]) == f"http://testserver/cues/{cue.pk}/"
     description = str(first["description"])
     assert description.startswith("Night Ferry · ")

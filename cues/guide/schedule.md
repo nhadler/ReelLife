@@ -117,9 +117,9 @@ copy it, or click **Subscribe in Calendar**. Anyone with the link can
 read your schedule, so **Revoke Link** if it gets out, and **Make a New
 Link** to replace it. **Download .ics** gives a one-off copy instead.
 
-Calendar apps on your own devices reach ReelLife wherever you can.
+Calendar apps on your own devices reach ReelTime wherever you can.
 Google Calendar and iCloud's server-side refresh fetch the feed from
-their own servers, so they only work once ReelLife is reachable from
+their own servers, so they only work once ReelTime is reachable from
 the internet.
 
 How soon changes show depends on the app. Apple Calendar can refresh a
@@ -127,7 +127,7 @@ subscription every 5 minutes (set **Auto-refresh** on the calendar).
 Google Calendar fetches a feed only every few hours and can't be asked
 to fetch it sooner; for updates every 10 minutes, a small Google Apps
 Script in your own Google account can copy the feed into a calendar
-there. It's in ReelLife's source, under `deploy/google-calendar`, with
+there. It's in ReelTime's source, under `deploy/google-calendar`, with
 setup steps.
 
 ## Month and Week
@@ -148,6 +148,6 @@ listed above the calendar.
 
 ## On the Overview
 
-The Overview, ReelLife's home page, shows the next seven days of the
+The Overview, ReelTime's home page, shows the next seven days of the
 schedule. Click a day to open the Schedule on that week with the day
 chosen.

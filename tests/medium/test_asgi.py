@@ -1,4 +1,4 @@
-"""The ASGI router in front of Django and the MCP server (reellife/asgi.py).
+"""The ASGI router in front of Django and the MCP server (reeltime/asgi.py).
 
 Rate limits for /mcp: every request counts against
 its client address; a token that verifies also counts against its user
@@ -15,7 +15,7 @@ from mcp.server.auth.provider import AccessToken
 import pytest
 
 from mcp_server import auth
-from reellife import asgi
+from reeltime import asgi
 
 pytestmark = pytest.mark.django_db(transaction=True)
 

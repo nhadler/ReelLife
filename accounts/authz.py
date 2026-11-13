@@ -21,7 +21,7 @@ from django.http import HttpResponseBase
 from accounts import roles
 from accounts.models import Role
 
-_ATTR = "reellife_minimum_role"
+_ATTR = "reeltime_minimum_role"
 SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 ViewT = TypeVar("ViewT", bound=Callable[..., Any])

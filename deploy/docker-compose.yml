@@ -1,21 +1,21 @@
-# ReelLife with Docker Compose (deploy/README.md).
+# ReelTime with Docker Compose (deploy/README.md).
 #   cp .env.example .env    # then fill it in
 #   docker compose up -d
 #
-# Runs the published image; pin a release with REELLIFE_IMAGE in .env.
+# Runs the published image; pin a release with REELTIME_IMAGE in .env.
 # To build from this checkout instead, add docker-compose.build.yml:
 #   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 #
 # Serves on 127.0.0.1:8000 only; point Tailscale Serve or a reverse
-# proxy at it. Data lives in the reellife-data volume.
+# proxy at it. Data lives in the reeltime-data volume.
 
-name: reellife
+name: reeltime
 
 x-app: &app
-  image: ${REELLIFE_IMAGE:-ghcr.io/nhadler/reellife:latest}
-  env_file: ${REELLIFE_ENV_FILE:-.env}
+  image: ${REELTIME_IMAGE:-ghcr.io/nhadler/reeltime:latest}
+  env_file: ${REELTIME_ENV_FILE:-.env}
   volumes:
-    - reellife-data:/data
+    - reeltime-data:/data
   read_only: true
   # Small on purpose: a tmpfs counts against mem_limit. Uploads spool to
   # /data/tmp instead (TMPDIR, set in the image).
@@ -36,7 +36,7 @@ services:
     <<: *app
     command: ['web']
     ports:
-      - '127.0.0.1:${REELLIFE_PORT:-8000}:8000'
+      - '127.0.0.1:${REELTIME_PORT:-8000}:8000'
     mem_limit: 512m
     pids_limit: 128
 
@@ -54,4 +54,4 @@ services:
     stop_grace_period: 30s
 
 volumes:
-  reellife-data:
+  reeltime-data:

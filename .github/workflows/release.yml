@@ -1,6 +1,6 @@
 # Publishes a release when a version tag is pushed (v1.0.0): runs the
 # whole CI suite, builds the image for amd64 and arm64, pushes it to
-# ghcr.io/nhadler/reellife with an SBOM and signed build provenance, and
+# ghcr.io/nhadler/reeltime with an SBOM and signed build provenance, and
 # creates the GitHub release from CHANGELOG.md.
 #
 # To release: move CHANGELOG.md's Unreleased notes under
@@ -65,7 +65,7 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      # Image names must be lowercase; the repository is nhadler/ReelLife.
+      # Image names must be lowercase; the repository is nhadler/ReelTime.
       - name: Image name
         run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
       - uses: actions/checkout@v7
@@ -126,4 +126,4 @@ jobs:
             printf '\n## Image\n\n```\nghcr.io/%s:%s\n```\n' "${GITHUB_REPOSITORY,,}" "$VERSION"
           } > body.md
           gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" \
-            --title "ReelLife $VERSION" --notes-file body.md $prerelease
+            --title "ReelTime $VERSION" --notes-file body.md $prerelease

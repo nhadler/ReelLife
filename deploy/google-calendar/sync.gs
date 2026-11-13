@@ -1,9 +1,9 @@
 /**
- * @fileoverview Keeps a Google calendar in step with ReelLife's schedule.
+ * @fileoverview Keeps a Google calendar in step with ReelTime's schedule.
  *
  * Google Calendar reads a subscribed iCal feed only every few hours.
  * This Google Apps Script, run in your own Google account every few
- * minutes, reads ReelLife's Calendar Feed and adds, changes and removes
+ * minutes, reads ReelTime's Calendar Feed and adds, changes and removes
  * events in a calendar of its own to match. See README.md beside it.
  *
  * It only touches events it made (each carries the feed event's UID),
@@ -11,11 +11,11 @@
  */
 
 // The calendar the events go in; made on the first run if missing.
-const CALENDAR_NAME = 'ReelLife';
-// The days ReelLife's feed covers (cues/services/feed.py).
+const CALENDAR_NAME = 'ReelTime';
+// The days ReelTime's feed covers (cues/services/feed.py).
 const PAST_DAYS = 30;
 const AHEAD_DAYS = 90;
-const UID_TAG = 'reellifeUid';
+const UID_TAG = 'reeltimeUid';
 
 /** Reads the feed and brings the calendar in line with it. */
 function sync() {
@@ -34,7 +34,7 @@ function sync() {
 
   const calendar = targetCalendar();
   // Strictly inside the feed's days (its edges may fall on another day
-  // in ReelLife's time zone), so older events stay as history.
+  // in ReelTime's time zone), so older events stay as history.
   const today = startOfDay(new Date());
   const from = addDays(today, -PAST_DAYS + 1);
   const to = addDays(today, AHEAD_DAYS);

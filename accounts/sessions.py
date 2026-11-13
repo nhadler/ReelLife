@@ -3,8 +3,8 @@
 Django's own expiry slides forward whenever the session is saved, so the
 absolute limit is enforced here from the sign-in time. Every
 SESSION_CHECK_INTERVAL an OIDC session also asks PocketID whether its
-user may still use ReelLife (accounts.oidc.check_session): removed from
-the ReelLife groups, disabled, or tokens that can't be refreshed, and the
+user may still use ReelTime (accounts.oidc.check_session): removed from
+the ReelTime groups, disabled, or tokens that can't be refreshed, and the
 session ends.
 """
 
@@ -22,9 +22,9 @@ from django.utils import timezone
 
 from accounts import oidc
 
-AUTH_AT = "reellife_auth_at"
-SEEN_AT = "reellife_seen_at"
-CHECKED_AT = "reellife_checked_at"
+AUTH_AT = "reeltime_auth_at"
+SEEN_AT = "reeltime_seen_at"
+CHECKED_AT = "reeltime_checked_at"
 # Record activity at most this often, to avoid a session write per request.
 _SEEN_RESOLUTION = 60
 SIGNED_OUT = "You've been signed out. Reload the page to sign in again."
