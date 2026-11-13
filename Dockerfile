@@ -60,13 +60,15 @@ COPY --from=build /app /app
 # Uploads (up to 200 MB for a backup being restored) are spooled to
 # TMPDIR. It is on the data volume because /tmp is a small tmpfs, and a
 # tmpfs counts against the container's memory limit; the entry point
-# creates it.
+# creates it. Fontconfig (PDF exports) keeps its small cache under
+# XDG_CACHE_HOME: on the tmpfs, since the rest of the image is read-only.
 ENV PATH=/app/.venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DJANGO_SETTINGS_MODULE=reellife.settings.prod \
     REELLIFE_DATA_DIR=/data \
-    TMPDIR=/data/tmp
+    TMPDIR=/data/tmp \
+    XDG_CACHE_HOME=/tmp/cache
 USER 10001:10001
 WORKDIR /app
 VOLUME ["/data"]

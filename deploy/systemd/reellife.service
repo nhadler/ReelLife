@@ -22,6 +22,8 @@ Environment=DJANGO_SETTINGS_MODULE=reellife.settings.prod
 Environment=REELLIFE_DATA_DIR=%S/reellife
 Environment=PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 Environment=TMPDIR=%C/reellife
+# Fontconfig's cache (PDF exports), in the service's own cache directory.
+Environment=XDG_CACHE_HOME=%C/reellife
 # Secrets arrive as files readable only by this service.
 LoadCredential=secret_key:/etc/reellife/secret_key
 LoadCredential=oidc_client_secret:/etc/reellife/oidc_client_secret

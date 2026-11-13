@@ -6,6 +6,13 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Quieter logs: a request for a host the server doesn't serve is logged
+  as a one-line warning instead of an error with a traceback, and
+  Fontconfig no longer warns at startup that it has no cache directory
+  (the image and systemd unit give it one).
+
 ## [1.6.0] - 2026-11-12
 
 ### Changed

@@ -29,3 +29,20 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info:
             entry["exception"] = self.formatException(record.exc_info)
         return json.dumps(entry, default=str)
+
+
+class BriefWarning(logging.Filter):
+    """Logs a record as a one-line warning, without its traceback.
+
+    For Django's report of a request for a host not in ALLOWED_HOSTS:
+    scanners and health probes to a bare IP send them all the time, and
+    the request is already refused with a 400.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        """Lowers the record to WARNING and drops its exception."""
+        record.levelno = logging.WARNING
+        record.levelname = "WARNING"
+        record.exc_info = None
+        record.exc_text = None
+        return True

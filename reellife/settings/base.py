@@ -199,10 +199,13 @@ LOGGING = {
             "formatter": "json",
         },
     },
+    "filters": {"brief": {"()": "reellife.logs.BriefWarning"}},
     "root": {"handlers": ["stdout"], "level": "INFO"},
-    # PDF rendering logs every font subset at INFO; warnings still show.
     "loggers": {
-        name: {"level": "WARNING"} for name in ("weasyprint", "fontTools")
+        # PDF rendering logs every font subset at INFO; warnings show.
+        **{name: {"level": "WARNING"} for name in ("weasyprint", "fontTools")},
+        # A request for a host ReelLife doesn't serve: one line, no trace.
+        "django.security.DisallowedHost": {"filters": ["brief"]},
     },
 }
 

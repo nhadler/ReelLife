@@ -2,6 +2,7 @@
 and a 400 for a host ReelLife doesn't serve."""
 
 from collections.abc import Callable
+import logging
 
 from django.test import Client
 from django.test import override_settings
@@ -33,10 +34,19 @@ def test_not_found_stands_alone_when_signed_out(client: Client) -> None:
 
 @override_settings(DEBUG=False, ALLOWED_HOSTS=["reel.example.com"])
 @pytest.mark.parametrize("path", ["/healthz", "/", "/auth/login/"])
-def test_an_unknown_host_is_a_bad_request_not_an_error(path: str) -> None:
+def test_an_unknown_host_is_a_bad_request_not_an_error(
+    path: str, caplog: pytest.LogCaptureFixture
+) -> None:
     # Turned away before sign-in runs: the 400 page renders with no user.
     client = Client(raise_request_exception=False)
-    response = client.get(path, HTTP_HOST="192.168.1.189:8098")
+    with caplog.at_level(logging.INFO, logger="django.security"):
+        response = client.get(path, HTTP_HOST="192.168.1.189:8098")
+    # Logged as a one-line warning, without a traceback.
+    (record,) = [
+        r for r in caplog.records if r.name == "django.security.DisallowedHost"
+    ]
+    assert record.levelname == "WARNING" and record.exc_info is None
+    assert "Invalid HTTP_HOST header" in record.getMessage()
     assert response.status_code == 400
     assert "<h1>Error 400</h1>" in response.content.decode()
     allowed = client.get("/healthz", HTTP_HOST="reel.example.com")
