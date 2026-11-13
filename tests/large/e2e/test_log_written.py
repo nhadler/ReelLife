@@ -5,6 +5,8 @@ from typing import Any
 from playwright.sync_api import expect
 import pytest
 
+from cues import models
+from cues import timecode
 from cues.services import demo
 from tests.large.e2e.conftest import Check
 from tests.large.e2e.conftest import SignInAs
@@ -46,6 +48,26 @@ def test_log_written_waits_for_one_cue(
         dialog.get_by_role("heading", name="Log Written: 1m01")
     ).to_be_visible()
     axe("log written", within="#app-dialog")
-    dialog.get_by_label("Written").fill("1:20")
+    # From the cue's IN to its OUT; log the first 20 seconds.
+    cue = project.cues.get(number="1m01")
+    assert cue.tc_in is not None and cue.tc_out is not None
+    rate = project.rate
+
+    def tc(frames: int) -> str:
+        return timecode.format_timecode(frames, rate)
+
+    stop = tc(cue.tc_in + 20 * rate.nominal)
+    expect(dialog.get_by_label("From")).to_have_value(tc(cue.tc_in))
+    expect(dialog.get_by_label("To")).to_have_value(tc(cue.tc_out))
+    dialog.get_by_label("To").fill(stop)
     dialog.get_by_role("button", name="Log", exact=True).click()
     expect(dialog).to_be_hidden()
+    log = models.WritingLog.objects.get(cue=cue)
+    assert (log.seconds, log.start) == (20, 0)
+    # Next time it carries on from there, and lists the log.
+    button.click()
+    expect(dialog.get_by_label("From")).to_have_value(stop)
+    expect(dialog.locator(".log-written__list")).to_contain_text(
+        f"{tc(cue.tc_in)} to {stop}"
+    )
+    axe("log written with a log", within="#app-dialog")

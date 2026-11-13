@@ -149,8 +149,39 @@ def test_log_written(editor: User, cue: models.Cue) -> None:
         schedule.log_written(cue.pk, "1:00", "2026-11-03")
     with pytest.raises(ToolError, match="Enter an amount"):
         schedule.log_written(cue.pk, "a bit")
+    with pytest.raises(ToolError, match="under 60"):
+        schedule.log_written(cue.pk, "1:75")
     assert schedule.log_written(cue.pk, "0") == {
         "cue": "1m01",
-        "removed": True,
+        "removed": 1,
     }
+    assert models.WritingLog.objects.count() == 1
+    # A day with nothing logged: nothing to remove.
+    assert schedule.log_written(cue.pk, "0", "2026-10-30")["removed"] == 0
+
+
+def test_log_written_takes_a_stretch(editor: User, cue: models.Cue) -> None:
+    del editor
+    assert schedule.log_written(
+        cue.pk, tc_from=" 1:00:00:00", tc_to="1:00:30:00"
+    ) == {
+        "cue": "1m01",
+        "date": "2026-11-02",
+        "written": "0:30",
+        "from": "1:00:00:00",
+        "to": "1:00:30:00",
+    }
+    log = models.WritingLog.objects.get()
+    assert (log.start, log.end, log.seconds) == (0, 30 * 24, 30)
+    for start, end, error in (
+        ("1:00:40:00", "1:00:30:00", "From before To"),
+        ("1:00:00:00", "1:05:00:00", "inside the cue"),
+        ("soon", "1:00:30:00", "not a timecode"),
+    ):
+        with pytest.raises(ToolError, match=error):
+            schedule.log_written(cue.pk, tc_from=start, tc_to=end)
+    cue.tc_in = cue.tc_out = None
+    cue.save(update_fields=["tc_in", "tc_out"])
+    with pytest.raises(ToolError, match="IN and OUT first"):
+        schedule.log_written(cue.pk, tc_from="1:00:00:00", tc_to="1:00:30:00")
     assert models.WritingLog.objects.count() == 1

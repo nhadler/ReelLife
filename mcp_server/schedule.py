@@ -8,6 +8,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 
 from accounts.models import Role
 from cues import models
+from cues import timecode
 from cues.services import agenda as agenda_service
 from cues.services import pins
 from cues.services import writing
@@ -95,19 +96,48 @@ def pin_cue(cue_id: int, date: str = "") -> dict[str, Any]:
     return {"cue": cue.number, "pinned_to": day.isoformat()}
 
 
-def log_written(cue_id: int, amount: str, date: str = "") -> dict[str, Any]:
-    """Logs how much of a cue was written on a day (today by default).
+def log_written(
+    cue_id: int,
+    amount: str = "",
+    date: str = "",
+    tc_from: str = "",
+    tc_to: str = "",
+) -> dict[str, Any]:
+    """Logs what of a cue was written on a day (today by default).
 
-    amount is m:ss ("1:20") or minutes ("1.5"); "0" or "" removes that
-    day's log. The schedule counts logged work as done. Undoable.
+    Give the stretch written as timecodes in the cue's picture (tc_from
+    and tc_to, e.g. "1:01:04:00" to "1:01:30:00"), or just an amount as
+    m:ss ("1:20") or minutes ("1.5"). Each call adds a log; a cue can
+    have several a day. amount "0" removes that day's logs. The schedule
+    counts logged work as done. Undoable.
     """
     user = common.user(Role.EDITOR)
     cue = common.cue(cue_id)
     day = _date(date, "date") if date else timezone.localdate()
     if day > timezone.localdate():
         raise ToolError("Pick today or an earlier day.")
+    if tc_from or tc_to:
+        if cue.tc_in is None or cue.tc_out is None:
+            raise ToolError(f"Give {cue.number} an IN and OUT first.")
+        rate = cue.project.rate
+        try:
+            start = timecode.parse(tc_from, rate) - cue.tc_in
+            end = timecode.parse(tc_to, rate) - cue.tc_in
+            entry = writing.log_stretch(cue, day, start, end, user)
+        except (timecode.TimecodeError, writing.StretchError) as exc:
+            raise ToolError(str(exc)) from exc
+        return {
+            "cue": cue.number,
+            "date": day.isoformat(),
+            "written": clock(entry.seconds),
+            "from": tc_from.strip(),
+            "to": tc_to.strip(),
+        }
     if amount.strip() in ("", "0"):
-        return {"cue": cue.number, "removed": writing.remove(cue, day, user)}
+        return {
+            "cue": cue.number,
+            "removed": writing.remove_day(cue, day, user),
+        }
     try:
         seconds = writing.parse_amount(amount)
     except writing.AmountError as exc:

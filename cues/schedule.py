@@ -105,20 +105,24 @@ class SchedulePin(Timestamped):
 
 
 class WritingLog(Timestamped):
-    """How much of a cue the composer wrote on a day ("Log Written…").
+    """A stretch of a cue the composer wrote on a day ("Log Written…").
 
     The schedule counts only logged work as done: a cue's logs of its
-    current kind of work (writing, or revising) come off what's left.
-    One per cue and day; logging again replaces it. Tracked by history,
-    so it undoes.
+    current kind of work (writing, or revising) come off what's left,
+    overlapping stretches once. A cue can have several logs a day.
+    Tracked by history, so it undoes.
     """
 
     cue = models.ForeignKey(
         "cues.Cue", on_delete=models.CASCADE, related_name="writing_logs"
     )
     date = models.DateField()
-    # Seconds of the cue's music written that day.
+    # Seconds of the cue's music written: the stretch's length.
     seconds = models.PositiveIntegerField()
+    # The stretch, in frames after the cue's IN (so a conform that moves
+    # the cue keeps it); both None for an amount logged without one.
+    start = models.PositiveIntegerField(null=True, blank=True)
+    end = models.PositiveIntegerField(null=True, blank=True)
     # Revision work is logged apart from writing.
     revise = models.BooleanField(default=False)
 
@@ -128,8 +132,12 @@ class WritingLog(Timestamped):
         verbose_name = "writing log"
         ordering = ["date", "id"]
         constraints = [
-            models.UniqueConstraint(
-                fields=["cue", "date"], name="writing_log_once_a_day"
+            models.CheckConstraint(
+                condition=(
+                    models.Q(start__isnull=True, end__isnull=True)
+                    | models.Q(start__lt=models.F("end"))
+                ),
+                name="writing_log_stretch_forwards",
             ),
         ]
 

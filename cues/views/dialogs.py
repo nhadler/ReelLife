@@ -6,8 +6,10 @@ grid, refresh the header and close the dialog. "Save and add another"
 answers with a fresh form instead, keeping the dialog open.
 """
 
+import dataclasses
 import datetime
 import json
+from typing import Any
 
 from django.core.exceptions import ValidationError
 from django.http import HttpRequest
@@ -254,10 +256,70 @@ def _day(text: str) -> datetime.date:
         return timezone.localdate()
 
 
+@dataclasses.dataclass(frozen=True)
+class _Logged:
+    """One of a cue's logs, as the Log Written dialog lists it."""
+
+    id: int
+    date: datetime.date
+    stretch: str  # '1:01:04:00 to 1:01:30:00', or '' for an amount
+    amount: str
+
+
+def _logged(cue: models.Cue) -> list[_Logged]:
+    """The cue's logs for its work now, as the dialog lists them."""
+    rate = cue.project.rate
+    listed = []
+    for entry in writing.logs(cue):
+        stretch = ""
+        if (
+            entry.start is not None
+            and entry.end is not None
+            and cue.tc_in is not None
+        ):
+            stretch = " to ".join(
+                timecode.format_timecode(cue.tc_in + frames, rate)
+                for frames in (entry.start, entry.end)
+            )
+        listed.append(
+            _Logged(entry.pk, entry.date, stretch, clock(entry.seconds))
+        )
+    return listed
+
+
+def _log_written_initial(
+    cue: models.Cue, date: datetime.date, share: str
+) -> dict[str, Any]:
+    """From where the last log ended (else IN); To at OUT, or a share on."""
+    # Only asked for a cue with an IN and OUT.
+    tc_in, tc_out = cue.tc_in or 0, cue.tc_out or 0
+    rate = cue.project.rate
+    length = tc_out - tc_in
+    start = writing.next_start(cue)
+    if start >= length:
+        start = 0  # logged to OUT already: start again from IN
+    end = length
+    try:
+        seconds = writing.parse_amount(share) if share else 0
+    except writing.AmountError:
+        seconds = 0
+    if seconds:
+        end = min(start + round(seconds * rate.nominal), length)
+    return {
+        "date": date,
+        "start": timecode.format_timecode(tc_in + start, rate),
+        "end": timecode.format_timecode(tc_in + end, rate),
+    }
+
+
 @role_required(Role.EDITOR)
 @require_http_methods(["GET", "POST"])
 def log_written(request: HttpRequest, cue_id: int) -> HttpResponse:
-    """Logs how much of a cue was written on a day, or removes the log."""
+    """Logs a stretch of a cue written on a day, or removes a log.
+
+    From starts where the last log ended, so logging carries on; a cue
+    can have several logs a day. Removing one keeps the dialog open.
+    """
     cue = get_object_or_404(
         models.Cue.objects.select_related("project", "status"), pk=cue_id
     )
@@ -265,27 +327,38 @@ def log_written(request: HttpRequest, cue_id: int) -> HttpResponse:
         return redirect("cues:cue", cue.pk)
     data = request.POST if request.method == "POST" else request.GET
     date = _day(data.get("date", ""))
-    found = models.WritingLog.objects.filter(cue=cue, date=date).first()
-    if request.method == "POST":
-        form = schedule_forms.LogWrittenForm(request.POST)
-        if "remove" in request.POST:
-            writing.remove(cue, date, _user(request))
-            return _rescheduled()
+    placed = cue.tc_in is not None and cue.tc_out is not None
+    form = None
+    removed = False
+    if request.method == "POST" and "remove" in request.POST:
+        chosen = request.POST["remove"]
+        entry = cue.writing_logs.filter(
+            pk=int(chosen) if chosen.isdigit() else 0
+        ).first()
+        if entry is not None:
+            writing.remove(entry, _user(request))
+            removed = True
+    elif request.method == "POST" and placed:
+        form = schedule_forms.LogWrittenForm(request.POST, cue=cue)
         if form.is_valid():
-            writing.log(
+            writing.log_stretch(
                 cue,
                 form.cleaned_data["date"],
-                form.cleaned_data["amount"],
+                form.cleaned_data["start"],
+                form.cleaned_data["end"],
                 _user(request),
             )
             return _rescheduled()
-    else:
-        amount = clock(found.seconds) if found else data.get("amount", "")
+    if placed and form is None:
         form = schedule_forms.LogWrittenForm(
-            initial={"date": date, "amount": amount}
+            initial=_log_written_initial(cue, date, data.get("amount", "")),
+            cue=cue,
         )
-    return render(
+    response = render(
         request,
         "cues/dialogs/log_written.html",
-        {"cue": cue, "form": form, "logged": found is not None},
+        {"cue": cue, "form": form, "logged": _logged(cue)},
     )
+    if removed:
+        response["HX-Trigger"] = json.dumps({"schedule:changed": True})
+    return response

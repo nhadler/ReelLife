@@ -94,7 +94,9 @@ class Context:
             picture_options=options,
             sequence=progress.sequence_numbers(project),
             users={u.pk: str(u) for u in User.objects.all()},
-            logged=writing.logged(project.cues.values_list("pk", flat=True)),
+            logged=writing.logged(
+                project.cues.values_list("pk", flat=True), project.rate
+            ),
         )
 
     def tc(self, frames: int | None) -> Json | None:

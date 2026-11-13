@@ -63,7 +63,11 @@ def test_percent_written_follows_log_written(
     assert cue.tc_in is not None and cue.tc_out is not None
     length = timecode.seconds(cue.tc_out - cue.tc_in, project.rate)
     half = int(length) // 2
-    dialog.get_by_label("Written").fill(f"{half // 60}:{half % 60:02d}")
+    dialog.get_by_label("To").fill(
+        timecode.format_timecode(
+            cue.tc_in + half * project.rate.nominal, project.rate
+        )
+    )
     dialog.get_by_role("button", name="Log").click()
     expected = math.floor(half * 100 / float(length))
     expect(cell("1m01")).to_have_text(f"{expected}%")

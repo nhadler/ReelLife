@@ -6,6 +6,16 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Log Written** takes the stretch you wrote as timecodes, From and To,
+  instead of an amount. From starts where your last log ended (else the
+  cue's IN), To at its OUT. A cue can have several logs a day; overlaps
+  count once in the schedule and % Written. The dialog lists the cue's
+  logs, each with Remove. Older logs keep counting as amounts. The AI
+  assistant's `log_written` takes `tc_from` and `tc_to` too, and an
+  amount now adds a log rather than replacing the day's.
+
 ## [1.5.2] - 2026-11-12
 
 ### Fixed

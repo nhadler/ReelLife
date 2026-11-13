@@ -5088,6 +5088,51 @@ button.stats__name:hover,
   margin: 0 0 var(--space);
 }
 
+/* Log Written: Day, From and To side by side; the logs so far below. */
+.log-written__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space);
+}
+
+.log-written__heading {
+  margin: calc(var(--space) * 2) 0 calc(var(--space) * 0.5);
+  color: var(--slate);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.log-written__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.log-written__list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  padding: 0.25rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.log-written__date {
+  min-width: 4.5rem;
+  color: var(--slate);
+}
+
+.log-written__stretch {
+  flex: 1;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 30rem) {
+  .log-written__fields {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Credits on the cue page: what still needs fixing. */
 .share-problems {
   margin: 0 0 var(--space);

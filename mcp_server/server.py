@@ -45,8 +45,8 @@ code only after they approve it. Exports are returned as files.
 
 `schedule` answers "what should I write today?" (or for a range of
 days), `pin_cue` fixes a cue to a day, the rest flowing around it, and
-`log_written` records how much of a cue was written, which the
-schedule counts as done.
+`log_written` records a stretch of a cue written (from and to
+timecodes) or an amount, which the schedule counts as done.
 
 When someone asks how to do something in ReelLife, read `user_guide`
 (the topic list first, then the relevant topic). Use the app's field and

@@ -17,6 +17,7 @@ from django.utils import dateformat
 
 from accounts.models import User
 from cues import models
+from cues import timecode
 from cues.services import history
 from cues.services import summaries
 
@@ -84,14 +85,86 @@ def progress(kind: str, music: float | None, written: int) -> Progress | None:
     return Progress(percent, stage, written, round(music))
 
 
-def logged(cue_ids: Iterable[int]) -> dict[tuple[int, bool], int]:
-    """Seconds logged per cue, split into writing (False) and revising."""
-    totals: dict[tuple[int, bool], int] = defaultdict(int)
-    for cue, revise, seconds in models.WritingLog.objects.filter(
+@dataclasses.dataclass(frozen=True)
+class Coverage:
+    """How much of one kind of work on a cue is logged.
+
+    Attributes:
+        seconds: Logged music: the stretches, overlaps counted once, plus
+            amounts logged without a stretch.
+        end: Frames after the cue's IN where the next log starts: past
+            the furthest stretch, or past the amounts laid end to end.
+    """
+
+    seconds: int
+    end: int
+
+
+# A log's stretch (frames after IN, or None) and seconds.
+Entry = tuple[int | None, int | None, int]
+
+
+def coverage(entries: Iterable[Entry], rate: timecode.Rate) -> Coverage:
+    """What `entries` (one cue, one kind of work) log, at `rate`."""
+    entries = list(entries)
+    stretches = sorted(
+        (start, end)
+        for start, end, _ in entries
+        if start is not None and end is not None
+    )
+    amounts = sum(seconds for start, _, seconds in entries if start is None)
+    frames = 0
+    furthest = 0
+    for start, end in stretches:
+        if end <= furthest:
+            continue
+        frames += end - max(start, furthest)
+        furthest = end
+    seconds = round(timecode.seconds(frames, rate)) + amounts
+    per_second = rate.fps if rate.drop_frame else rate.nominal
+    laid = math.floor(amounts * per_second)
+    return Coverage(seconds, max(furthest, laid))
+
+
+def _entries(
+    cue_ids: Iterable[int],
+) -> dict[tuple[int, bool], list[Entry]]:
+    """Each cue's logs as entries, split into writing and revising."""
+    found: dict[tuple[int, bool], list[Entry]] = defaultdict(list)
+    for cue, revise, start, end, seconds in models.WritingLog.objects.filter(
         cue__in=list(cue_ids)
-    ).values_list("cue", "revise", "seconds"):
-        totals[cue, revise] += seconds
-    return dict(totals)
+    ).values_list("cue", "revise", "start", "end", "seconds"):
+        found[cue, revise].append((start, end, seconds))
+    return found
+
+
+def logged(
+    cue_ids: Iterable[int], rate: timecode.Rate
+) -> dict[tuple[int, bool], int]:
+    """Seconds logged per cue, split into writing (False) and revising.
+
+    Overlapping stretches count once. `rate` is the cues' project's.
+    """
+    return {
+        key: coverage(entries, rate).seconds
+        for key, entries in _entries(cue_ids).items()
+    }
+
+
+def revising(cue: models.Cue) -> bool:
+    """Whether the cue's work now is revising (logged apart)."""
+    return bool(cue.status and cue.status.kind in summaries.REVISE_KINDS)
+
+
+def next_start(cue: models.Cue) -> int:
+    """Frames after the cue's IN where its next log starts."""
+    entries = _entries([cue.pk]).get((cue.pk, revising(cue)), [])
+    return coverage(entries, cue.project.rate).end
+
+
+def logs(cue: models.Cue) -> list[models.WritingLog]:
+    """The cue's logs for its work now, oldest first."""
+    return list(cue.writing_logs.filter(revise=revising(cue)))
 
 
 class AmountError(ValueError):
@@ -122,27 +195,80 @@ def _day(date: datetime.date) -> str:
 def log(
     cue: models.Cue, date: datetime.date, seconds: int, user: User | None
 ) -> None:
-    """Records `seconds` of `cue` written on `date`, replacing that day's."""
-    revise = bool(cue.status and cue.status.kind in summaries.REVISE_KINDS)
+    """Records `seconds` of `cue` written on `date`, without a stretch."""
     label = f"Log {summaries.clock(seconds)} of {cue.number} on {_day(date)}"
     with history.recording(cue.project, label, user):
-        models.WritingLog.objects.update_or_create(
-            cue=cue,
-            date=date,
-            defaults={"seconds": seconds, "revise": revise},
+        models.WritingLog.objects.create(
+            cue=cue, date=date, seconds=seconds, revise=revising(cue)
         )
 
 
-def remove(cue: models.Cue, date: datetime.date, user: User | None) -> bool:
-    """Takes back `date`'s log for `cue`.
+class StretchError(ValueError):
+    """A stretch that isn't inside the cue, or runs backwards."""
+
+
+def log_stretch(
+    cue: models.Cue,
+    date: datetime.date,
+    start: int,
+    end: int,
+    user: User | None,
+) -> models.WritingLog:
+    """Records that `cue` was written from `start` to `end` on `date`.
+
+    Args:
+        cue: The cue, with an IN and OUT.
+        date: The day it was written.
+        start: Frames after the cue's IN.
+        end: Frames after the cue's IN, past `start`.
+        user: Who logged it, for History.
+
+    Raises:
+        StretchError: The cue has no IN and OUT, or the stretch isn't
+            inside them or runs backwards.
+    """
+    if cue.tc_in is None or cue.tc_out is None:
+        raise StretchError(f"Give {cue.number} an IN and OUT first.")
+    if not 0 <= start < end <= cue.tc_out - cue.tc_in:
+        raise StretchError(
+            "Pick a stretch inside the cue's IN and OUT, From before To."
+        )
+    rate = cue.project.rate
+    seconds = round(timecode.seconds(end - start, rate))
+    shown = " to ".join(
+        timecode.format_timecode(cue.tc_in + frames, rate)
+        for frames in (start, end)
+    )
+    label = f"Log {shown} of {cue.number} on {_day(date)}"
+    with history.recording(cue.project, label, user):
+        return models.WritingLog.objects.create(
+            cue=cue,
+            date=date,
+            seconds=seconds,
+            start=start,
+            end=end,
+            revise=revising(cue),
+        )
+
+
+def remove(entry: models.WritingLog, user: User | None) -> None:
+    """Takes back one log."""
+    cue = entry.cue
+    label = f"Remove {cue.number}'s log on {_day(entry.date)}"
+    with history.recording(cue.project, label, user):
+        entry.delete()
+
+
+def remove_day(cue: models.Cue, date: datetime.date, user: User | None) -> int:
+    """Takes back every log of `cue` on `date`.
 
     Returns:
-        Whether there was one.
+        How many there were.
     """
-    found = models.WritingLog.objects.filter(cue=cue, date=date).first()
-    if found is None:
-        return False
-    label = f"Remove {cue.number}'s log on {_day(date)}"
-    with history.recording(cue.project, label, user):
-        found.delete()
-    return True
+    found = list(models.WritingLog.objects.filter(cue=cue, date=date))
+    if found:
+        label = f"Remove {cue.number}'s logs on {_day(date)}"
+        with history.recording(cue.project, label, user):
+            for entry in found:
+                entry.delete()
+    return len(found)

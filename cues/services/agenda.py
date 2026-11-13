@@ -20,6 +20,7 @@ from cues import models
 from cues import timecode
 from cues.services import scheduler
 from cues.services import summaries
+from cues.services import writing
 
 _PRIORITY = {
     models.Priority.HIGH: 0,
@@ -253,17 +254,23 @@ def _calendar(
 def _written(rows: Iterable[dict[str, Any]]) -> dict[int, int]:
     """Seconds logged for each cue, for the kind of work it has now.
 
-    Writing logs don't count toward revisions, nor the other way round.
+    Writing logs don't count toward revisions, nor the other way round;
+    overlapping stretches count once (writing.logged).
     """
+    rows = list(rows)
     revising = {
         row["id"]: row["status__kind"] in summaries.REVISE_KINDS for row in rows
     }
-    written: dict[int, int] = defaultdict(int)
-    for cue, revise, seconds in models.WritingLog.objects.filter(
-        cue__in=list(revising)
-    ).values_list("cue", "revise", "seconds"):
-        if revise == revising[cue]:
-            written[cue] += seconds
+    by_project: dict[int, list[int]] = defaultdict(list)
+    for row in rows:
+        by_project[row["project_id"]].append(row["id"])
+    written: dict[int, int] = {}
+    for project in models.Project.objects.filter(pk__in=list(by_project)):
+        for (cue, revise), seconds in writing.logged(
+            by_project[project.pk], project.rate
+        ).items():
+            if revise == revising[cue]:
+                written[cue] = seconds
     return written
 
 
@@ -320,7 +327,7 @@ def _logged(
     for date, cue, seconds in models.WritingLog.objects.filter(
         date__lte=today, date__gte=today - datetime.timedelta(days=PAST_DAYS)
     ).values_list("date", "cue", "seconds"):
-        logged[date][cue] = seconds
+        logged[date][cue] = logged[date].get(cue, 0) + seconds
     return dict(logged)
 
 

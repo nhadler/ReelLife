@@ -61,12 +61,17 @@ the coming days rather than marked late.
 
 To tell the schedule how far you got, use **Log Written…** beside a cue
 in today's or a past day's list, **Log Written** in the grid's toolbar
-with one cue ticked, the cue page's ⋯ menu, or the grid's right-click
-menu: the day, and how much music you wrote, as
-m:ss or minutes. It starts filled in with what was planned. The days
-ahead then plan only what's left, though at least one Smallest Share
-stays until you mark the cue composed. Logging the same cue and day
-again replaces it; **Remove** takes it back, and so does **Undo**.
+with one cue ticked, the cue page's ⋯ menu, the grid's right-click
+menu, or a click on the cue's **% Written**: the day, and the stretch
+you wrote, **From** and **To** as timecodes. From starts at the cue's
+IN, or where your last log ended, so logging carries on; To starts at
+the cue's OUT (from a day's list, at what was planned that day). Change
+either. A cue can have several logs a day, and where they overlap the
+music counts once. The days ahead then plan only what's left, though at
+least one Smallest Share stays until you mark the cue composed.
+
+The dialog lists the cue's logs so far; **Remove** beside one takes it
+back, and so does **Undo**. A cue needs an IN and OUT to log stretches.
 
 Only logged work counts: a planned day you didn't log just leaves the
 work in the queue. Writing and revising are logged apart, so a cue sent

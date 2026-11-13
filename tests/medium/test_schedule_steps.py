@@ -15,6 +15,7 @@ from accounts.models import User
 from cues import models
 from cues.services import agenda
 from cues.services import history
+from cues.services import writing
 from tests import factories
 
 pytestmark = pytest.mark.django_db
@@ -313,45 +314,80 @@ def test_the_records_read_as_text(
 # Logging what was written
 
 
-def test_log_written_logs_replaces_removes_and_undoes(
+def test_log_written_logs_stretches_and_carries_on(
     editor: Client, film: models.Project
 ) -> None:
     cue = _cue(film, "1m01", 10, models.StatusKind.IN_PROGRESS)
     url = reverse("cues:log_written", args=[cue.pk])
-    form = editor.get(
-        url, {"date": "2026-11-01", "amount": "2:30"}, headers=HX
-    ).content.decode()
-    assert 'value="2026-11-01"' in form and 'value="2:30"' in form
-    assert "Remove" not in form
-    editor.post(url, {"date": "2026-11-01", "amount": "2:30"}, headers=HX)
-    log = models.WritingLog.objects.get()
-    assert (log.date, log.seconds, log.revise) == (MON - _DAY, 150, False)
-    latest = models.ChangeSet.objects.filter(project=film).latest("pk")
-    assert latest.label == "Log 2:30 of 1m01 on Nov 1"
-    # The dialog then shows that day's log, and logging again replaces it.
-    again = editor.get(url, {"date": "2026-11-01"}, headers=HX)
-    assert 'value="2:30"' in again.content.decode()
-    assert "Remove" in again.content.decode()
-    editor.post(url, {"date": "2026-11-01", "amount": "1.5"}, headers=HX)
-    assert models.WritingLog.objects.get().seconds == 90
-    history.undo(models.ChangeSet.objects.filter(project=film).latest("pk"))
-    assert models.WritingLog.objects.get().seconds == 150
+    # From the cue's IN to its OUT, or a planned share from the Schedule.
+    form = editor.get(url, {"date": "2026-11-01"}, headers=HX).content
+    assert b'value="1:00:00:00"' in form and b'value="1:10:00:00"' in form
+    assert b"Logged" not in form
+    shared = editor.get(url, {"amount": "2:30"}, headers=HX).content
+    assert b'value="1:02:30:00"' in shared
     editor.post(
-        url, {"date": "2026-11-01", "amount": "", "remove": "1"}, headers=HX
+        url,
+        {"date": "2026-11-01", "start": "1:00:00:00", "end": "1:02:30:00"},
+        headers=HX,
     )
-    assert not models.WritingLog.objects.exists()
+    log = models.WritingLog.objects.get()
+    assert (log.date, log.seconds, log.start, log.end, log.revise) == (
+        MON - _DAY,
+        150,
+        0,
+        150 * 24,
+        False,
+    )
+    latest = models.ChangeSet.objects.filter(project=film).latest("pk")
+    assert latest.label == "Log 1:00:00:00 to 1:02:30:00 of 1m01 on Nov 1"
+    # The next log starts where that one ended, and lists it.
+    again = editor.get(url, {"date": "2026-11-01"}, headers=HX).content
+    assert b'value="1:02:30:00"' in again
+    assert b"1:00:00:00 to 1:02:30:00" in again and b"Remove" in again
+    # Several a day; an overlap counts once.
+    for stretch in (("1:02:30:00", "1:05:00:00"), ("1:04:00:00", "1:06:00:00")):
+        editor.post(
+            url,
+            {"date": "2026-11-01", "start": stretch[0], "end": stretch[1]},
+            headers=HX,
+        )
+    assert models.WritingLog.objects.count() == 3
+    assert writing.logged([cue.pk], film.rate) == {(cue.pk, False): 360}
+    assert writing.next_start(cue) == 6 * 60 * 24
+    # Remove takes off one log and keeps the dialog open; Undo puts it back.
+    response = editor.post(url, {"remove": str(log.pk)}, headers=HX)
+    assert response.status_code == 200
+    assert json.loads(response["HX-Trigger"]) == {"schedule:changed": True}
+    assert b"Log Written: 1m01" in response.content
+    assert models.WritingLog.objects.count() == 2
+    history.undo(models.ChangeSet.objects.filter(project=film).latest("pk"))
+    assert models.WritingLog.objects.count() == 3
     # Removing a log that isn't there does nothing.
     count = models.ChangeSet.objects.count()
-    editor.post(url, {"date": "2026-11-01", "remove": "1"}, headers=HX)
+    for missing in ("999999", "x"):
+        editor.post(url, {"remove": missing}, headers=HX)
     assert models.ChangeSet.objects.count() == count
 
 
 @pytest.mark.parametrize(
     ("data", "error"),
     [
-        ({"date": "2026-11-03", "amount": "1:00"}, "today or an earlier day"),
-        ({"date": "2026-11-02", "amount": "lots"}, "Enter an amount"),
-        ({"date": "2026-11-02", "amount": "1:75"}, "under 60"),
+        (
+            {"date": "2026-11-03", "start": "1:00:00:00", "end": "1:01:00:00"},
+            "today or an earlier day",
+        ),
+        (
+            {"date": "2026-11-02", "start": "lots", "end": "1:01:00:00"},
+            "timecode",
+        ),
+        (
+            {"date": "2026-11-02", "start": "1:02:00:00", "end": "1:01:00:00"},
+            "From before To",
+        ),
+        (
+            {"date": "2026-11-02", "start": "1:09:00:00", "end": "1:12:00:00"},
+            "Pick a stretch from 1:00:00:00 to 1:10:00:00",
+        ),
     ],
 )
 def test_log_written_refuses(
@@ -364,13 +400,67 @@ def test_log_written_refuses(
     assert not models.WritingLog.objects.exists()
 
 
+def test_log_written_needs_in_and_out(
+    editor: Client, film: models.Project
+) -> None:
+    cue = _cue(film, "1m01", 10)
+    cue.tc_in = cue.tc_out = None
+    cue.save(update_fields=["tc_in", "tc_out"])
+    url = reverse("cues:log_written", args=[cue.pk])
+    page = editor.get(url, headers=HX).content.decode()
+    assert "Give 1m01 an IN and OUT to log what's written." in page
+    assert 'name="start"' not in page
+    editor.post(url, {"start": "1:00:00:00", "end": "1:01:00:00"}, headers=HX)
+    assert not models.WritingLog.objects.exists()
+    with pytest.raises(writing.StretchError):
+        writing.log_stretch(cue, MON, 0, 24, None)
+
+
+def test_log_written_starts_again_for_revisions_and_after_out(
+    editor: Client, film: models.Project
+) -> None:
+    cue = _cue(film, "1m01", 2, models.StatusKind.IN_PROGRESS)
+    url = reverse("cues:log_written", args=[cue.pk])
+    editor.post(
+        url,
+        {"date": "2026-11-02", "start": "1:00:00:00", "end": "1:02:00:00"},
+        headers=HX,
+    )
+    # Logged to OUT: the next log starts from IN again.
+    assert b'value="1:00:00:00"' in editor.get(url, headers=HX).content
+    # In revisions, revision logs start from IN, apart from the writing.
+    cue.status = film.statuses.filter(kind=models.StatusKind.REDO).first() or (
+        factories.StatusOptionFactory.create(
+            project=film, kind=models.StatusKind.REDO
+        )
+    )
+    cue.save(update_fields=["status"])
+    page = editor.get(url, headers=HX).content
+    assert b'value="1:00:00:00"' in page and b"Logged" not in page
+    with pytest.raises(writing.StretchError):
+        writing.log_stretch(cue, MON, 24, 24, None)
+
+
+def test_log_written_lists_an_older_amount(
+    editor: Client, film: models.Project
+) -> None:
+    cue = _cue(film, "1m01", 10)
+    # Logged before stretches: an amount, taken to run on from IN.
+    models.WritingLog.objects.create(cue=cue, date=MON - _DAY, seconds=90)
+    url = reverse("cues:log_written", args=[cue.pk])
+    page = editor.get(url, headers=HX).content.decode()
+    assert "1:30 written" in page
+    assert 'value="1:01:30:00"' in page
+
+
 def test_log_written_defaults_to_today(
     editor: Client, film: models.Project
 ) -> None:
     cue = _cue(film, "1m01", 10)
     url = reverse("cues:log_written", args=[cue.pk])
-    form = editor.get(url, {"date": "x"}, headers=HX).content.decode()
-    assert 'value="2026-11-02"' in form
+    form = editor.get(url, {"date": "x", "amount": "lots"}, headers=HX)
+    assert b'value="2026-11-02"' in form.content
+    assert b'value="1:10:00:00"' in form.content  # a bad share: to OUT
     assert editor.get(url)["Location"] == reverse("cues:cue", args=[cue.pk])
 
 
