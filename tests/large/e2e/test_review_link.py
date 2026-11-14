@@ -65,6 +65,18 @@ def _watch(page: Any, url: str, name: str = "Dana Director") -> None:
     page.goto(url)
     page.get_by_label("Your Name").fill(name)
     page.get_by_role("button", name="Watch").click()
+    _ready(page)
+
+
+def _ready(page: Any) -> None:
+    """Waits until the review page's scripts have run.
+
+    A test types faster than anyone could: before then Enter would only
+    break the line, and Send would post the form the plain way.
+    """
+    page.wait_for_url("**/review/*/")
+    page.wait_for_load_state("load")
+    expect(page.locator("#review-time")).not_to_be_empty()
 
 
 def _cue_with_video() -> models.Cue:
@@ -221,6 +233,7 @@ def test_replies_and_an_editor_resolving_on_the_review_page(
     _dropbox(page)
     sign_in_as("Casey Composer")
     page.goto(f"{app}/review/{link.token}/")
+    _ready(page)
     listed = page.locator(".review-comment")
     expect(listed).to_contain_text("Too busy")
     # Reply turns the comment box into a reply, under the user's own name.
@@ -279,6 +292,7 @@ def test_a_password_then_a_video_that_cannot_play(
     page.get_by_role("button", name="Open").click()
     page.get_by_label("Your Name").fill("Dana")
     page.get_by_role("button", name="Watch").click()
+    _ready(page)
     expect(page.get_by_role("heading", name="1m01")).to_be_visible()
     # The page says the video can't play, and comments still work.
     expect(page.get_by_role("alert")).to_contain_text(

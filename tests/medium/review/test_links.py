@@ -408,6 +408,9 @@ def test_wrong_passwords_are_limited_per_link(
     cue: models.Cue, link: models.ReviewLink
 ) -> None:
     review.set_password(link, "strings42")
+    # Each link's hour starts at its own offset (from its token), so a
+    # fixed token keeps the ten minutes below inside one hour.
+    link.token = "a-token-whose-hour-is-known"
     link.save()
     unlock = reverse("cues:review_unlock", args=[link.token])
     with freezegun.freeze_time("2026-11-13 18:00:30") as clock:
