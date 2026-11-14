@@ -1,0 +1,18 @@
+{# Who a comment is from: a signed-in user's own name, else the guest's, asked once and kept for the session. #}
+<div class="review-name" id="review-name"{% if oob %} hx-swap-oob="true"{% endif %}>
+  {% if member %}
+    <p class="review-name__as">Commenting as <strong>{{ member.get_full_name|default:member.username }}</strong></p>
+  {% elif guest_name %}
+    <p class="review-name__as">Commenting as <strong>{{ guest_name }}</strong>
+      <button class="button button--quiet button--small" type="button" data-review-rename>Change</button></p>
+    <div class="field" hidden>
+      <label for="review-name-input">Your Name</label>
+      <input id="review-name-input" type="text" name="name" value="{{ guest_name }}" maxlength="{{ max_name }}" required autocomplete="name">
+    </div>
+  {% else %}
+    <div class="field">
+      <label for="review-name-input">Your Name</label>
+      <input id="review-name-input" type="text" name="name" maxlength="{{ max_name }}" required autocomplete="name">
+    </div>
+  {% endif %}
+</div>

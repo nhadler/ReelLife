@@ -41,6 +41,7 @@ from cues.services import cue_history
 from cues.services import history
 from cues.services import progress
 from cues.services import thumbnails
+from cues.views import review as review_views
 from cues.views import shares as share_views
 from cues.views.imports import _limit as _limit_uploads
 
@@ -239,6 +240,7 @@ def cue_detail(request: HttpRequest, cue_id: int) -> HttpResponse:
             "thumbnail_url": grid.cue_thumbnail_url(cue),
             "can_edit": _can_edit(request),
             **share_views.shares_context(cue),
+            **review_views.panel_context(request, cue, selected),
             "page_config": {
                 "projectUrl": reverse("cues:project", args=[cue.project_id]),
                 # Copy JSON describes the version on screen.

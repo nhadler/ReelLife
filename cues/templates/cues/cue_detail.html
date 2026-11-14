@@ -7,6 +7,7 @@
 
 {% block scripts %}
   <script src="{% static 'cues/cue.js' %}" type="module"></script>
+  <script src="{% static 'cues/copy-link.js' %}" type="module"></script>
 {% endblock %}
 
 {% block content %}
@@ -89,6 +90,7 @@
       <nav class="cue-index" aria-label="Sections">
         <a href="#group-cue">Cue</a>
         <a href="#group-version">Version</a>
+        <a href="#group-review">Review</a>
         <a href="#group-picture">Picture</a>
         <a href="#group-spotting">Spotting</a>
         <a href="#group-sheet">Cue Sheet</a>
@@ -167,6 +169,8 @@
           <p class="muted">No versions yet.</p>
         {% endif %}
       </section>
+
+      {% include "cues/details/review.html" %}
 
       <section class="details-group" aria-labelledby="group-picture">
         <h2 class="details-group__title" id="group-picture">Current Picture</h2>

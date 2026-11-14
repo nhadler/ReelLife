@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{# A review link's pages: for a guest, so no top bar and nothing of the app but the wordmark. #}
+
+{% block page_class %}review{% endblock %}
+
+{% block scripts %}
+  <meta name="robots" content="noindex, nofollow">
+  {% block review_scripts %}{% endblock %}
+{% endblock %}
+
+{% block content %}
+  <header class="review-head">
+    <p class="review-head__mark"><span class="wordmark__reel">Reel</span>Time</p>
+    {% block review_head %}{% endblock %}
+  </header>
+  {% block review %}{% endblock %}
+{% endblock %}

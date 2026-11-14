@@ -1,0 +1,18 @@
+{% extends "cues/review/base.html" %}
+{# A review link with a password: asked once per browser session. #}
+
+{% block title %}Review Link · ReelTime{% endblock %}
+
+{% block review %}
+  <form class="notice review-lock" method="post" action="{% url 'cues:review_unlock' link.token %}">
+    {% csrf_token %}
+    <h1>Enter the Password</h1>
+    <div class="field">
+      <label for="review-password">Password</label>
+      <input id="review-password" type="password" name="password" required autofocus autocomplete="off"
+             {% if error %}aria-invalid="true" aria-describedby="review-password-error"{% endif %}>
+      {% if error %}<ul class="errorlist" id="review-password-error"><li>{{ error }}</li></ul>{% endif %}
+    </div>
+    <button class="button" type="submit">Open</button>
+  </form>
+{% endblock %}

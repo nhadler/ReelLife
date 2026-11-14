@@ -19,6 +19,7 @@ from cues.views import picture
 from cues.views import project_notes
 from cues.views import project_settings
 from cues.views import projects
+from cues.views import review
 from cues.views import schedule
 from cues.views import search
 from cues.views import settings
@@ -331,6 +332,29 @@ urlpatterns = [
         "calendar/<str:token>.ics",
         calendar_feed.feed,
         name="calendar",
+    ),
+    path("review/<str:token>/", review.page, name="review"),
+    path("review/<str:token>/unlock/", review.unlock, name="review_unlock"),
+    path(
+        "review/<str:token>/comments/",
+        review.comments,
+        name="review_comments",
+    ),
+    path("cues/<int:cue_id>/review/", review.panel, name="cue_review"),
+    path(
+        "cues/<int:cue_id>/review-link/",
+        review.link_settings,
+        name="review_link",
+    ),
+    path(
+        "cues/<int:cue_id>/review-link/create/",
+        review.create,
+        name="review_create",
+    ),
+    path(
+        "review-comments/<int:comment_id>/delete/",
+        review.delete_comment,
+        name="review_comment_delete",
     ),
     path("credits/", shares.credits_page, name="credits"),
     path("credits/undo/", shares.credits_undo, name="credits_undo"),

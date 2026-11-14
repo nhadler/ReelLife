@@ -1,0 +1,11 @@
+{% extends "cues/review/base.html" %}
+{# An unknown, revoked or expired review link (404). #}
+
+{% block title %}Review Link · ReelTime{% endblock %}
+
+{% block review %}
+  <section class="notice">
+    <h1>This Link Doesn't Work</h1>
+    <p>It may have expired or been replaced. Ask whoever sent it for a new one.</p>
+  </section>
+{% endblock %}

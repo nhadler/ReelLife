@@ -31,6 +31,8 @@ _CUE_FIELD = {
     models.CueShare: "cue_id",
     models.CueInstrument: "cue_id",
 }
+# Tracked models that name a version instead; its cue is looked up.
+_BY_VERSION = (models.VersionTheme, models.ReviewComment)
 
 
 @dataclasses.dataclass
@@ -122,12 +124,10 @@ def _touched(
     """
     last: dict[tuple[Any, int], dict[int, int]] = defaultdict(dict)
     cues: dict[int, set[int]] = defaultdict(set)
-    themes: list[tuple[int, int]] = []
+    versioned: list[tuple[int, int]] = []
     for model in history.TRACKED:
         cue_field = _CUE_FIELD.get(model)
-        extra = cue_field or (
-            "version_id" if model is models.VersionTheme else "id"
-        )
+        extra = cue_field or ("version_id" if model in _BY_VERSION else "id")
         rows = _history(model).filter(change_set_id__in=ids)
         for cs_id, pk, history_id, related in rows.values_list(
             "change_set_id", "id", "history_id", extra
@@ -136,16 +136,16 @@ def _touched(
             sets[cs_id] = max(sets.get(cs_id, 0), history_id)
             if cue_field:
                 cues[cs_id].add(related)
-            elif model is models.VersionTheme:
-                themes.append((cs_id, related))
+            elif model in _BY_VERSION:
+                versioned.append((cs_id, related))
     version_cues: dict[int, int] = {}
-    for chunk in _chunks(version for _, version in themes):
+    for chunk in _chunks(version for _, version in versioned):
         version_cues.update(
             _history(models.CueVersion)
             .filter(id__in=chunk)
             .values_list("id", "cue_id")
         )
-    for cs_id, version in themes:
+    for cs_id, version in versioned:
         cues[cs_id].add(version_cues[version])
     return last, cues
 

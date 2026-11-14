@@ -6,6 +6,26 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Review links.** A cue's page has a **Review** section that makes a
+  link for someone without an account: they watch the cue's bounce
+  against its timecode and comment on the frame on screen or on the
+  whole cue. The video is each version's **File Link** when that is a
+  Dropbox link to a single file; ReelTime doesn't hold video. The same
+  link follows new versions, and comments stay with the version they
+  were made on. A link can have a password and a last day, can be
+  closed to comments and can be revoked. Comments show on the cue's
+  page and in Activity, where they undo. See Help, Review Links.
+
+### Security
+
+- The review page, and only it, may load video from `www.dropbox.com`
+  and `*.dropboxusercontent.com` (`media-src`). It and what it posts to
+  are reachable without signing in, by the link's secret address:
+  rate-limited per client address, password tries per link as well, and
+  never cached or indexed.
+
 ## [2.0.1] - 2026-11-13
 
 ### Fixed

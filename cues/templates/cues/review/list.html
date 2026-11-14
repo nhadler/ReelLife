@@ -1,0 +1,27 @@
+{# A version's comments on its review page: on the whole version first, then by timecode. Refreshed by htmx; after a post it also carries the form's error and name. #}
+{% load text %}
+<h2 class="review-comments__title" id="review-comments-title">Comments{% if comments %} <span class="chip">{{ comments|length }}</span>{% endif %}</h2>
+{% if comments %}
+  <ol class="review-list">
+    {% for item in comments %}
+      <li class="review-comment"{% if item.timecode %} data-frame="{{ item.comment.frame }}" data-summary="{{ item.comment.name }}: {{ item.comment.body|truncatechars:80 }}"{% endif %}>
+        <div class="review-comment__head">
+          {% if item.timecode %}
+            <button class="review-comment__at tc" type="button" data-seek="{{ item.comment.frame }}" aria-label="Go to {{ item.timecode }}">{{ item.timecode }}</button>
+          {% else %}
+            <span class="review-comment__at review-comment__at--overall">Overall</span>
+          {% endif %}
+          <span class="review-comment__name">{{ item.comment.name }}</span>
+          <time class="review-comment__when" datetime="{{ item.comment.created_at.isoformat }}">{{ item.comment.created_at|stamp:short_format }}</time>
+        </div>
+        <p class="review-comment__body">{{ item.comment.body|linebreaksbr }}</p>
+      </li>
+    {% endfor %}
+  </ol>
+{% else %}
+  <p class="review-comments__none muted">No comments yet.</p>
+{% endif %}
+{% if posted %}
+  {% include "cues/review/error.html" with oob=True %}
+  {% include "cues/review/name.html" with oob=True %}
+{% endif %}

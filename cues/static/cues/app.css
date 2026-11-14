@@ -7366,3 +7366,397 @@ form:has(input[name='confirm']:valid) .backup__restore {
 .share-list__none {
   list-style: none;
 }
+
+/* Review links. The cue page's Review section: the link, then the
+   chosen version's comments. */
+.cue-review__link {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space);
+  align-items: center;
+}
+
+.cue-review__link input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: var(--step--1);
+}
+
+.cue-review__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 calc(var(--space) * 3);
+  margin: var(--space) 0 0;
+  padding: 0;
+  color: var(--slate);
+  font-size: var(--step--1);
+  list-style: none;
+}
+
+.cue-review__warn {
+  color: var(--amber);
+}
+
+.cue-review__comments {
+  margin-top: calc(var(--space) * 2);
+}
+
+/* Comments, on the cue page and the review page. */
+.review-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.review-comment {
+  padding: calc(var(--space) * 1.25) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.review-comment__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space);
+  align-items: baseline;
+}
+
+.review-comment__at {
+  color: var(--accent);
+}
+
+button.review-comment__at {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+button.review-comment__at:hover {
+  text-decoration: underline;
+}
+
+.review-comment__at--overall {
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.review-comment__name {
+  font-weight: 600;
+}
+
+.review-comment__when {
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.review-comment__delete {
+  margin-left: auto;
+}
+
+.review-comment__body {
+  margin: calc(var(--space) * 0.5) 0 0;
+  overflow-wrap: anywhere;
+}
+
+/* The review page, for a guest: the video with the comments beside it. */
+.page.review {
+  max-width: none;
+  padding: calc(var(--space) * 2) calc(var(--space) * 3);
+}
+
+.review-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space) calc(var(--space) * 3);
+  align-items: center;
+  margin-bottom: calc(var(--space) * 2);
+}
+
+.review-head__mark {
+  margin: 0;
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.review-head__title {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 0 calc(var(--space) * 1.5);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.review-head__title h1 {
+  margin: 0;
+  font-size: var(--step-1);
+}
+
+.review-head__title p,
+.review-head__version {
+  margin: 0;
+}
+
+.review-versions {
+  display: flex;
+  gap: calc(var(--space) * 0.5);
+}
+
+.review-versions__item {
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.review-versions__item[aria-current] {
+  border-color: var(--accent);
+  background: var(--panel-raised);
+}
+
+.review-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 22rem;
+  gap: calc(var(--space) * 2);
+  align-items: start;
+}
+
+.review-player {
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: #000;
+}
+
+.review-player__video {
+  display: block;
+  width: 100%;
+  /* Room for the header and the controls, so the page needn't scroll. */
+  height: calc(100dvh - 9.5rem);
+  min-height: 12rem;
+  background: #000;
+  cursor: pointer;
+}
+
+.review-player:fullscreen {
+  display: flex;
+  flex-direction: column;
+  border: 0;
+  border-radius: 0;
+}
+
+.review-player:fullscreen .review-player__video {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+.review-player__error {
+  margin: 0;
+  padding: calc(var(--space) * 2);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.review-player.is-broken .review-player__video {
+  display: none;
+}
+
+.review-controls {
+  display: flex;
+  gap: calc(var(--space) * 0.5);
+  align-items: center;
+  padding: calc(var(--space) * 0.75) var(--space);
+  background: var(--panel);
+}
+
+.icon--solid {
+  fill: currentcolor;
+  stroke: none;
+}
+
+.review-controls__pause,
+.review-player.is-playing .review-controls__play,
+.review-controls__muted,
+.review-player.is-muted .review-controls__sound {
+  display: none;
+}
+
+.review-player.is-playing .review-controls__pause,
+.review-player.is-muted .review-controls__muted {
+  display: inline;
+}
+
+.review-controls__time {
+  min-width: 6.5rem;
+  padding: 0 var(--space);
+  text-align: center;
+}
+
+/* The scrubber, with each timed comment as a mark over its track. The
+   marks sit inside the thumb's travel (half a thumb in at each end). */
+.review-scrub {
+  --thumb: 0.875rem;
+  position: relative;
+  flex: 1;
+  min-width: 4rem;
+}
+
+.review-scrub__range {
+  display: block;
+  width: 100%;
+  height: 1.5rem;
+  margin: 0;
+  background: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.review-scrub__range::-webkit-slider-runnable-track {
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--rule);
+}
+
+.review-scrub__range::-moz-range-track {
+  height: 0.3rem;
+  border-radius: 999px;
+  background: var(--rule);
+}
+
+.review-scrub__range::-webkit-slider-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  margin-top: calc((0.3rem - var(--thumb)) / 2);
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+  appearance: none;
+}
+
+.review-scrub__range::-moz-range-thumb {
+  width: var(--thumb);
+  height: var(--thumb);
+  border: 0;
+  border-radius: 50%;
+  background: var(--ink);
+}
+
+.review-scrub__marks {
+  position: absolute;
+  inset: 0 calc(var(--thumb) / 2);
+  pointer-events: none;
+}
+
+.review-scrub__mark {
+  position: absolute;
+  top: 0;
+  left: calc(var(--at) * 100%);
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--amber);
+  transform: translateX(-50%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.review-comments {
+  position: sticky;
+  top: calc(var(--space) * 2);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 6rem);
+  padding: calc(var(--space) * 2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.review-comments__list {
+  flex: 1;
+  min-height: 4rem;
+  overflow-y: auto;
+}
+
+.review-comments__title {
+  margin-bottom: var(--space);
+  font-size: var(--step-0);
+}
+
+.review-comments .review-comment:first-child {
+  border-top: 0;
+}
+
+.review-comment.is-current {
+  margin-inline: calc(var(--space) * -1);
+  padding-inline: var(--space);
+  border-radius: var(--radius);
+  background: var(--panel-raised);
+}
+
+.review-form {
+  display: grid;
+  gap: var(--space);
+  padding-top: calc(var(--space) * 1.5);
+  border-top: 1px solid var(--rule);
+}
+
+.review-form textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.review-name__as {
+  margin: 0;
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.review-form__error {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--step--1);
+}
+
+.review-form__error:empty {
+  display: none;
+}
+
+.review-form__row {
+  display: flex;
+  gap: var(--space);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.review-comments__closed {
+  margin: var(--space) 0 0;
+}
+
+.review-lock {
+  display: grid;
+  gap: calc(var(--space) * 2);
+  justify-items: start;
+}
+
+@media (max-width: 56rem) {
+  .review-body {
+    grid-template-columns: 1fr;
+  }
+
+  .review-player__video {
+    height: auto;
+    max-height: 60dvh;
+  }
+
+  .review-comments {
+    position: static;
+    max-height: none;
+  }
+}

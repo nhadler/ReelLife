@@ -2,10 +2,10 @@
 
 A deleted cue's history ends with its deletion, and the cue no longer
 exists. Restoring it puts back the cue with its versions, shares,
-themes and instrumentation as the deleting action left them, as one
-new change set ("Restore 1m05"), so it works even when later changes
-make undoing that whole action impossible. Deleted turnovers aren't
-covered.
+themes, instrumentation and review comments as the deleting action left
+them, as one new change set ("Restore 1m05"), so it works even when
+later changes make undoing that whole action impossible. Deleted
+turnovers and review links aren't covered.
 """
 
 # pylint: disable=no-member  # simple_history's managers
@@ -232,6 +232,7 @@ def restore(
         version_ids = [row.id for row in versions]
         linked = [
             _history(models.VersionTheme).filter(version_id__in=version_ids),
+            _history(models.ReviewComment).filter(version_id__in=version_ids),
             _history(models.CueInstrument).filter(cue_id=cue_id),
             _history(models.CueShare).filter(cue_id=cue_id),
         ]

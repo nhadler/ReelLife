@@ -327,6 +327,21 @@ class WritingLogAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_filter = ("date",)
 
 
+@admin.register(models.ReviewLink)
+class ReviewLinkAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    """Review links. The token and password hash aren't shown."""
+
+    list_display = ("cue", "expires_on", "comments_open", "last_opened_at")
+    exclude = ("token", "password")
+
+
+@admin.register(models.ReviewComment)
+class ReviewCommentAdmin(SimpleHistoryAdmin):  # type: ignore[misc]
+    """Comments left on a version's review page."""
+
+    list_display = ("version", "name", "member", "frame", "created_at")
+
+
 @admin.register(models.ScheduleEntry)
 class ScheduleEntryAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     """Saved daily plans: a log, read only."""

@@ -18,6 +18,7 @@ ORDER = (
     "getting-started",
     "picture-and-turnovers",
     "cues-and-versions",
+    "review-links",
     "importing",
     "conform",
     "tools",

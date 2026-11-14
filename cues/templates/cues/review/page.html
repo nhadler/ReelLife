@@ -1,0 +1,97 @@
+{% extends "cues/review/base.html" %}
+{% load static %}
+{# The review page: one version's video beside its comments. The player's own controls carry the comments as marks (review.js). #}
+
+{% block title %}{{ cue.number }}{% if cue.title %} {{ cue.title }}{% endif %} · Review · ReelTime{% endblock %}
+
+{% block review_scripts %}
+  {% if shown %}<script src="{% static 'cues/review.js' %}" type="module"></script>{% endif %}
+{% endblock %}
+
+{% block review_head %}
+  <div class="review-head__title">
+    <h1><span class="tc">{{ cue.number }}</span>{% if cue.title %} {{ cue.title }}{% endif %}</h1>
+    <p class="muted">{{ project.title }}</p>
+  </div>
+  {% if versions|length > 1 %}
+    <nav class="review-versions" aria-label="Versions">
+      {% for each in versions %}
+        <a class="review-versions__item" href="?v={{ each.version.label|urlencode:'' }}"{% if each == shown %} aria-current="page"{% endif %}>{{ each.version.label }}{% if each.current %} <span class="chip">Current</span>{% endif %}</a>
+      {% endfor %}
+    </nav>
+  {% elif shown %}
+    <p class="review-head__version"><span class="chip">{{ shown.version.label }}</span></p>
+  {% endif %}
+{% endblock %}
+
+{% block review %}
+  {% if shown %}
+    <div class="review-body">
+      <section class="review-player" id="review-player" aria-label="Video">
+        <video class="review-player__video" id="review-video" src="{{ shown.url }}" preload="metadata" playsinline></video>
+        <p class="review-player__error" id="review-video-error" role="alert" hidden>
+          This video can't be played here. It may have been moved, or this browser doesn't play its format: H.264 video with AAC audio plays everywhere, but Firefox doesn't play uncompressed (PCM) audio.
+          <a href="{{ shown.url }}" rel="noopener noreferrer" target="_blank">Open the File</a>
+        </p>
+        <div class="review-controls">
+          <button class="button button--quiet button--icon" id="review-play" type="button" aria-label="Play" title="Play or pause (Space)">
+            <svg class="icon icon--solid review-controls__play" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M6 4l10 6-10 6z"/></svg>
+            <svg class="icon icon--solid review-controls__pause" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5.5 4h3v12h-3z M11.5 4h3v12h-3z"/></svg>
+          </button>
+          <button class="button button--quiet button--icon" id="review-back" type="button" aria-label="Back one frame" title="Back one frame (←)">
+            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M12.5 5 7.5 10l5 5 M5 5v10"/></svg>
+          </button>
+          <button class="button button--quiet button--icon" id="review-forward" type="button" aria-label="Forward one frame" title="Forward one frame (→)">
+            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M7.5 5l5 5-5 5 M15 5v10"/></svg>
+          </button>
+          <output class="review-controls__time tc" id="review-time" aria-label="Timecode"></output>
+          <div class="review-scrub">
+            <input class="review-scrub__range" id="review-seek" type="range" min="0" max="0" step="1" value="0" aria-label="Position in the video">
+            <div class="review-scrub__marks" id="review-marks" aria-hidden="true"></div>
+          </div>
+          <button class="button button--quiet button--icon" id="review-mute" type="button" aria-label="Mute" aria-pressed="false" title="Mute (M)">
+            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3.5 7.5h3l4-3.5v12l-4-3.5h-3z"/><path class="review-controls__sound" d="M13.5 7a4.5 4.5 0 0 1 0 6 M15.5 4.5a8 8 0 0 1 0 11"/><path class="review-controls__muted" d="M13.5 7.5l4 5 M17.5 7.5l-4 5"/></svg>
+          </button>
+          <button class="button button--quiet button--icon" id="review-full" type="button" aria-label="Full screen" title="Full screen (F)">
+            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M3.5 7.5v-4h4 M12.5 3.5h4v4 M16.5 12.5v4h-4 M7.5 16.5h-4v-4"/></svg>
+          </button>
+        </div>
+      </section>
+
+      <section class="review-comments" aria-labelledby="review-comments-title">
+        <div class="review-comments__list" id="review-list"
+             hx-get="{{ comments_url }}?v={{ shown.version.label|urlencode:'' }}"
+             hx-trigger="every 30s" hx-swap="innerHTML">
+          {% include "cues/review/list.html" %}
+        </div>
+        {% if can_comment %}
+          <form class="review-form" id="review-form" method="post" action="{{ comments_url }}"
+                hx-post="{{ comments_url }}" hx-target="#review-list" hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="v" value="{{ shown.version.label }}">
+            <input type="hidden" name="frame" id="review-frame" value="">
+            {% include "cues/review/name.html" %}
+            <label class="visually-hidden" for="review-body">Comment</label>
+            <textarea id="review-body" name="body" rows="3" maxlength="{{ max_body }}" required placeholder="Leave a comment"></textarea>
+            {% include "cues/review/error.html" %}
+            <div class="review-form__row">
+              <span class="field--check" title="Untick for a comment on the whole cue">
+                <input type="checkbox" id="review-timed" checked>
+                <label for="review-timed">At <span class="tc" id="review-at"></span></label>
+              </span>
+              <button class="button" type="submit" title="Send (Enter)">Send</button>
+            </div>
+          </form>
+        {% else %}
+          <p class="review-comments__closed muted">Comments are closed.</p>
+        {% endif %}
+      </section>
+    </div>
+    {{ player|json_script:"review-config" }}
+  {% else %}
+    <section class="notice">
+      <h1>Nothing to Watch Yet</h1>
+      <p>This cue has no video to review yet.</p>
+    </section>
+  {% endif %}
+{% endblock %}

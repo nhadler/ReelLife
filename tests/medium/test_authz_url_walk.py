@@ -32,6 +32,11 @@ PUBLIC = {
     # The calendar feed: a calendar app can't sign in, so the link's
     # secret token stands for its user (cues.services.feed).
     "cues:calendar",
+    # A review link: its token stands for permission to watch one cue's
+    # bounces and comment on them (cues.services.review).
+    "cues:review",
+    "cues:review_unlock",
+    "cues:review_comments",
 }
 # Pages a viewer may POST to: their own calendar link.
 VIEWER_POSTS = {"cues:calendar_feed"}

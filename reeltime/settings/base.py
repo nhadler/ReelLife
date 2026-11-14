@@ -315,6 +315,13 @@ RATELIMIT_BACKUPS = "10/h"
 # Calendar feeds, per client address: apps refresh every few minutes at
 # most, so this only stops someone guessing links.
 RATELIMIT_CALENDAR = "60/m"
+# Review links, reachable without signing in. Per client address: the
+# page and its comment refreshes, comments posted, and password tries;
+# password tries also per link, whoever makes them.
+RATELIMIT_REVIEW = "120/m"
+RATELIMIT_REVIEW_COMMENTS = "20/m"
+RATELIMIT_REVIEW_UNLOCK = "10/m"
+RATELIMIT_REVIEW_UNLOCK_LINK = "100/h"
 
 # django-ratelimit warns (E003, W001) that the database cache's
 # increments aren't atomic: a burst of concurrent requests can slightly

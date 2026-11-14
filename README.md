@@ -13,6 +13,7 @@ Self-hosted cue tracking and project management for film and TV composers.
 
 - **Cue tracking:** Manage cues across reels in an editable grid, with statuses, timecodes, picture versions, and undo support. Includes separate views for spotting, conforming, orchestration, recording, mixing, and cue sheets. Supports arbitrary frame rates, including drop-frame.
 - **Cue versions:** Keep multiple versions of a cue, each with its own notes, themes, and associated picture.
+- **Review links:** Share a cue's bounce (a Dropbox link) with someone who has no account. They watch it against timecode and leave comments on a frame or on the whole cue.
 - **Import:** Bring in cues from Pro Tools (Session Info as Text, clips, or markers), Cubase, Nuendo, MIDI markers, Excel, or CSV. Review additions and changes before importing.
 - **Conform:** Track cues against picture revisions and shift timecodes by reel when a new cut arrives.
 - **Export:** Generate Excel and CSV cue logs, PDF reports, and RapidCue cue sheets with writer and publisher splits.
