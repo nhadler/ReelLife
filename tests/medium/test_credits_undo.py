@@ -125,3 +125,14 @@ def test_viewers_see_recent_changes_without_undo(
     page = unescape(role_client(Role.VIEWER).get(CREDITS).content.decode())
     assert "Edit credits: add Jane Doe" in page
     assert f'action="{UNDO}"' not in page
+
+
+def test_recent_changes_dont_share_the_grid_timelines_styles(
+    editor: Client,
+) -> None:
+    # The list once used the class names of the grid's timeline strip,
+    # and was drawn with its box, rule and one-line labels.
+    _add_writer(editor, "Ann", "Lee")
+    page = editor.get(CREDITS).content.decode()
+    assert 'class="changes"' in page and "changes__label" in page
+    assert "timeline" not in page

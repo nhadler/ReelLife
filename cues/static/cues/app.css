@@ -6492,19 +6492,21 @@ td.party-table__ipi {
   color: var(--amber);
 }
 
-.timeline {
+/* Recent changes: a short list down a line, newest first. Named apart
+   from the grid's timeline strip, whose styles it once picked up. */
+.changes {
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.timeline__entry {
+.changes__entry {
   position: relative;
   padding: 0 0 var(--space) 1rem;
   border-left: 1px solid var(--rule);
 }
 
-.timeline__entry::before {
+.changes__entry::before {
   position: absolute;
   top: 0.4rem;
   left: -0.25rem;
@@ -6515,23 +6517,23 @@ td.party-table__ipi {
   content: '';
 }
 
-.timeline__entry:first-child::before {
+.changes__entry:first-child::before {
   background: var(--accent);
 }
 
-.timeline__label {
+.changes__label {
   margin: 0;
   font-size: var(--step--1);
   font-weight: 600;
 }
 
-.timeline__entry--undone .timeline__label {
+.changes__entry--undone .changes__label {
   color: var(--slate);
   font-weight: 500;
   text-decoration: line-through;
 }
 
-.timeline__meta {
+.changes__meta {
   margin: 0;
   color: var(--slate);
   font-size: var(--step--1);

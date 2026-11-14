@@ -47,6 +47,9 @@ this project follows [Semantic Versioning](https://semver.org/).
   backup limit could be exceeded by pausing between bursts. Counters
   now last their whole window, and the cache that holds them is no
   longer small enough to be flushed by a flood of requests.
+- Credits, Recent Changes: entries were drawn in a dark box with a
+  rule through them and cut-off labels; they shared class names with
+  the grid's timeline. They wrap and line up again.
 - Undo no longer takes away a version, a cue or a review comment that
   reviewers have commented on or replied to since; it says to delete it
   from its page instead, which undoes with the comments.

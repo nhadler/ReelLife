@@ -74,11 +74,11 @@
     <aside class="credits__side side-card" aria-labelledby="credits-history-title">
       <h2 class="side-card__title" id="credits-history-title">Recent Changes</h2>
       {% if recent %}
-        <ol class="timeline">
+        <ol class="changes">
           {% for entry in recent %}
-            <li class="timeline__entry{% if entry.undone %} timeline__entry--undone{% endif %}">
-              <p class="timeline__label">{{ entry.label }}{% if entry.undone %} <span class="chip">Undone</span>{% endif %}</p>
-              <p class="timeline__meta">{% if entry.user %}{{ entry.user }} · {% endif %}<time datetime="{{ entry.when|date:'c' }}">{{ entry.when|stamp:short_format }}</time></p>
+            <li class="changes__entry{% if entry.undone %} changes__entry--undone{% endif %}">
+              <p class="changes__label">{{ entry.label }}{% if entry.undone %} <span class="chip">Undone</span>{% endif %}</p>
+              <p class="changes__meta">{% if entry.user %}{{ entry.user }} · {% endif %}<time datetime="{{ entry.when|date:'c' }}">{{ entry.when|stamp:short_format }}</time></p>
             </li>
           {% endfor %}
         </ol>
