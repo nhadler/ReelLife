@@ -12,6 +12,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 - Log Written: the list of logs no longer slides under the Log and
   Cancel buttons; it sits above them.
+- A dialog that opens on a date field keeps the focus on it; adding the
+  calendar button had dropped the focus to the page.
 
 ## [2.0.0] - 2026-11-12
 
