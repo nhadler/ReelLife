@@ -46,6 +46,11 @@ The link's settings are under it and save as you change them:
 - **Revoke Link** ends the link for everyone who has it. Comments stay
   on the cue, and a new link has a new address.
 
+A password, a last day and revoking protect the review page. The video
+itself is on Dropbox: anyone who opened the page while it worked could
+have kept the file's Dropbox address. To cut that off as well, stop
+sharing the file in Dropbox.
+
 A reviewer's browser has to reach ReelTime itself, so a link only works
 from where your ReelTime can be opened.
 
@@ -62,7 +67,9 @@ Typing a comment pauses the video. The comment is about the frame on
 screen, shown as **At** with its timecode; untick **At** for a comment
 on the whole cue. Enter sends it. A reviewer gives their name with
 their first comment. Reviewers see each other's comments, and **Reply**
-on a comment answers it.
+on a comment answers it. A guest can type any name; comments from
+someone signed in to ReelTime are marked **Team**, and only those are
+sure to be from who they say.
 
 Each timed comment is a mark on the video's timeline. Clicking a
 comment's timecode, or its mark, goes to that frame.
@@ -70,8 +77,8 @@ comment's timecode, or its mark, goes to that frame.
 ## Working Through the Comments
 
 Open the link yourself while signed in to ReelTime: you skip the
-password, comment under your own name, and editors get two more buttons
-on each comment.
+password and comment under your own name (viewers too), and editors get
+two more buttons on each comment.
 
 - **Resolve** marks a comment dealt with. It stays in the list, faded,
   and its mark on the timeline turns grey. **Reopen** undoes that.

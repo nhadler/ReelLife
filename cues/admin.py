@@ -334,6 +334,11 @@ class ReviewLinkAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     list_display = ("cue", "expires_on", "comments_open", "last_opened_at")
     exclude = ("token", "password")
 
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Links are made on a cue's page, which gives them their token."""
+        del request
+        return False
+
 
 @admin.register(models.ReviewComment)
 class ReviewCommentAdmin(SimpleHistoryAdmin):  # type: ignore[misc]

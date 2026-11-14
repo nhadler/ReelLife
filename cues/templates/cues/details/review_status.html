@@ -1,10 +1,8 @@
 {# What the review link is set to, any errors from the settings just saved, and its Remove Password and Revoke Link buttons. Redrawn after each save. #}
 {% load text %}
 <div class="cue-review__status" id="review-status">
-  {% if review_form.errors %}
-    <ul class="errorlist" role="alert">
-      {% for field in review_form %}{% for error in field.errors %}<li>{{ field.label|title_case }}: {{ error }}</li>{% endfor %}{% endfor %}
-    </ul>
+  {% if review_error %}
+    <ul class="errorlist" role="alert"><li>{{ review_error }} Not saved.</li></ul>
   {% endif %}
   <ul class="cue-review__facts">
     {% if review_expired %}
@@ -14,6 +12,7 @@
     {% endif %}
     <li>{% if review_link.password %}Password set{% else %}No password{% endif %}</li>
     {% if not review_link.comments_open %}<li>Comments closed</li>{% endif %}
+    {% if review_preroll %}<li>Pre-roll <span class="tc">{{ review_preroll }}</span></li>{% endif %}
     <li>{% if review_link.last_opened_at %}Last opened {{ review_link.last_opened_at|stamp:short_format }}{% else %}Not opened yet{% endif %}</li>
     {% if selected %}
       <li>{% if review_notes.0 %}{{ review_notes.0 }} comment{{ review_notes.0|pluralize }} on {{ selected.label }}, {{ review_notes.1 }} open{% else %}No comments on {{ selected.label }} yet{% endif %}</li>

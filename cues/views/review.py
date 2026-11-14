@@ -33,7 +33,9 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST
+from django_ratelimit.core import get_usage
 from django_ratelimit.decorators import ratelimit
+from django_ratelimit.exceptions import Ratelimited
 
 from accounts import roles
 from accounts.authz import role_required
@@ -148,6 +150,7 @@ def _context(
         "max_name": review.MAX_NAME,
         "max_body": review.MAX_BODY,
         "comments_url": reverse("cues:review_comments", args=[link.token]),
+        "stamp": review.stamp(link, shown.version),
     }
 
 
@@ -186,25 +189,51 @@ def page(request: HttpRequest, token: str) -> HttpResponse:
     return _private(render(request, "cues/review/page.html", context))
 
 
+def _too_many_tries(request: HttpRequest, *, count: bool) -> bool:
+    """Whether a link has had its fill of wrong passwords this hour.
+
+    Counted per link, whoever tries, on top of the limit per address.
+    Only wrong tries count (`count` adds one), so reviewers opening the
+    link don't use it up; at the limit nobody gets in until the hour
+    turns.
+    """
+    usage = get_usage(
+        request,
+        group="review-unlock-link",
+        key=_token_key,
+        rate=settings.RATELIMIT_REVIEW_UNLOCK_LINK,
+        method=["POST"],
+        increment=count,
+    )
+    return usage is not None and usage["count"] >= usage["limit"]
+
+
 @login_not_required
 @require_POST
 @_limit("review-unlock", "RATELIMIT_REVIEW_UNLOCK")
-@_limit("review-unlock-link", "RATELIMIT_REVIEW_UNLOCK_LINK", key=_token_key)
 def unlock(request: HttpRequest, token: str) -> HttpResponse:
-    """Takes a link's password; right, the session remembers it."""
+    """Takes a link's password; right, the session remembers it.
+
+    Raises:
+        Ratelimited: The link has had too many wrong passwords.
+    """
     link = review.find(token)
     if link is None:
         return _gone(request)
-    if link.password and not review.check_password(
-        link, request.POST.get("password", "")
-    ):
-        return _private(
-            render(
-                request,
-                "cues/review/locked.html",
-                {"link": link, "error": WRONG_PASSWORD},
+    if link.password:
+        if _too_many_tries(request, count=False):
+            raise Ratelimited
+        if not review.check_password(link, request.POST.get("password", "")):
+            _too_many_tries(request, count=True)
+            return _private(
+                render(
+                    request,
+                    "cues/review/locked.html",
+                    {"link": link, "error": WRONG_PASSWORD},
+                )
             )
-        )
+    # A new session id for the browser that now holds the key.
+    request.session.cycle_key()
     kept = dict(request.session.get(UNLOCKED, {}))
     kept[str(link.pk)] = review.unlock_key(link)
     request.session[UNLOCKED] = kept
@@ -242,8 +271,11 @@ def _parent(
         else None
     )
     if found is None:
-        raise review.ReviewError("That comment isn't there any more.")
+        raise review.ReviewError(GONE)
     return found
+
+
+GONE = "That comment isn't there any more."
 
 
 def _comments(
@@ -258,9 +290,12 @@ def _comments(
     context = _context(request, link, shown)
     context |= {"posted": posted, "error": error}
     response = render(request, "cues/review/list.html", context)
-    if posted and not error:
-        # review.js clears the comment box.
-        response["HX-Trigger"] = json.dumps({"review:posted": True})
+    if posted:
+        # review.js clears the comment box, or drops a reply to a note
+        # that has gone.
+        event = "review:reply-gone" if error == GONE else "review:posted"
+        if not error or error == GONE:
+            response["HX-Trigger"] = json.dumps({event: True})
     return _private(response)
 
 
@@ -268,8 +303,18 @@ def _comments(
 @require_http_methods(["GET", "POST"])
 @_limit("review", "RATELIMIT_REVIEW", method="GET")
 @_limit("review-comment", "RATELIMIT_REVIEW_COMMENTS", method="POST")
+@_limit(
+    "review-comment-link",
+    "RATELIMIT_REVIEW_COMMENTS_LINK",
+    key=_token_key,
+    method="POST",
+)
 def comments(request: HttpRequest, token: str) -> HttpResponse:
-    """A version's comments (the page refreshes them), or adds one."""
+    """A version's comments (the page refreshes them), or adds one.
+
+    A refresh sends the list's stamp and gets 204 while nothing changed,
+    so the page isn't redrawn under someone reading or about to click.
+    """
     link = review.find(token)
     if link is None or _locked(request, link):
         return _gone(request)
@@ -278,6 +323,8 @@ def comments(request: HttpRequest, token: str) -> HttpResponse:
     if shown is None:
         return _gone(request)
     if request.method == "GET":
+        if request.GET.get("stamp") == review.stamp(link, shown.version):
+            return _private(HttpResponse(status=204))
         return _comments(request, link, shown)
     if not link.comments_open:
         return _comments(request, link, shown, posted=True, error=CLOSED)
@@ -318,7 +365,10 @@ def _cue(cue_id: int) -> models.Cue:
 
 def _web_link(text: str) -> str:
     """The text if it's an http(s) URL (safe to link to), else ""."""
-    parts = urllib.parse.urlsplit(text.strip())
+    try:
+        parts = urllib.parse.urlsplit(text.strip())
+    except ValueError:
+        return ""
     return (
         text.strip()
         if parts.scheme in ("http", "https") and parts.netloc
@@ -330,12 +380,8 @@ def panel_context(
     request: HttpRequest,
     cue: models.Cue,
     version: models.CueVersion | None,
-    form: "LinkForm | None" = None,
 ) -> dict[str, Any]:
-    """The Review section's context, for the cue page and its refreshes.
-
-    `form` is the link's settings as just posted, to show their errors.
-    """
+    """The Review section's context, for the cue page and its refreshes."""
     link = models.ReviewLink.objects.filter(cue=cue).first()
     return {
         "cue": cue,
@@ -352,8 +398,12 @@ def panel_context(
         "audio_playable": bool(version and review.play_url(version.audio_link)),
         "file_url": _web_link(version.file_link) if version else "",
         "review_notes": review.note_counts(version) if version else (0, 0),
-        "review_form": form
-        or (LinkForm(link=link) if link and _can_edit(request) else None),
+        "review_form": LinkForm(link=link, version=version)
+        if link and _can_edit(request)
+        else None,
+        "review_preroll": preroll_text(link.preroll, cue.project.rate)
+        if link
+        else "",
         "can_edit": _can_edit(request),
     }
 
@@ -432,24 +482,44 @@ class LinkForm(django_forms.Form):
     )
 
     def __init__(
-        self, *args: Any, link: models.ReviewLink, **kwargs: Any
+        self,
+        *args: Any,
+        link: models.ReviewLink,
+        version: models.CueVersion | None = None,
+        **kwargs: Any,
     ) -> None:
-        """Starts from the link's settings."""
+        """Starts from the link's settings.
+
+        `version` is the one the cue page is showing, sent back with
+        each save so the answer is about the same version.
+        """
         self.link = link
         self.rate = link.cue.project.rate
         kwargs["initial"] = {
             "expires_on": link.expires_on,
             "comments_open": link.comments_open,
-            "preroll": timecode.format_timecode(
-                link.preroll, self.rate, leading_zero=True
-            )
-            if link.preroll
-            else "",
+            "preroll": preroll_text(link.preroll, self.rate),
         }
         super().__init__(*args, **kwargs)
         self.fields["password"].widget.attrs["placeholder"] = (
             "Set. Type a new one to change it." if link.password else "None"
         )
+        # Each field posts itself on change, alone: see link_settings.
+        for name, field in self.fields.items():
+            sent = {"field": name}
+            if version is not None:
+                sent["version"] = str(version.pk)
+            field.widget.attrs |= {
+                "hx-post": reverse("cues:review_link", args=[link.cue_id]),
+                # A date typed digit by digit is a date at each digit.
+                "hx-trigger": "change delay:600ms"
+                if name == "expires_on"
+                else "change",
+                "hx-vals": json.dumps(sent),
+                "hx-target": "#review-status",
+                "hx-swap": "outerHTML",
+                "hx-sync": "#cue-review:queue all",
+            }
 
     def clean_password(self) -> str:
         """Checks a new password's length."""
@@ -479,24 +549,36 @@ class LinkForm(django_forms.Form):
                 "Enter a length like 0:02, or a timecode like 00:00:02:00."
             ) from None
 
-    def save(self) -> None:
-        """Writes the settings to the link."""
-        link, data = self.link, self.cleaned_data
-        if data["password"]:
-            review.set_password(link, data["password"])
-        link.expires_on = data["expires_on"]
-        link.comments_open = data["comments_open"]
-        link.preroll = data["preroll"]
+    def save(self, field: str) -> None:
+        """Writes one setting to the link: the one that was changed."""
+        link, value = self.link, self.cleaned_data[field]
+        if field == "password":
+            if value:
+                review.set_password(link, value)
+        else:
+            setattr(link, field, value)
         link.save()
+
+
+def preroll_text(frames: int, rate: timecode.Rate) -> str:
+    """A pre-roll as it's typed: m:ss for whole seconds, else a timecode."""
+    if not frames:
+        return ""
+    short = timecode.format_duration(frames, rate)
+    if timecode.parse_duration(short, rate) == frames:
+        return short
+    return timecode.format_timecode(frames, rate, leading_zero=True)
 
 
 @role_required(Role.EDITOR)
 @require_POST
 def link_settings(request: HttpRequest, cue_id: int) -> HttpResponse:
-    """Saves the link's settings as they change, or revokes the link.
+    """Saves one of the link's settings, or revokes the link.
 
-    The Review section posts its settings whenever one changes and shows
-    what comes back under them: what the link is set to, and any errors.
+    Each setting posts itself when it changes, naming itself in `field`,
+    and only that one is checked and saved: a mistake in one, or a value
+    another tab shows, never touches the rest. The answer is the status
+    under the settings: what the link is set to now, or the error.
     """
     cue = _cue(cue_id)
     version = _version(cue, request.POST.get("version", ""))
@@ -509,15 +591,20 @@ def link_settings(request: HttpRequest, cue_id: int) -> HttpResponse:
         link.save()
         return _panel(request, cue, version)
     form = LinkForm(request.POST, link=link)
-    saved = form.is_valid()
-    if saved:
-        form.save()
-    context = panel_context(request, cue, version, form)
-    # Only the status is redrawn: the fields stay as typed, so a change
-    # made while this one saves isn't overwritten. A saved password's
-    # field is emptied again.
-    if saved and form.cleaned_data["password"]:
-        context |= {"review_form": LinkForm(link=link), "empty_field": True}
+    field = request.POST.get("field", "")
+    if field not in form.fields:
+        return HttpResponse(status=400)
+    form.is_valid()  # cleans every field; only this one's result is used
+    error = " ".join(str(e) for e in form.errors.get(field, []))
+    if not error:
+        form.save(field)
+    context = panel_context(request, cue, version)
+    context["review_error"] = (
+        f"{form.fields[field].label or 'Password'}: {error}" if error else ""
+    )
+    # Only the status is redrawn, so the other fields stay as typed. A
+    # saved password's field is emptied again.
+    context["empty_field"] = field == "password" and not error
     return render(request, "cues/details/review_status.html", context)
 
 

@@ -146,7 +146,9 @@ def _touched(
             .values_list("id", "cue_id")
         )
     for cs_id, version in versioned:
-        cues[cs_id].add(version_cues[version])
+        # A version with no history (made outside the app) has no cue here.
+        if version in version_cues:
+            cues[cs_id].add(version_cues[version])
     return last, cues
 
 

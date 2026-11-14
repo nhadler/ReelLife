@@ -615,7 +615,8 @@ kbd.palette__detail {
   background: var(--panel);
 }
 
-.notice h1 {
+.notice h1,
+.notice h2 {
   font-size: var(--step-2);
 }
 
@@ -7438,7 +7439,10 @@ button.review-comment__at:hover {
 }
 
 .review-comment__name {
+  min-width: 0;
   font-weight: 600;
+  /* A name with no spaces mustn't widen the page. */
+  overflow-wrap: anywhere;
 }
 
 .review-comment__when {
@@ -7486,8 +7490,10 @@ button.review-comment__at:hover {
 }
 
 .review-head__title h1 {
+  min-width: 0;
   margin: 0;
   font-size: var(--step-1);
+  overflow-wrap: anywhere;
 }
 
 .review-head__title p,
@@ -7497,6 +7503,7 @@ button.review-comment__at:hover {
 
 .review-versions {
   display: flex;
+  flex-wrap: wrap;
   gap: calc(var(--space) * 0.5);
 }
 
@@ -7776,7 +7783,22 @@ button.review-comment__at:hover {
 
 @media (max-width: 56rem) {
   .review-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* On a phone the scrubber gets a row to itself, above the buttons. */
+  .review-controls {
+    flex-wrap: wrap;
+  }
+
+  .review-scrub {
+    flex-basis: 100%;
+    order: -1;
+  }
+
+  .review-controls__time {
+    flex: 1;
+    min-width: 0;
   }
 
   .review-player__video {
@@ -7821,9 +7843,10 @@ button.review-comment__at:hover {
   margin-top: var(--space);
 }
 
-.review-comment.is-resolved > .review-comment__body,
-.review-comment.is-resolved > .review-replies {
-  opacity: 0.6;
+/* Slate rather than faded: faded text falls under readable contrast. */
+.review-comment.is-resolved .review-comment__body,
+.review-comment.is-resolved .review-comment__name {
+  color: var(--slate);
 }
 
 .review-form__replying {
@@ -7902,4 +7925,12 @@ button.review-comment__at:hover {
 /* With the audio player under it, the video gives up that much height. */
 .review-main:has(.review-audio) .review-player__video {
   --below: 4rem;
+}
+
+.review-comments {
+  min-width: 0;
+}
+
+.review-comment__team {
+  font-size: var(--step--1);
 }

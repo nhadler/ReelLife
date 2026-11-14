@@ -1,10 +1,12 @@
-{# The cue page's Review section, under the version's File Link: whether that link plays, the cue's review link and its settings. The settings save as they change; only the status under them is redrawn, so a second change made straight after the first isn't lost. Comments are read on the review page. #}
+{# The cue page's Review section, under the version's File Link: whether that link plays, the cue's review link and its settings. Each setting saves itself when it changes; only the status under them is redrawn, so nothing else being typed is lost. Comments are read on the review page. #}
 {% load text %}
-<div class="cue-review__body" id="cue-review"
-     hx-get="{% url 'cues:cue_review' cue.pk %}{% if selected %}?version={{ selected.pk }}{% endif %}"
-     hx-trigger="review:changed from:body, cues:changed from:body" hx-swap="outerHTML">
+<div class="cue-review__body" id="cue-review">
   {% if selected %}
-    <p class="cue-review__video">
+    {# After a field saves (the File Link, say), this line and the status are fetched again; the settings in between are left alone, so nothing being typed is lost. #}
+    <p class="cue-review__video" id="review-plays"
+       hx-get="{% url 'cues:cue_review' cue.pk %}?version={{ selected.pk }}"
+       hx-trigger="cues:changed from:body" hx-select="#review-plays" hx-select-oob="#review-status"
+       hx-swap="outerHTML">
       {% if review_playable %}
         <span class="cue-review__ok">Plays on the review page.</span>
       {% elif file_link %}
@@ -32,18 +34,12 @@
       <a class="button" href="{{ review_url }}" rel="noopener" target="_blank">Open</a>
     </div>
     {% if review_form %}
-      <form class="cue-review__settings" method="post" action="{% url 'cues:review_link' cue.pk %}" novalidate
-            hx-post="{% url 'cues:review_link' cue.pk %}" hx-trigger="change"
-            hx-target="#review-status" hx-swap="outerHTML" hx-sync="this:queue all">
-        {% csrf_token %}
-        {% if selected %}<input type="hidden" name="version" value="{{ selected.pk }}">{% endif %}
-        <div class="fields">
-          {% include "cues/details/review_password.html" %}
-          {% include "cues/includes/field.html" with field=review_form.expires_on %}
-          {% include "cues/includes/field.html" with field=review_form.preroll %}
-          {% include "cues/includes/field.html" with field=review_form.comments_open %}
-        </div>
-      </form>
+      <div class="fields cue-review__settings">
+        {% include "cues/details/review_password.html" %}
+        {% include "cues/includes/field.html" with field=review_form.expires_on %}
+        {% include "cues/includes/field.html" with field=review_form.preroll %}
+        {% include "cues/includes/field.html" with field=review_form.comments_open %}
+      </div>
     {% endif %}
     {% include "cues/details/review_status.html" %}
   {% elif can_edit %}

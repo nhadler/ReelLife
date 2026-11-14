@@ -289,8 +289,14 @@ NIGHTLY_HOUR_UTC = 3
 # every gunicorn worker shares them without another service.
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        # The database cache, with counters that keep their expiry
+        # (reeltime.cache).
+        "BACKEND": "reeltime.cache.Cache",
         "LOCATION": "reeltime_cache",
+        # Past this many entries the cache drops a third of them, live
+        # rate-limit counters included; Django's 300 is within reach of
+        # someone sending requests from many addresses.
+        "OPTIONS": {"MAX_ENTRIES": 100_000},
     },
 }
 
@@ -316,12 +322,14 @@ RATELIMIT_BACKUPS = "10/h"
 # most, so this only stops someone guessing links.
 RATELIMIT_CALENDAR = "60/m"
 # Review links, reachable without signing in. Per client address: the
-# page and its comment refreshes, comments posted, and password tries;
-# password tries also per link, whoever makes them.
+# page and its comment refreshes, comments posted, and password tries.
 RATELIMIT_REVIEW = "120/m"
 RATELIMIT_REVIEW_COMMENTS = "20/m"
 RATELIMIT_REVIEW_UNLOCK = "10/m"
+# Wrong passwords for one link, whoever tries them.
 RATELIMIT_REVIEW_UNLOCK_LINK = "100/h"
+# Comments on one link, whoever posts them.
+RATELIMIT_REVIEW_COMMENTS_LINK = "120/h"
 
 # django-ratelimit warns (E003, W001) that the database cache's
 # increments aren't atomic: a burst of concurrent requests can slightly

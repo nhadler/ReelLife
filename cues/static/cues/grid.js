@@ -2687,7 +2687,7 @@ function cellMenu(params) {
   showMenu(params.event.clientX, params.event.clientY, [
     {
       label: 'Details',
-      shortcut: 'Enter',
+      shortcut: 'Ctrl+Enter',
       action: () => openCue(cueId),
       disabled: !cueId,
     },

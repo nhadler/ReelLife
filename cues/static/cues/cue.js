@@ -81,7 +81,15 @@ document.addEventListener('keydown', onKey);
 document.body.addEventListener('htmx:afterRequest', (event) => {
   const source = event.detail.elt;
   const isSave = event.detail.requestConfig.verb === 'post';
-  if (!isSave || !source.closest || !source.closest('.details-fields')) {
+  // The review link's settings say what happened under themselves. (By
+  // address: once its button is replaced, htmx names the section here.)
+  const path = event.detail.requestConfig.path || '';
+  if (
+    !isSave ||
+    !source.closest ||
+    !source.closest('.details-fields') ||
+    path.includes('/review-link/')
+  ) {
     return;
   }
   // The server sends cues:changed only when it saved something.

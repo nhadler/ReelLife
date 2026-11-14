@@ -20,9 +20,10 @@ document.addEventListener('click', async (event) => {
     field.select();
     return;
   }
-  const label = button.textContent;
+  // Kept on the button: a second click mustn't take "Copied" for it.
+  button.dataset.label ??= button.textContent;
   button.textContent = 'Copied';
   setTimeout(() => {
-    button.textContent = label;
+    button.textContent = button.dataset.label;
   }, SHOWN_MS);
 });

@@ -14,11 +14,18 @@ section.
 
 from collections.abc import Iterable
 import dataclasses
+import hashlib
+import re
 import secrets
+import unicodedata
 import urllib.parse
 
 from django.contrib.auth import hashers
+from django.db.models import Count
 from django.db.models import F
+from django.db.models import Max
+from django.db.models import Q
+from django.db.models import Sum
 from django.utils import crypto
 from django.utils import timezone
 
@@ -37,10 +44,15 @@ MIN_PASSWORD = 6
 # site, which redirects to its file servers.
 MEDIA_SOURCES = ("https://www.dropbox.com", "https://*.dropboxusercontent.com")
 
+# Unicode categories left out of names: control, format, unassigned,
+# private use, surrogates, and the separators that aren't a plain space.
+_HIDDEN = frozenset({"Cc", "Cf", "Cn", "Co", "Cs", "Zl", "Zp"})
 _DROPBOX = frozenset({"dropbox.com", "www.dropbox.com"})
 _DROPBOX_FILES = "dl.dropboxusercontent.com"
-# Shared folders, which have no single file to play.
-_FOLDERS = ("/scl/fo/", "/sh/")
+# A share link to one file: /scl/fi/<id>/<name> or the older
+# /s/<id>/<name>. Folders, the owner's own pages (/home, /preview) and
+# transfers have nothing a guest's browser can play.
+_SHARED_FILE = re.compile(r"^/(?:scl/fi|s)/[^/]+/[^/]+$")
 
 
 class ReviewError(ValueError):
@@ -50,7 +62,7 @@ class ReviewError(ValueError):
 def play_url(file_link: str) -> str:
     """The address a browser plays a File Link or Audio Link from, or "".
 
-    Only Dropbox links to a single file can be played: the link is
+    Only Dropbox share links to a single file can be played: the link is
     rewritten to ask for the file itself (`raw=1`) rather than Dropbox's
     page about it.
     """
@@ -60,13 +72,17 @@ def play_url(file_link: str) -> str:
         plain = parts.netloc.lower() == host  # no port, no user:password@
     except ValueError:
         return ""
-    if parts.scheme != "https" or not plain or len(parts.path) < 2:
+    if (
+        parts.scheme != "https"
+        or not plain
+        or not _SHARED_FILE.match(parts.path)
+    ):
         return ""
     if host == _DROPBOX_FILES:
         return urllib.parse.urlunsplit(
             ("https", host, parts.path, parts.query, "")
         )
-    if host not in _DROPBOX or parts.path.startswith(_FOLDERS):
+    if host not in _DROPBOX:
         return ""
     query = [
         (key, value)
@@ -256,6 +272,25 @@ def comments(
     ]
 
 
+def stamp(link: models.ReviewLink, version: models.CueVersion) -> str:
+    """Changes whenever what a version's comment list shows would.
+
+    The review page sends the one it has with each refresh, and gets
+    nothing back while it still matches.
+    """
+    found = version.review_comments.aggregate(
+        ids=Sum("pk"),
+        latest=Max("updated_at"),
+        resolved=Count("pk", filter=Q(resolved_at__isnull=False)),
+    )
+    latest = found["latest"].isoformat() if found["latest"] else ""
+    text = (
+        f"{found['ids']}|{latest}|{found['resolved']}|"
+        f"{link.comments_open}|{link.preroll}"
+    )
+    return hashlib.sha256(text.encode()).hexdigest()[:16]
+
+
 def note_counts(version: models.CueVersion) -> tuple[int, int]:
     """A version's notes: how many, and how many aren't resolved."""
     notes = version.review_comments.filter(parent=None)
@@ -285,11 +320,22 @@ def _clean(text: str, limit: int, what: str) -> str:
     return text
 
 
+def _visible(text: str) -> str:
+    """Text without characters that don't show or that reorder others.
+
+    Control and format characters (zero-width spaces, direction
+    overrides) would let a name look blank or read backwards.
+    """
+    return "".join(
+        char for char in text if unicodedata.category(char) not in _HIDDEN
+    )
+
+
 def _name(name: str, user: User | None) -> str:
     """The name a comment shows: the user's own, else the guest's."""
     if user is not None:
         return activity.user_name(user)[:MAX_NAME]
-    return _clean(" ".join(name.split()), MAX_NAME, "your name")
+    return _clean(" ".join(_visible(name).split()), MAX_NAME, "your name")
 
 
 def add_comment(
@@ -329,14 +375,22 @@ def add_comment(
         cue.project.rate
     ):
         raise ReviewError("That time isn't in the video.")
-    if version.review_comments.count() >= MAX_COMMENTS:
-        raise ReviewError(
-            f"{cue.number} {version.label} has {MAX_COMMENTS} comments, "
-            "the most a version takes."
-        )
     what = f"Reply to {parent.name}" if parent else "Comment"
-    label = f"{what} on {cue.number} {version.label} by {shown}"
+    who = shown if user else f"{shown} (guest)"
+    label = f"{what} on {cue.number} {version.label} by {who}"
     with history.recording(cue.project, label, user):
+        # Checked inside the transaction, which holds the write lock: the
+        # note can't be deleted, nor the limit passed, in between.
+        if (
+            parent is not None
+            and not version.review_comments.filter(pk=parent.pk).exists()
+        ):
+            raise ReviewError("That comment isn't there any more.")
+        if version.review_comments.count() >= MAX_COMMENTS:
+            raise ReviewError(
+                f"{cue.number} {version.label} has {MAX_COMMENTS} comments, "
+                "the most a version takes."
+            )
         return models.ReviewComment.objects.create(
             version=version,
             frame=frame,

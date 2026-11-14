@@ -10,6 +10,14 @@
  * screen unless "At" is unticked; Enter sends it, Shift+Enter breaks the
  * line. Reply on a comment turns the box into a reply to it. Clicking a
  * comment's timecode or its mark goes to its frame.
+ *
+ * A version can also have its audio alone, in a small player under the
+ * video; playing one pauses the other, and a comment made while
+ * listening to the audio is about the whole cue.
+ *
+ * This script runs after the video has started loading, so whatever it
+ * listens for (the length arriving, an error) may already have happened:
+ * each is also checked once at the end.
  */
 
 const config = JSON.parse(document.getElementById('review-config').textContent);
@@ -23,6 +31,10 @@ const marks = document.getElementById('review-marks');
 const time = document.getElementById('review-time');
 const list = document.getElementById('review-list');
 const form = document.getElementById('review-form');
+// A frame asked for before the video's length was known.
+let pending = null;
+// Whether the audio-only player was the last thing played.
+let listening = false;
 
 /**
  * A frame count as a timecode label, e.g. 1:02:14:08, with ';' before
@@ -62,26 +74,46 @@ function frameAt(seconds) {
   return Math.max(0, Math.floor(seconds * FPS + 0.01));
 }
 
+/** @return {boolean} Whether the video's length is known yet. */
+function known() {
+  return Number.isFinite(video.duration) && video.duration > 0;
+}
+
 /** @return {number} The video's last frame (0 until its length is known). */
 function lastFrame() {
-  return Number.isFinite(video.duration)
-    ? Math.max(0, frameAt(video.duration) - 1)
-    : 0;
+  return known() ? Math.max(0, frameAt(video.duration) - 1) : 0;
+}
+
+/**
+ * The frame on screen: never past the last one, where the video rests
+ * when it ends.
+ * @return {number}
+ */
+function position() {
+  const frame = frameAt(video.currentTime);
+  return known() ? Math.min(frame, lastFrame()) : frame;
 }
 
 /**
  * Shows a frame: the middle of it, so rounding can't land on the one
- * before.
+ * before. Before the video's length is known the frame is kept and
+ * shown once it is.
  * @param {number} frame
  */
 function show(frame) {
+  listening = false;
+  showAt();
+  if (!known()) {
+    pending = Math.max(0, frame);
+    return;
+  }
   const target = Math.min(Math.max(0, frame), lastFrame());
   video.currentTime = (target + 0.5) / FPS;
 }
 
 /** Updates the timecode, the scrubber and the comment box's "At". */
 function update() {
-  const frame = frameAt(video.currentTime);
+  const frame = pending ?? position();
   const text = label(config.firstFrame + frame);
   if (time.value !== text) {
     time.value = text;
@@ -168,27 +200,52 @@ function fullScreen() {
  */
 function step(frames) {
   video.pause();
-  show(frameAt(video.currentTime) + frames);
+  show((pending ?? position()) + frames);
+  update();
 }
 
-video.addEventListener('loadedmetadata', () => {
+/** The video's length is known (or has changed): size what depends on it. */
+function sized() {
+  if (!known()) {
+    return;
+  }
   seek.max = String(lastFrame());
   drawMarks();
+  if (pending !== null) {
+    const frame = pending;
+    pending = null;
+    show(frame);
+  }
   update();
-});
+}
+
+/** Shows or hides the comment box's "At": only the video has frames. */
+function showAt() {
+  const field = document.getElementById('review-timed-field');
+  if (field) {
+    field.hidden =
+      listening ||
+      player.classList.contains('is-broken') ||
+      Boolean(document.getElementById('review-parent').value);
+  }
+}
+
+/** The video can't play: say so, with nothing to comment "at". */
+function broken() {
+  document.getElementById('review-video-error').hidden = false;
+  player.classList.add('is-broken');
+  showAt();
+}
+
+video.addEventListener('loadedmetadata', sized);
+video.addEventListener('durationchange', sized);
 video.addEventListener('timeupdate', update);
 video.addEventListener('seeked', update);
 video.addEventListener('click', toggle);
-video.addEventListener('error', () => {
-  document.getElementById('review-video-error').hidden = false;
-  player.classList.add('is-broken');
-  // Nothing on screen to comment at: comments are on the whole cue.
-  const timed = document.getElementById('review-timed');
-  if (timed) {
-    timed.checked = false;
-    timed.disabled = true;
-    document.getElementById('review-timed-field').hidden = true;
-  }
+video.addEventListener('error', broken);
+video.addEventListener('play', () => {
+  listening = false;
+  showAt();
 });
 for (const name of ['play', 'pause', 'volumechange']) {
   video.addEventListener(name, () => {
@@ -212,39 +269,82 @@ if ('requestVideoFrameCallback' in video) {
 }
 
 seek.addEventListener('input', () => show(Number(seek.value)));
-document.getElementById('review-play').addEventListener('click', toggle);
-document.getElementById('review-back').addEventListener('click', () => {
-  step(-1);
-});
-document.getElementById('review-forward').addEventListener('click', () => {
-  step(1);
-});
-document.getElementById('review-mute').addEventListener('click', mute);
-document.getElementById('review-full').addEventListener('click', fullScreen);
+const BUTTONS = {
+  'review-play': toggle,
+  'review-back': () => step(-1),
+  'review-forward': () => step(1),
+  'review-mute': mute,
+  'review-full': fullScreen,
+};
+for (const [id, action] of Object.entries(BUTTONS)) {
+  document.getElementById(id).addEventListener('click', (event) => {
+    action();
+    // After a mouse click the button would keep the keyboard, and Space
+    // would press it again instead of playing.
+    if (event.detail > 0) {
+      event.currentTarget.blur();
+    }
+  });
+}
 
+// Keys held down repeat; these act once per press.
+const ONCE = new Set([' ', 'k', 'm', 'f']);
 const KEYS = {
   ' ': toggle,
   k: toggle,
-  ArrowLeft: () => step(-1),
-  ArrowRight: () => step(1),
+  arrowleft: () => step(-1),
+  arrowright: () => step(1),
   j: () => (video.currentTime -= JUMP_SECONDS),
   l: () => (video.currentTime += JUMP_SECONDS),
   m: mute,
   f: fullScreen,
 };
+
+/**
+ * Whether a key belongs to what has focus rather than to the player:
+ * anything typed into, a slider's own arrows, a button's Space or Enter.
+ * @param {!KeyboardEvent} event
+ * @return {boolean}
+ */
+function ownKey(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) {
+    return false;
+  }
+  const kind = target.matches('input') ? target.type : '';
+  if (
+    target.closest('textarea, select, [contenteditable]') ||
+    (kind && !['range', 'checkbox', 'button'].includes(kind))
+  ) {
+    return true;
+  }
+  if (kind === 'range') {
+    return event.key.startsWith('Arrow');
+  }
+  return (
+    Boolean(target.closest('button, a, summary, input')) &&
+    (event.key === ' ' || event.key === 'Enter')
+  );
+}
+
 document.addEventListener('keydown', (event) => {
-  const action = KEYS[event.key];
+  // Letters whatever Caps Lock says.
+  const key = event.key.toLowerCase();
+  const action = KEYS[key];
   if (
     !action ||
     event.ctrlKey ||
     event.metaKey ||
     event.altKey ||
-    event.target.closest('input, textarea, select, button, a')
+    ownKey(event) ||
+    document.querySelector('dialog[open]')
   ) {
     return;
   }
   event.preventDefault();
-  action();
+  if (!(event.repeat && ONCE.has(key))) {
+    action();
+  }
 });
 
 // Comments: go to one's frame; redraw the marks when the list changes.
@@ -257,16 +357,59 @@ list.addEventListener('click', (event) => {
 });
 list.addEventListener('htmx:afterSwap', () => {
   drawMarks();
-  highlight(frameAt(video.currentTime));
+  highlight(position());
 });
+// A refresh says which list it has, and gets nothing back while that's
+// still the one. None is sent while a question is open over the page:
+// the button that asked it would be replaced before the answer.
+list.addEventListener('htmx:configRequest', (event) => {
+  if (event.detail.verb !== 'get' || event.detail.elt !== list) {
+    return;
+  }
+  if (document.querySelector('dialog[open]')) {
+    event.preventDefault();
+    return;
+  }
+  const stamp = list.querySelector('[data-stamp]')?.dataset.stamp;
+  if (stamp) {
+    event.detail.parameters.stamp = stamp;
+  }
+});
+
+/**
+ * Says under the comment box why something sent from the page failed.
+ * @param {!CustomEvent} event htmx:responseError or htmx:sendError.
+ */
+function failed(event) {
+  const told = document.getElementById('review-form-error');
+  if (!told || event.detail.requestConfig?.verb === 'get') {
+    return; // refreshes fail quietly and try again
+  }
+  const status = event.detail.xhr?.status;
+  told.textContent =
+    {
+      403: 'This page is out of date. Reload it and try again.',
+      404: 'This link no longer works. Reload the page.',
+      429: 'Too many at once. Wait a minute and try again.',
+    }[status] ?? "That couldn't be sent. Check your connection and try again.";
+}
+document.body.addEventListener('htmx:responseError', failed);
+document.body.addEventListener('htmx:sendError', failed);
 
 if (form) {
   const body = document.getElementById('review-body');
   const timed = document.getElementById('review-timed');
   const frame = document.getElementById('review-frame');
-  body.addEventListener('input', () => video.pause());
+  // The comment as it was last sent, so only that text is cleared.
+  let sent = null;
+  body.addEventListener('input', () => {
+    video.pause();
+    document.getElementById('review-audio-source')?.pause();
+  });
   body.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
+    // 229: Safari's Enter that finishes typing in an input method.
+    const composing = event.isComposing || event.keyCode === 229;
+    if (event.key === 'Enter' && !event.shiftKey && !composing) {
       event.preventDefault();
       form.requestSubmit();
     }
@@ -283,8 +426,7 @@ if (form) {
     replying.hidden = !id;
     document.getElementById('review-replying-name').textContent = name;
     // A reply is about its note, not a frame.
-    document.getElementById('review-timed-field').hidden =
-      Boolean(id) || timed.disabled;
+    showAt();
   };
   list.addEventListener('click', (event) => {
     const button = event.target.closest('[data-reply]');
@@ -296,16 +438,21 @@ if (form) {
   // The frame on screen as the comment is sent, unless "At" is unticked
   // or it's a reply.
   form.addEventListener('htmx:configRequest', (event) => {
-    const value =
-      timed.checked && !parent.value ? String(frameAt(video.currentTime)) : '';
+    const at = document.getElementById('review-timed-field');
+    const value = timed.checked && !at.hidden ? String(position()) : '';
     frame.value = value;
     event.detail.parameters.frame = value;
+    sent = body.value;
   });
   document.body.addEventListener('review:posted', () => {
-    body.value = '';
-    timed.checked = !timed.disabled;
+    // Anything typed since it was sent is the next comment: keep it.
+    if (body.value === sent) {
+      body.value = '';
+    }
     replyTo();
   });
+  // The note being replied to was deleted meanwhile.
+  document.body.addEventListener('review:reply-gone', () => replyTo());
   form.addEventListener('click', (event) => {
     if (event.target.closest('[data-reply-cancel]')) {
       replyTo();
@@ -334,20 +481,22 @@ if (audio) {
     return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
   };
   const showAudio = () => {
+    if (Number.isFinite(audio.duration)) {
+      audioSeek.max = String(audio.duration);
+    }
     audioSeek.value = String(audio.currentTime);
     const text = `${clock(audio.currentTime)} / ${clock(audio.duration)}`;
     audioTime.value = text;
     audioSeek.setAttribute('aria-valuetext', text);
   };
-  audio.addEventListener('loadedmetadata', () => {
-    audioSeek.max = String(audio.duration);
-    showAudio();
-  });
-  audio.addEventListener('timeupdate', showAudio);
-  audio.addEventListener('error', () => {
+  const audioBroken = () => {
     document.getElementById('review-audio-error').hidden = false;
     box.classList.add('is-broken');
-  });
+  };
+  audio.addEventListener('loadedmetadata', showAudio);
+  audio.addEventListener('durationchange', showAudio);
+  audio.addEventListener('timeupdate', showAudio);
+  audio.addEventListener('error', audioBroken);
   for (const name of ['play', 'pause', 'ended']) {
     audio.addEventListener(name, () => {
       box.classList.toggle('is-playing', !audio.paused);
@@ -359,8 +508,13 @@ if (audio) {
         );
     });
   }
-  // One at a time: the video and the audio are the same music.
-  audio.addEventListener('play', () => video.pause());
+  // One at a time: the video and the audio are the same music. While
+  // the audio is what's being heard, a comment is on the whole cue.
+  audio.addEventListener('play', () => {
+    video.pause();
+    listening = true;
+    showAt();
+  });
   video.addEventListener('play', () => audio.pause());
   audioSeek.addEventListener('input', () => {
     audio.currentTime = Number(audioSeek.value);
@@ -372,6 +526,17 @@ if (audio) {
       audio.pause();
     }
   });
+  if (audio.error) {
+    audioBroken();
+  } else {
+    showAudio();
+  }
 }
 
+// What may have happened before this script ran.
+if (video.error) {
+  broken();
+} else {
+  sized();
+}
 update();

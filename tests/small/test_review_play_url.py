@@ -39,7 +39,17 @@ def test_dropbox_file_links_play(link: str, url: str) -> None:
         "https://www.dropbox.com",
         "https://www.dropbox.com/",
         "https://www.dropbox.com/scl/fo/abc/folder?rlkey=k",  # a folder
+        "https://www.dropbox.com/SCL/FO/abc/folder?rlkey=k",
         "https://www.dropbox.com/sh/abc/folder",
+        # The owner's own pages, transfers and the like: not share links.
+        "https://www.dropbox.com/home/Films/1m01.mp4",
+        "https://www.dropbox.com/preview/Films/1m01.mp4",
+        "https://www.dropbox.com/t/abcdef",
+        "https://www.dropbox.com/transfer/abc",
+        "https://www.dropbox.com/login",
+        "https://www.dropbox.com/scl/fi/abc",  # no file name
+        "https://www.dropbox.com/scl/fi/abc/1m01.mp4/more",
+        "https://dl.dropboxusercontent.com/home/1m01.mp4",
         "https://www.dropbox.com:8443/s/abc/1m01.mp4",
         "https://user@www.dropbox.com/s/abc/1m01.mp4",
         "https://www.dropbox.com.example.org/s/abc/1m01.mp4",

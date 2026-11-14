@@ -411,6 +411,35 @@ def _refuse_renaming_in_use(row: Any, previous: Any) -> None:
         )
 
 
+def _refuse_losing_comments(by_model: dict[Any, list[int]]) -> None:
+    """Refuses to take away what reviewers have commented on since.
+
+    Deleting a cue, a version or a review note also deletes the comments
+    and replies under it. The ones this change set made go with it; any
+    made since are someone else's words, which undo mustn't drop
+    unasked.
+    """
+    made = by_model.get(models.ReviewComment, [])
+    others = models.ReviewComment.objects.exclude(pk__in=made)
+    if others.filter(parent_id__in=made).exists():
+        raise UndoError(
+            "That comment has been replied to since, so undo can't take it "
+            "away. Delete it on the review page instead."
+        )
+    lost = others.filter(
+        version_id__in=by_model.get(models.CueVersion, [])
+    ) | others.filter(version__cue_id__in=by_model.get(models.Cue, []))
+    comment = lost.select_related("version__cue").first()
+    if comment is not None:
+        version = comment.version
+        raise UndoError(
+            f"Reviewers have commented on {version.cue.number} "
+            f"{version.label} since, so undo can't take it away. Delete it "
+            "from the cue's page instead: that can be undone, comments and "
+            "all."
+        )
+
+
 def _delete_created(rows: list[Any]) -> None:
     """Deletes what the change set created: one delete per model.
 
@@ -421,6 +450,7 @@ def _delete_created(rows: list[Any]) -> None:
     by_model: dict[Any, list[int]] = {}
     for row in rows:  # newest first
         by_model.setdefault(row.instance_type, []).append(row.id)
+    _refuse_losing_comments(by_model)
     for model, pks in by_model.items():
         for pk in pks:
             _refuse_if_in_use(model, pk)

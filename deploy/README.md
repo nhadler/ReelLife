@@ -154,6 +154,14 @@ and sets HSTS, so it must sit behind TLS.
   reports too many redirects, it doesn't; put Caddy between Tailscale and
   ReelTime (Caddy can use `tailscale cert` certificates) rather than
   turning off the HTTPS redirect.
+- **A CDN or tunnel in front of your proxy** (Cloudflare, for one):
+  ReelTime takes the client's address from the last `X-Forwarded-For`
+  entry, the one your proxy adds. If your proxy sees the CDN rather than
+  the visitor, every visitor shares that address, and with it the rate
+  limits per address: one busy visitor can then hold up the rest. Have
+  the proxy pass the visitor's real address on. In Caddy, list the CDN's
+  ranges under `trusted_proxies` and set `client_ip_headers` to its
+  header (`CF-Connecting-IP` for Cloudflare).
 - Only set `REELTIME_TRUST_PROXY=true` when a proxy really sits in front:
   otherwise clients could claim to be on HTTPS or forge their IP in the
   audit log and rate limits.

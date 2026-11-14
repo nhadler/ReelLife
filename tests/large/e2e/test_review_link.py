@@ -125,7 +125,9 @@ def test_a_guest_watches_and_comments(
     page.get_by_role("button", name="Send").click()
     expect(listed).to_have_count(2)
     expect(listed.first).to_contain_text("Overall")
-    expect(page.locator("#review-timed")).to_be_checked()  # the usual kind
+    # The choice is kept for the next comment; tick it again.
+    expect(page.locator("#review-timed")).not_to_be_checked()
+    page.locator("#review-timed").check()
     assert models.ReviewComment.objects.filter(frame=None).count() == 1
 
     # A comment's timecode goes to its frame.
@@ -157,6 +159,8 @@ def test_the_composer_sets_up_a_link_on_the_cue_page(
     section.get_by_role("button", name="Make a Review Link").click()
     field = section.get_by_label("Review link")
     expect(field).to_be_visible()
+    # The page's "Saved" line is about the cue's fields, not the link.
+    expect(page.locator("#cue-status")).not_to_have_text("Not saved.")
     link = models.ReviewLink.objects.get(cue=cue)
     expect(field).to_have_value(f"{app}/review/{link.token}/")
     expect(section).to_contain_text("No password")
@@ -232,6 +236,7 @@ def test_replies_and_an_editor_resolving_on_the_review_page(
     # Resolving marks it here and on the scrubber; Reopen undoes it.
     listed.get_by_role("button", name="Resolve the comment by Dana").click()
     expect(listed).to_contain_text("Resolved")
+    axe("review page with a resolved comment")
     expect(page.locator(".review-scrub__mark.is-resolved")).to_have_count(1)
     note.refresh_from_db()
     assert note.resolved_at is not None
@@ -303,9 +308,103 @@ def test_the_audio_alone_plays_under_the_video(
     player.get_by_role("button", name="Play the audio").click()
     expect(player.get_by_role("button", name="Pause the audio")).to_be_visible()
     expect(page.locator("#review-player.is-playing")).to_have_count(0)
+    # Listening to the audio, a comment is about the whole cue.
+    expect(page.locator("#review-timed")).to_be_hidden()
     page.get_by_role("button", name="Play", exact=True).click()
     expect(player.get_by_role("button", name="Play the audio")).to_be_visible()
+    expect(page.locator("#review-timed")).to_be_visible()
     # A version without an Audio Link has no audio player.
     cue.versions.update(audio_link="")
     page.reload()
     expect(page.locator("#review-audio")).to_have_count(0)
+
+
+def test_keys_work_after_clicking_the_controls(
+    page: Any, app: str, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    cue = _cue_with_video()
+    link = review.create(cue, None)
+    _dropbox(page)
+    start = cue.tc_in
+    assert start is not None
+
+    def tc(frames: int) -> str:
+        return timecode.format_timecode(start + frames, cue.project.rate)
+
+    page.goto(f"{app}/review/{link.token}/")
+    readout = page.locator("#review-time")
+    expect(page.locator("#review-seek")).not_to_have_attribute("max", "0")
+    # A click leaves the keyboard with the page, not the button.
+    page.get_by_role("button", name="Forward one frame").click()
+    expect(readout).to_have_text(tc(1))
+    page.keyboard.press("ArrowRight")
+    expect(readout).to_have_text(tc(2))
+    page.keyboard.press("ArrowLeft")
+    expect(readout).to_have_text(tc(1))
+    # Space plays whatever was clicked last, and letters whatever the case.
+    page.get_by_role("button", name="Mute").click()
+    page.keyboard.press("Space")
+    expect(page.locator("#review-player.is-playing")).to_have_count(1)
+    page.keyboard.press("K")
+    expect(page.locator("#review-player.is-playing")).to_have_count(0)
+    page.keyboard.press("m")
+    expect(page.locator("#review-player.is-muted")).to_have_count(0)
+    # With the scrubber focused its own arrows step, and Space still plays.
+    page.locator("#review-seek").focus()
+    before = readout.inner_text()
+    page.keyboard.press("ArrowRight")
+    expect(readout).not_to_have_text(before)
+    page.keyboard.press("Space")
+    expect(page.locator("#review-player.is-playing")).to_have_count(1)
+    page.keyboard.press("Space")
+    # Typing a comment never drives the player.
+    page.get_by_label("Comment", exact=True).fill("k j l m f")
+    page.get_by_label("Comment", exact=True).press("Space")
+    expect(page.locator("#review-player.is-playing")).to_have_count(0)
+
+
+def test_the_page_fits_a_phone(
+    page: Any, app: str, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    cue = _cue_with_video()
+    link = review.create(cue, None)
+    review.add_comment(
+        cue.versions.get(),
+        name="W" * 60,  # a name with nowhere to break
+        body="x" * 200,
+        frame=10,
+        user=None,
+    )
+    _dropbox(page)
+    page.set_viewport_size({"width": 375, "height": 700})
+    page.goto(f"{app}/review/{link.token}/")
+    expect(page.locator("#review-seek")).not_to_have_attribute("max", "0")
+    # Nothing is wider than the screen, and every control is on it.
+    assert page.evaluate("document.documentElement.scrollWidth") <= 375
+    for name in ("Play", "Back one frame", "Mute", "Full screen"):
+        box = page.get_by_role("button", name=name, exact=True).bounding_box()
+        assert box is not None
+        assert box["x"] >= 0 and box["x"] + box["width"] <= 375, name
+
+
+def test_a_comment_that_cannot_be_sent_says_so(
+    page: Any, app: str, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    cue = _cue_with_video()
+    link = review.create(cue, None)
+    _dropbox(page)
+    page.goto(f"{app}/review/{link.token}/")
+    page.get_by_label("Your Name").fill("Dana")
+    box = page.get_by_label("Comment", exact=True)
+    box.fill("Too busy")
+    review.revoke(link)  # while the page is open
+    box.press("Enter")
+    expect(page.locator("#review-form-error")).to_have_text(
+        "This link no longer works. Reload the page."
+    )
+    # What was typed is still there.
+    expect(box).to_have_value("Too busy")
+    expect(page.get_by_label("Your Name")).to_have_value("Dana")

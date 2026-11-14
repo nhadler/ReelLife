@@ -33,6 +33,17 @@ this project follows [Semantic Versioning](https://semver.org/).
 - The grid's right-click menu on a cue starts with **Details**, which
   opens the cue's page.
 
+### Fixed
+
+- Rate limits counted per hour forgot their count after five idle
+  minutes, so the emergency admin login's five tries an hour and the
+  backup limit could be exceeded by pausing between bursts. Counters
+  now last their whole window, and the cache that holds them is no
+  longer small enough to be flushed by a flood of requests.
+- Undo no longer takes away a version, a cue or a review comment that
+  reviewers have commented on or replied to since; it says to delete it
+  from its page instead, which undoes with the comments.
+
 ### Security
 
 - The review page, and only it, may load video from `www.dropbox.com`
