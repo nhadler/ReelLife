@@ -123,6 +123,7 @@ const HEADER_TIPS = {
   version_seq_start: 'Seq. start when the current version was written',
   percent_written:
     'How much is written, from Log Written; revisions count anew',
+  open_notes: 'Review comments on the current version not yet resolved',
 };
 // The side panel's contents and the buttons that toggle them.
 const PANEL_TOGGLES = {notes: 'notes-toggle', stats: 'stats-toggle'};
@@ -2684,6 +2685,13 @@ function openCueDialog(url, cueId) {
 function cellMenu(params) {
   const cueId = params.node?.data?.id;
   showMenu(params.event.clientX, params.event.clientY, [
+    {
+      label: 'Details',
+      shortcut: 'Enter',
+      action: () => openCue(cueId),
+      disabled: !cueId,
+    },
+    null,
     {label: 'Copy', shortcut: 'Ctrl+C', action: () => copyCells(false)},
     {label: 'Copy with Headers', action: () => copyCells(true)},
     null,

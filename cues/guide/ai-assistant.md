@@ -10,6 +10,9 @@ deadlines, credits, default shares and notes. It can also run cue tools
 and Conform, import files, export cue logs, PDFs and cue sheets, and
 undo changes. It uses this guide to answer questions about ReelTime.
 
+It can also read the comments reviewers leave through a cue's review
+link, reply to them and mark them resolved.
+
 For bulk changes (tools, conform shifts and imports), the assistant gets
 a preview and a confirmation code. It must show you the preview and ask
 for approval before applying it. History labels its changes as made

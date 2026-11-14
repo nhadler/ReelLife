@@ -1,0 +1,36 @@
+{# What the review link is set to, any errors from the settings just saved, and its Remove Password and Revoke Link buttons. Redrawn after each save. #}
+{% load text %}
+<div class="cue-review__status" id="review-status">
+  {% if review_form.errors %}
+    <ul class="errorlist" role="alert">
+      {% for field in review_form %}{% for error in field.errors %}<li>{{ field.label|title_case }}: {{ error }}</li>{% endfor %}{% endfor %}
+    </ul>
+  {% endif %}
+  <ul class="cue-review__facts">
+    {% if review_expired %}
+      <li class="cue-review__warn">Ended {{ review_link.expires_on|date:short_format }}</li>
+    {% elif review_link.expires_on %}
+      <li>Works through {{ review_link.expires_on|date:short_format }}</li>
+    {% endif %}
+    <li>{% if review_link.password %}Password set{% else %}No password{% endif %}</li>
+    {% if not review_link.comments_open %}<li>Comments closed</li>{% endif %}
+    <li>{% if review_link.last_opened_at %}Last opened {{ review_link.last_opened_at|stamp:short_format }}{% else %}Not opened yet{% endif %}</li>
+    {% if selected %}
+      <li>{% if review_notes.0 %}{{ review_notes.0 }} comment{{ review_notes.0|pluralize }} on {{ selected.label }}, {{ review_notes.1 }} open{% else %}No comments on {{ selected.label }} yet{% endif %}</li>
+    {% endif %}
+  </ul>
+  {% if can_edit %}
+    <div class="cue-review__actions">
+      {% if review_link.password %}
+        <button class="button button--quiet button--small" type="button"
+                hx-post="{% url 'cues:review_link' cue.pk %}" hx-vals='{"remove_password": "1"{% if selected %}, "version": "{{ selected.pk }}"{% endif %}}'
+                hx-target="#cue-review" hx-swap="outerHTML">Remove Password</button>
+      {% endif %}
+      <button class="button button--quiet button--small button--danger-text" type="button"
+              hx-post="{% url 'cues:review_link' cue.pk %}" hx-vals='{"revoke": "1"{% if selected %}, "version": "{{ selected.pk }}"{% endif %}}'
+              hx-target="#cue-review" hx-swap="outerHTML"
+              hx-confirm="Revoke this link? It stops working for everyone who has it. The comments stay.">Revoke Link</button>
+    </div>
+  {% endif %}
+</div>
+{% if empty_field %}{% include "cues/details/review_password.html" with oob=True %}{% endif %}

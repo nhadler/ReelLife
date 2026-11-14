@@ -11,12 +11,25 @@ this project follows [Semantic Versioning](https://semver.org/).
 - **Review links.** A cue's page has a **Review** section that makes a
   link for someone without an account: they watch the cue's bounce
   against its timecode and comment on the frame on screen or on the
-  whole cue. The video is each version's **File Link** when that is a
-  Dropbox link to a single file; ReelTime doesn't hold video. The same
-  link follows new versions, and comments stay with the version they
-  were made on. A link can have a password and a last day, can be
-  closed to comments and can be revoked. Comments show on the cue's
-  page and in Activity, where they undo. See Help, Review Links.
+  whole cue.
+  - The video is each version's **File Link**, now at the top of
+    Review, when that is a Dropbox link to a single file; ReelTime
+    doesn't hold video. The same link follows new versions, and comments
+    stay with the version they were made on.
+  - A link can have a password and a last day, can be closed to
+    comments and can be revoked. Its settings are in the section and
+    save as they change.
+  - Reviewers reply to each other's comments. Signed in, an editor also
+    resolves and deletes comments on the review page.
+  - The grid has an **Open Notes** column: the comments on each cue's
+    current version not yet resolved.
+  - Every comment, reply, resolve and deletion is in Activity, where it
+    undoes. See Help, Review Links.
+- AI assistants (MCP): `review_comments` reads a cue's review comments,
+  `reply_to_comment` answers one and `resolve_comment` marks it dealt
+  with.
+- The grid's right-click menu on a cue starts with **Details**, which
+  opens the cue's page.
 
 ### Security
 

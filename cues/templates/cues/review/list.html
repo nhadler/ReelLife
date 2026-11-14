@@ -1,10 +1,10 @@
-{# A version's comments on its review page: on the whole version first, then by timecode. Refreshed by htmx; after a post it also carries the form's error and name. #}
+{# A version's notes on its review page: on the whole version first, then by timecode, each with its replies. Refreshed by htmx; after a post it also carries the form's error and name. #}
 {% load text %}
 <h2 class="review-comments__title" id="review-comments-title">Comments{% if comments %} <span class="chip">{{ comments|length }}</span>{% endif %}</h2>
 {% if comments %}
   <ol class="review-list">
     {% for item in comments %}
-      <li class="review-comment"{% if item.timecode %} data-frame="{{ item.comment.frame }}" data-summary="{{ item.comment.name }}: {{ item.comment.body|truncatechars:80 }}"{% endif %}>
+      <li class="review-comment{% if item.resolved %} is-resolved{% endif %}"{% if item.timecode %} data-frame="{{ item.comment.frame }}" data-summary="{{ item.comment.name }}: {{ item.comment.body|truncatechars:80 }}"{% endif %}>
         <div class="review-comment__head">
           {% if item.timecode %}
             <button class="review-comment__at tc" type="button" data-seek="{{ item.comment.frame }}" aria-label="Go to {{ item.timecode }}">{{ item.timecode }}</button>
@@ -13,8 +13,46 @@
           {% endif %}
           <span class="review-comment__name">{{ item.comment.name }}</span>
           <time class="review-comment__when" datetime="{{ item.comment.created_at.isoformat }}">{{ item.comment.created_at|stamp:short_format }}</time>
+          {% if item.resolved %}<span class="chip review-comment__resolved">Resolved</span>{% endif %}
         </div>
         <p class="review-comment__body">{{ item.comment.body|linebreaksbr }}</p>
+        {% if item.replies %}
+          <ol class="review-replies">
+            {% for reply in item.replies %}
+              <li class="review-reply">
+                <div class="review-comment__head">
+                  <span class="review-comment__name">{{ reply.name }}</span>
+                  <time class="review-comment__when" datetime="{{ reply.created_at.isoformat }}">{{ reply.created_at|stamp:short_format }}</time>
+                  {% if can_resolve %}
+                    <button class="button button--quiet button--small review-comment__delete" type="button"
+                            aria-label="Delete the reply by {{ reply.name }}"
+                            hx-post="{% url 'cues:review_comment_delete' reply.pk %}" hx-swap="none"
+                            hx-confirm="Delete this reply by {{ reply.name }}? Activity can undo it.">Delete</button>
+                  {% endif %}
+                </div>
+                <p class="review-comment__body">{{ reply.body|linebreaksbr }}</p>
+              </li>
+            {% endfor %}
+          </ol>
+        {% endif %}
+        {% if can_comment or can_resolve %}
+          <div class="review-comment__actions">
+            {% if can_comment %}
+              <button class="button button--quiet button--small" type="button" data-reply="{{ item.comment.pk }}" data-reply-name="{{ item.comment.name }}"
+                      aria-label="Reply to {{ item.comment.name }}{% if item.timecode %} at {{ item.timecode }}{% endif %}">Reply</button>
+            {% endif %}
+            {% if can_resolve %}
+              <button class="button button--quiet button--small" type="button"
+                      aria-label="{% if item.resolved %}Reopen{% else %}Resolve{% endif %} the comment by {{ item.comment.name }}{% if item.timecode %} at {{ item.timecode }}{% endif %}"
+                      hx-post="{% url 'cues:review_comment_resolve' item.comment.pk %}" hx-vals='{"resolved": "{{ item.resolved|yesno:"0,1" }}"}'
+                      hx-swap="none">{% if item.resolved %}Reopen{% else %}Resolve{% endif %}</button>
+              <button class="button button--quiet button--small" type="button"
+                      aria-label="Delete the comment by {{ item.comment.name }}{% if item.timecode %} at {{ item.timecode }}{% endif %}"
+                      hx-post="{% url 'cues:review_comment_delete' item.comment.pk %}" hx-swap="none"
+                      hx-confirm="Delete this comment by {{ item.comment.name }}{% if item.replies %} and its {{ item.replies|length }} repl{{ item.replies|length|pluralize:'y,ies' }}{% endif %}? Activity can undo it.">Delete</button>
+            {% endif %}
+          </div>
+        {% endif %}
       </li>
     {% endfor %}
   </ol>

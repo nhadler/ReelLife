@@ -11,7 +11,6 @@ refused rather than overwritten.
 
 import json
 from typing import Any
-import urllib.parse
 
 from django import forms as django_forms
 from django.contrib import messages
@@ -137,16 +136,6 @@ def _versions(cue: models.Cue) -> list[models.CueVersion]:
     )
 
 
-def _web_link(text: str) -> str:
-    """The text if it's an http(s) URL (safe to link to), else ""."""
-    parts = urllib.parse.urlsplit(text.strip())
-    return (
-        text.strip()
-        if parts.scheme in ("http", "https") and parts.netloc
-        else ""
-    )
-
-
 Neighbour = tuple[int, str] | None  # (id, number)
 
 
@@ -232,7 +221,6 @@ def cue_detail(request: HttpRequest, cue_id: int) -> HttpResponse:
             "version_form": _version_form(request, selected)
             if selected
             else None,
-            "file_url": _web_link(selected.file_link) if selected else "",
             "previous": previous,
             "following": following,
             "switcher": _switcher(cue.project),

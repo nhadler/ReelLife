@@ -29,20 +29,22 @@
     <div class="review-body">
       <section class="review-player" id="review-player" aria-label="Video">
         <video class="review-player__video" id="review-video" src="{{ shown.url }}" preload="metadata" playsinline></video>
-        <p class="review-player__error" id="review-video-error" role="alert" hidden>
-          This video can't be played here. It may have been moved, or this browser doesn't play its format: H.264 video with AAC audio plays everywhere, but Firefox doesn't play uncompressed (PCM) audio.
-          <a href="{{ shown.url }}" rel="noopener noreferrer" target="_blank">Open the File</a>
-        </p>
+        <div class="review-player__error" id="review-video-error" role="alert" hidden>
+          {% include "cues/includes/icon.html" with name="alert" %}
+          <p class="review-player__error-title">This video can't be played in this browser.</p>
+          <p>It may have been moved, or the browser doesn't play its format. H.264 video with AAC audio plays everywhere; Firefox doesn't play uncompressed (PCM) audio.</p>
+          <a class="button" href="{{ shown.url }}" rel="noopener noreferrer" target="_blank">Open the File</a>
+        </div>
         <div class="review-controls">
           <button class="button button--quiet button--icon" id="review-play" type="button" aria-label="Play" title="Play or pause (Space)">
             <svg class="icon icon--solid review-controls__play" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M6 4l10 6-10 6z"/></svg>
             <svg class="icon icon--solid review-controls__pause" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5.5 4h3v12h-3z M11.5 4h3v12h-3z"/></svg>
           </button>
           <button class="button button--quiet button--icon" id="review-back" type="button" aria-label="Back one frame" title="Back one frame (←)">
-            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M12.5 5 7.5 10l5 5 M5 5v10"/></svg>
+            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
           </button>
           <button class="button button--quiet button--icon" id="review-forward" type="button" aria-label="Forward one frame" title="Forward one frame (→)">
-            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M7.5 5l5 5-5 5 M15 5v10"/></svg>
+            <svg class="icon" viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5"/></svg>
           </button>
           <output class="review-controls__time tc" id="review-time" aria-label="Timecode"></output>
           <div class="review-scrub">
@@ -61,7 +63,7 @@
       <section class="review-comments" aria-labelledby="review-comments-title">
         <div class="review-comments__list" id="review-list"
              hx-get="{{ comments_url }}?v={{ shown.version.label|urlencode:'' }}"
-             hx-trigger="every 30s" hx-swap="innerHTML">
+             hx-trigger="every 30s, review:changed from:body" hx-swap="innerHTML">
           {% include "cues/review/list.html" %}
         </div>
         {% if can_comment %}
@@ -70,12 +72,17 @@
             {% csrf_token %}
             <input type="hidden" name="v" value="{{ shown.version.label }}">
             <input type="hidden" name="frame" id="review-frame" value="">
+            <input type="hidden" name="parent" id="review-parent" value="">
             {% include "cues/review/name.html" %}
+            <p class="review-form__replying" id="review-replying" hidden>
+              Replying to <strong id="review-replying-name"></strong>
+              <button class="button button--quiet button--small" type="button" data-reply-cancel>Cancel</button>
+            </p>
             <label class="visually-hidden" for="review-body">Comment</label>
             <textarea id="review-body" name="body" rows="3" maxlength="{{ max_body }}" required placeholder="Leave a comment"></textarea>
             {% include "cues/review/error.html" %}
             <div class="review-form__row">
-              <span class="field--check" title="Untick for a comment on the whole cue">
+              <span class="field--check" id="review-timed-field" title="Untick for a comment on the whole cue">
                 <input type="checkbox" id="review-timed" checked>
                 <label for="review-timed">At <span class="tc" id="review-at"></span></label>
               </span>

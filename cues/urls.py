@@ -356,6 +356,11 @@ urlpatterns = [
         review.delete_comment,
         name="review_comment_delete",
     ),
+    path(
+        "review-comments/<int:comment_id>/resolve/",
+        review.resolve,
+        name="review_comment_resolve",
+    ),
     path("credits/", shares.credits_page, name="credits"),
     path("credits/undo/", shares.credits_undo, name="credits_undo"),
     path(

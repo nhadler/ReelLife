@@ -7398,10 +7398,6 @@ form:has(input[name='confirm']:valid) .backup__restore {
   color: var(--amber);
 }
 
-.cue-review__comments {
-  margin-top: calc(var(--space) * 2);
-}
-
 /* Comments, on the cue page and the review page. */
 .review-list {
   margin: 0;
@@ -7554,14 +7550,43 @@ button.review-comment__at:hover {
   min-height: 0;
 }
 
+/* The video failed to load: a message where it would have been, and no
+   controls. */
 .review-player__error {
-  margin: 0;
-  padding: calc(var(--space) * 2);
+  display: grid;
+  gap: var(--space);
+  place-content: center;
+  justify-items: center;
+  min-height: min(60dvh, 26rem);
+  padding: calc(var(--space) * 4);
   background: var(--panel);
-  color: var(--ink);
+  text-align: center;
 }
 
-.review-player.is-broken .review-player__video {
+.review-player__error p {
+  max-width: 32rem;
+  margin: 0;
+  color: var(--slate);
+}
+
+.review-player__error .review-player__error-title {
+  color: var(--ink);
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.review-player__error .icon {
+  width: 2rem;
+  height: 2rem;
+  color: var(--amber);
+}
+
+.review-player__error .button {
+  margin-top: var(--space);
+}
+
+.review-player.is-broken .review-player__video,
+.review-player.is-broken .review-controls {
   display: none;
 }
 
@@ -7735,6 +7760,10 @@ button.review-comment__at:hover {
   justify-content: space-between;
 }
 
+.review-form__row .button {
+  margin-left: auto;
+}
+
 .review-comments__closed {
   margin: var(--space) 0 0;
 }
@@ -7759,4 +7788,66 @@ button.review-comment__at:hover {
     position: static;
     max-height: none;
   }
+}
+
+/* Review: the bounce's link, whether it plays, then the review link. */
+.cue-review__video {
+  margin: var(--space) 0 calc(var(--space) * 2);
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.cue-review__ok {
+  color: var(--accent);
+}
+
+/* Notes: replies indented under theirs; resolved ones stand back. */
+.review-replies {
+  margin: var(--space) 0 0 calc(var(--space) * 1.5);
+  padding: 0 0 0 calc(var(--space) * 1.5);
+  border-left: 2px solid var(--rule);
+  list-style: none;
+}
+
+.review-reply + .review-reply {
+  margin-top: var(--space);
+}
+
+.review-comment__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(var(--space) * 0.5);
+  align-items: start;
+  margin-top: var(--space);
+}
+
+.review-comment.is-resolved > .review-comment__body,
+.review-comment.is-resolved > .review-replies {
+  opacity: 0.6;
+}
+
+.review-form__replying {
+  margin: 0;
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.review-scrub__mark.is-resolved {
+  background: var(--slate);
+}
+
+/* The link's settings, saved as they change. */
+.cue-review__settings {
+  margin-top: calc(var(--space) * 2);
+}
+
+.cue-review__actions {
+  display: flex;
+  gap: var(--space);
+  margin-top: var(--space);
+}
+
+/* The bounce's link is as wide as the review link under it. */
+.cue-review__file .field {
+  grid-column: 1 / -1;
 }

@@ -53,8 +53,10 @@ class ReviewLink(Timestamped):
 class ReviewComment(Timestamped):
     """A comment on one version, from its review page.
 
-    Tracked by history, so a comment deleted on its own or with its
-    version or cue comes back with undo.
+    Either a note (on the whole version, or at a frame of its video) or
+    a reply to one. A note can be resolved once it's dealt with. Tracked
+    by history, so resolving undoes, and a comment deleted on its own or
+    with its version or cue comes back with undo.
     """
 
     version = models.ForeignKey(
@@ -71,6 +73,18 @@ class ReviewComment(Timestamped):
     # The name shown: the guest's, or the user's when it was written.
     name = models.CharField(max_length=60)
     body = models.TextField()
+    # The comment this one replies to; replies don't nest further and
+    # have no frame of their own.
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="replies",
+    )
+    # When the note was dealt with, and who said so; replies have none.
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    resolved_by = models.CharField(max_length=60, blank=True)
 
     history = _history()
 

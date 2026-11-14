@@ -372,7 +372,6 @@ def test_a_version_takes_only_so_many_comments(
             review.MAX_COMMENTS = kept
     assert "1m01 v1 has 2 comments" in page
     assert version.review_comments.count() == 2
-    assert review.counts([version]) == {version.pk: 2}
 
 
 def test_a_comment_names_a_version_of_this_cue(
@@ -523,32 +522,48 @@ def test_the_trash_restores_a_cues_comments(
 # The cue page's side.
 
 
-def test_the_cue_page_shows_the_link_and_comments(
+def _panel(cue: models.Cue) -> str:
+    return reverse("cues:cue_review", args=[cue.pk])
+
+
+def test_the_cue_page_has_the_file_link_the_link_and_a_count(
     role_client: Callable[[Role], Client],
     cue: models.Cue,
     link: models.ReviewLink,
 ) -> None:
     version = cue.versions.get()
-    review.add_comment(
+    note = review.add_comment(
         version, name="Dana", body="Too busy", frame=24, user=None
     )
     review.add_comment(
         version, name="Dana", body="Lovely", frame=None, user=None
     )
+    review.add_comment(
+        version, name="Casey", body="Fixed", frame=None, user=None, parent=note
+    )
+    review.resolve(note, None)
     editor = role_client(Role.EDITOR)
     page = editor.get(reverse("cues:cue", args=[cue.pk])).content.decode()
+    # File Link sits in Review, with whether it plays.
+    review_at = page.index('id="group-review"')
+    assert page.index('name="version-file_link"') > review_at
+    assert "Plays on the review page." in page and "Open the Bounce" in page
     assert f"http://testserver/review/{link.token}/" in page
     assert "No password" in page and "Not opened yet" in page
-    assert "1:00:11:00" in page and "Too busy" in page and "Overall" in page
-    assert "Delete the comment by Dana at 1:00:11:00" in page
-    assert "Settings…" in page
+    # Notes are counted (replies aren't); they're read on the review page.
+    assert "2 comments on v1, 1 open" in page
+    assert "Too busy" not in page
+    # The settings are fields in the section, not a dialog.
+    assert 'name="expires_on"' in page and "Revoke Link" in page
+    assert "Remove Password" not in page
     # A viewer reads it all but can't change it.
     viewer = role_client(Role.VIEWER)
-    panel = reverse("cues:cue_review", args=[cue.pk])
-    seen = viewer.get(panel, {"version": str(version.pk)}).content.decode()
-    assert link.token in seen and "Too busy" in seen
-    assert "Settings…" not in seen and "Delete" not in seen
-    assert viewer.get(panel, {"version": "999999"}).status_code == 404
+    seen = viewer.get(
+        _panel(cue), {"version": str(version.pk)}
+    ).content.decode()
+    assert link.token in seen and "2 comments on v1" in seen
+    assert 'name="expires_on"' not in seen and "Revoke Link" not in seen
+    assert viewer.get(_panel(cue), {"version": "999999"}).status_code == 404
 
 
 def test_the_panel_says_what_the_link_is_set_to(
@@ -556,7 +571,6 @@ def test_the_panel_says_what_the_link_is_set_to(
     cue: models.Cue,
     link: models.ReviewLink,
 ) -> None:
-    panel = reverse("cues:cue_review", args=[cue.pk])
     editor = role_client(Role.EDITOR)
     Client().get(_page(link))
     link.refresh_from_db()
@@ -564,58 +578,56 @@ def test_the_panel_says_what_the_link_is_set_to(
     link.expires_on = datetime.date(2026, 11, 30)
     link.comments_open = False
     link.save()
-    seen = editor.get(panel).content.decode()
+    seen = editor.get(_panel(cue)).content.decode()
     assert "Password set" in seen and "Works through Nov 30" in seen
     assert "Comments closed" in seen and "Last opened" in seen
-    assert "No comments on v1 yet." in seen
+    assert "No comments on v1 yet" in seen and "Remove Password" in seen
+    assert "strings42" not in seen
     link.expires_on = datetime.date(2026, 11, 1)
     link.save()
-    assert "Ended Nov 1" in editor.get(panel).content.decode()
-    # A version whose File Link can't be played says so.
+    assert "Ended Nov 1" in editor.get(_panel(cue)).content.decode()
+    # A File Link that can't be played says so; a path isn't linked.
     cue.versions.update(file_link="/Volumes/Bounces/1m01.mov")
-    assert (
-        "has no video on its review page" in editor.get(panel).content.decode()
-    )
+    seen = editor.get(_panel(cue)).content.decode()
+    assert "Not a Dropbox link to a single file" in seen
+    assert "Open the Bounce" not in seen
+    cue.versions.update(file_link="")
+    seen = editor.get(_panel(cue)).content.decode()
+    assert "Paste a Dropbox link to v1" in seen
 
 
 def test_a_cue_without_versions_or_a_link(
     role_client: Callable[[Role], Client],
 ) -> None:
     cue = factories.CueFactory.create()
-    panel = reverse("cues:cue_review", args=[cue.pk])
-    assert (
-        "Make a Review Link"
-        in role_client(Role.EDITOR).get(panel).content.decode()
-    )
-    assert (
-        "No review link."
-        in role_client(Role.VIEWER).get(panel).content.decode()
-    )
+    editor = role_client(Role.EDITOR).get(_panel(cue)).content.decode()
+    assert "Make a Review Link" in editor and "File Link" not in editor
+    viewer = role_client(Role.VIEWER)
+    assert "No review link." in viewer.get(_panel(cue)).content.decode()
+    review.create(cue, None)
+    assert "comment" not in viewer.get(_panel(cue)).content.decode()
 
 
 def test_an_editor_makes_sets_up_and_revokes_a_link(
     role_client: Callable[[Role], Client], cue: models.Cue
 ) -> None:
     editor = role_client(Role.EDITOR)
+    version = str(cue.versions.get().pk)
     made = editor.post(
         reverse("cues:review_create", args=[cue.pk]),
-        {"version": str(cue.versions.get().pk)},
+        {"version": version},
         headers=HX,
     )
     link = models.ReviewLink.objects.get(cue=cue)
     assert link.created_by == User.objects.get(role=Role.EDITOR)
     assert link.token in made.content.decode()
     settings_url = reverse("cues:review_link", args=[cue.pk])
-    # Opened directly, the dialog's address goes to the cue's page.
-    typed = editor.get(settings_url)
-    assert typed.status_code == 302
-    assert typed["Location"] == reverse("cues:cue", args=[cue.pk])
-    form = editor.get(settings_url, headers=HX).content.decode()
-    assert "Leave empty for a link anyone can open." in form
-    assert "Remove Password" not in form
+    assert editor.get(settings_url).status_code == 405
+    # The section posts its settings whenever one changes.
     saved = editor.post(
         settings_url,
         {
+            "version": version,
             "password": "strings42",
             "expires_on": "2026-11-30",
             "preroll": "0:02",
@@ -623,8 +635,15 @@ def test_an_editor_makes_sets_up_and_revokes_a_link(
         },
         headers=HX,
     )
-    assert saved.status_code == 204
-    assert "review:changed" in saved["HX-Trigger"]
+    assert saved.status_code == 200
+    shown = saved.content.decode()
+    assert "Password set" in shown and "Works through Nov 30" in shown
+    # Only the status comes back, and the password field emptied again.
+    assert 'id="review-status"' in shown and 'id="cue-review"' not in shown
+    assert 'id="review-password-field" hx-swap-oob="true"' in shown
+    assert "strings42" not in shown
+    again = editor.get(_panel(cue)).content.decode()
+    assert 'value="00:00:02:00"' in again and "strings42" not in again
     link.refresh_from_db()
     assert review.check_password(link, "strings42")
     assert (link.expires_on, link.preroll, link.comments_open) == (
@@ -633,9 +652,6 @@ def test_an_editor_makes_sets_up_and_revokes_a_link(
         True,
     )
     # Left empty, the password stays; a timecode pre-roll counts frames.
-    form = editor.get(settings_url, headers=HX).content.decode()
-    assert "Set. Enter a new one to change it." in form
-    assert 'value="00:00:02:00"' in form and "strings42" not in form
     editor.post(settings_url, {"preroll": "00:00:01:12"}, headers=HX)
     link.refresh_from_db()
     assert review.check_password(link, "strings42")
@@ -644,18 +660,19 @@ def test_an_editor_makes_sets_up_and_revokes_a_link(
         36,
         False,
     )
-    editor.post(settings_url, {"remove_password": "on"}, headers=HX)
+    removed = editor.post(settings_url, {"remove_password": "1"}, headers=HX)
+    assert "No password" in removed.content.decode()
     link.refresh_from_db()
-    assert (link.password, link.preroll) == ("", 0)
+    assert (link.password, link.preroll) == ("", 36)
     # Revoking ends the link; the comments stay on the cue.
     review.add_comment(
         cue.versions.get(), name="Dana", body="Too busy", frame=1, user=None
     )
     revoked = editor.post(settings_url, {"revoke": "1"}, headers=HX)
-    assert revoked.status_code == 204
+    assert "Make a Review Link" in revoked.content.decode()
     assert not models.ReviewLink.objects.exists()
     assert models.ReviewComment.objects.count() == 1
-    assert editor.get(settings_url, headers=HX).status_code == 404
+    assert editor.post(settings_url, {}, headers=HX).status_code == 404
 
 
 @pytest.mark.parametrize(
@@ -675,26 +692,202 @@ def test_bad_settings_are_refused(
     url = reverse("cues:review_link", args=[link.cue.pk])
     response = role_client(Role.EDITOR).post(url, data, headers=HX)
     assert response.status_code == 200
+    # The status comes back with the error.
     assert error in response.content.decode()
+    assert 'id="review-status"' in response.content.decode()
     link.refresh_from_db()
     assert (link.password, link.expires_on, link.preroll) == ("", None, 0)
 
 
-def test_an_editor_deletes_a_comment(
+def test_viewers_cannot_change_a_link(
+    role_client: Callable[[Role], Client], link: models.ReviewLink
+) -> None:
+    viewer = role_client(Role.VIEWER)
+    url = reverse("cues:review_link", args=[link.cue.pk])
+    assert viewer.post(url, {"revoke": "1"}).status_code == 403
+    create = reverse("cues:review_create", args=[link.cue.pk])
+    assert viewer.post(create).status_code == 403
+    assert models.ReviewLink.objects.exists()
+
+
+# Replies and resolving.
+
+
+def test_a_guest_replies_to_a_note(
+    cue: models.Cue, link: models.ReviewLink
+) -> None:
+    version = cue.versions.get()
+    note = review.add_comment(
+        version, name="Dana", body="Too busy", frame=24, user=None
+    )
+    client = Client()
+    status, page = _post(
+        client, link, name="Pat", body="Agreed", parent=str(note.pk), frame="99"
+    )
+    assert status == 200
+    reply = models.ReviewComment.objects.get(parent=note)
+    # A reply is about its note, not a frame.
+    assert (reply.name, reply.body, reply.frame) == ("Pat", "Agreed", None)
+    assert page.count("review-reply") >= 1 and "Agreed" in page
+    assert f'data-reply="{note.pk}"' in page
+    listed = review.comments(link, version)
+    assert [(c.comment, c.replies) for c in listed] == [(note, [reply])]
+    assert models.ChangeSet.objects.latest("pk").label == (
+        "Reply to Dana on 1m01 v1 by Pat"
+    )
+    # Not to a reply, another version's note, or one that's gone.
+    other = review.add_comment(
+        factories.CueVersionFactory.create(cue=cue, label="v2"),
+        name="Dana",
+        body="Elsewhere",
+        frame=None,
+        user=None,
+    )
+    for parent in (str(reply.pk), str(other.pk), "999999", "x"):
+        _, answer = _post(client, link, parent=parent)
+        assert "That comment isn" in answer
+    assert models.ReviewComment.objects.count() == 3
+    with pytest.raises(review.ReviewError, match="can't be replied to"):
+        review.add_comment(
+            version, name="Pat", body="No", frame=None, user=None, parent=reply
+        )
+
+
+def test_an_editor_resolves_and_reopens_on_the_review_page(
+    role_client: Callable[[Role], Client],
+    cue: models.Cue,
+    link: models.ReviewLink,
+) -> None:
+    version = cue.versions.get()
+    note = review.add_comment(
+        version, name="Dana", body="Too busy", frame=24, user=None
+    )
+    reply = review.add_comment(
+        version, name="Pat", body="Agreed", frame=None, user=None, parent=note
+    )
+    # Guests and viewers see no Resolve or Delete.
+    viewer = role_client(Role.VIEWER)
+    for client in (Client(), viewer):
+        page = client.get(_page(link)).content.decode()
+        assert "Reply" in page
+        assert "Resolve" not in page and "Delete" not in page
+    editor = role_client(Role.EDITOR)
+    page = editor.get(_page(link)).content.decode()
+    assert "Resolve the comment by Dana at 1:00:11:00" in page
+    assert "Delete the reply by Pat" in page
+    url = reverse("cues:review_comment_resolve", args=[note.pk])
+    assert viewer.post(url).status_code == 403
+    done = editor.post(url, headers=HX)
+    assert done.status_code == 204 and "review:changed" in done["HX-Trigger"]
+    note.refresh_from_db()
+    user = User.objects.get(role=Role.EDITOR)
+    assert note.resolved_at is not None
+    assert note.resolved_by == activity.user_name(user)
+    assert models.ChangeSet.objects.latest("pk").label == (
+        "Resolve comment on 1m01 v1 by Dana"
+    )
+    page = Client().get(_page(link)).content.decode()
+    assert "is-resolved" in page and "Resolved" in page
+    assert review.note_counts(version) == (1, 0)
+    # Again changes nothing; resolved=0 reopens; undo resolves again.
+    count = models.ChangeSet.objects.count()
+    editor.post(url, headers=HX)
+    assert models.ChangeSet.objects.count() == count
+    editor.post(url, {"resolved": "0"}, headers=HX)
+    note.refresh_from_db()
+    assert note.resolved_at is None and note.resolved_by == ""
+    history.undo(models.ChangeSet.objects.latest("pk"))
+    note.refresh_from_db()
+    assert note.resolved_at is not None
+    # A reply isn't resolved on its own.
+    bad = editor.post(
+        reverse("cues:review_comment_resolve", args=[reply.pk]), headers=HX
+    )
+    assert bad.status_code == 400
+
+
+def test_an_editor_deletes_a_note_with_its_replies(
     role_client: Callable[[Role], Client],
     cue: models.Cue,
     link: models.ReviewLink,
 ) -> None:
     del link
-    comment = review.add_comment(
-        cue.versions.get(), name="Dana", body="Too busy", frame=1, user=None
+    version = cue.versions.get()
+    note = review.add_comment(
+        version, name="Dana", body="Too busy", frame=1, user=None
     )
-    url = reverse("cues:review_comment_delete", args=[comment.pk])
+    reply = review.add_comment(
+        version, name="Pat", body="Agreed", frame=None, user=None, parent=note
+    )
+    editor = role_client(Role.EDITOR)
+    # A reply on its own.
+    url = reverse("cues:review_comment_delete", args=[reply.pk])
     assert role_client(Role.VIEWER).post(url).status_code == 403
-    response = role_client(Role.EDITOR).post(url, headers=HX)
-    assert response.status_code == 200
-    assert "Too busy" not in response.content.decode()
-    assert not models.ReviewComment.objects.exists()
-    change = models.ChangeSet.objects.first()
-    assert change is not None
+    response = editor.post(url, headers=HX)
+    assert response.status_code == 204
+    assert "review:changed" in response["HX-Trigger"]
+    change = models.ChangeSet.objects.latest("pk")
+    assert change.label == "Delete reply on 1m01 v1 by Pat"
     assert change.user == User.objects.get(role=Role.EDITOR)
+    history.undo(change)
+    # The note takes its replies with it, and undo brings both back.
+    editor.post(
+        reverse("cues:review_comment_delete", args=[note.pk]), headers=HX
+    )
+    assert not models.ReviewComment.objects.exists()
+    history.undo(models.ChangeSet.objects.latest("pk"))
+    assert models.ReviewComment.objects.get(parent=None).body == "Too busy"
+    assert models.ReviewComment.objects.get(parent__isnull=False).body == (
+        "Agreed"
+    )
+
+
+def test_replies_come_back_with_a_deleted_cue(
+    cue: models.Cue, link: models.ReviewLink
+) -> None:
+    del link
+    version = cue.versions.get()
+    note = review.add_comment(
+        version, name="Dana", body="Too busy", frame=1, user=None
+    )
+    review.add_comment(
+        version, name="Pat", body="Agreed", frame=None, user=None, parent=note
+    )
+    project, pk = cue.project, cue.pk
+    authoring.delete_cue(cue)
+    history.undo(models.ChangeSet.objects.latest("pk"))
+    assert models.ReviewComment.objects.count() == 2
+    authoring.delete_cue(models.Cue.objects.get(pk=pk))
+    assert not models.ReviewComment.objects.exists()
+    trash.restore(project, pk)
+    assert models.ReviewComment.objects.get(parent__isnull=False).parent == (
+        models.ReviewComment.objects.get(parent=None)
+    )
+
+
+def test_open_notes_count_the_current_versions_unresolved_notes(
+    role_client: Callable[[Role], Client],
+    cue: models.Cue,
+) -> None:
+    v1 = cue.versions.get()
+    first = review.add_comment(v1, name="Dana", body="A", frame=1, user=None)
+    second = review.add_comment(v1, name="Dana", body="B", frame=2, user=None)
+    review.add_comment(
+        v1, name="Pat", body="C", frame=None, user=None, parent=first
+    )
+    assert review.open_notes([cue.pk]) == {cue.pk: 2}
+    review.resolve(second, None)
+    assert review.open_notes([cue.pk]) == {cue.pk: 1}
+    editor = role_client(Role.EDITOR)
+    grid = editor.get(reverse("cues:api_grid", args=[cue.project.pk])).json()
+    assert [row["open_notes"] for row in grid["rows"]] == [1]
+    assert {"id": "open_notes", "label": "Open Notes"}.items() <= next(
+        c for c in grid["columns"] if c["id"] == "open_notes"
+    ).items()
+    # A new current version starts with none.
+    v2 = factories.CueVersionFactory.create(cue=cue, label="v2")
+    cue.current_version = v2
+    cue.save()
+    assert not review.open_notes([cue.pk])
+    grid = editor.get(reverse("cues:api_grid", args=[cue.project.pk])).json()
+    assert grid["rows"][0]["open_notes"] is None

@@ -237,6 +237,9 @@ def restore(
             _history(models.CueShare).filter(cue_id=cue_id),
         ]
         for rows in linked:
-            for row in _same_action(rows, deletion).order_by("history_id"):
+            found = list(_same_action(rows, deletion).order_by("history_id"))
+            # A review note before the replies to it.
+            found.sort(key=lambda r: getattr(r, "parent_id", None) is not None)
+            for row in found:
                 _put_back(number, row)
     return models.Cue.objects.get(pk=cue_id)

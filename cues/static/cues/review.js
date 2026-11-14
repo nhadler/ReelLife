@@ -8,7 +8,8 @@
  *
  * Typing a comment pauses the video. A comment is about the frame on
  * screen unless "At" is unticked; Enter sends it, Shift+Enter breaks the
- * line. Clicking a comment's timecode or its mark goes to its frame.
+ * line. Reply on a comment turns the box into a reply to it. Clicking a
+ * comment's timecode or its mark goes to its frame.
  */
 
 const config = JSON.parse(document.getElementById('review-config').textContent);
@@ -123,6 +124,10 @@ function drawMarks() {
     const mark = document.createElement('button');
     mark.type = 'button';
     mark.className = 'review-scrub__mark';
+    mark.classList.toggle(
+      'is-resolved',
+      item.classList.contains('is-resolved'),
+    );
     mark.tabIndex = -1;
     mark.title = item.dataset.summary;
     mark.style.setProperty('--at', String(frame / last));
@@ -182,6 +187,7 @@ video.addEventListener('error', () => {
   if (timed) {
     timed.checked = false;
     timed.disabled = true;
+    document.getElementById('review-timed-field').hidden = true;
   }
 });
 for (const name of ['play', 'pause', 'volumechange']) {
@@ -265,17 +271,45 @@ if (form) {
       form.requestSubmit();
     }
   });
-  // The frame on screen as the comment is sent, unless "At" is unticked.
+  const parent = document.getElementById('review-parent');
+  const replying = document.getElementById('review-replying');
+  /**
+   * Starts a reply to a note, or with no id goes back to a new comment.
+   * @param {string=} id The note's id.
+   * @param {string=} name Who wrote it.
+   */
+  const replyTo = (id = '', name = '') => {
+    parent.value = id;
+    replying.hidden = !id;
+    document.getElementById('review-replying-name').textContent = name;
+    // A reply is about its note, not a frame.
+    document.getElementById('review-timed-field').hidden =
+      Boolean(id) || timed.disabled;
+  };
+  list.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-reply]');
+    if (button) {
+      replyTo(button.dataset.reply, button.dataset.replyName);
+      body.focus();
+    }
+  });
+  // The frame on screen as the comment is sent, unless "At" is unticked
+  // or it's a reply.
   form.addEventListener('htmx:configRequest', (event) => {
-    const value = timed.checked ? String(frameAt(video.currentTime)) : '';
+    const value =
+      timed.checked && !parent.value ? String(frameAt(video.currentTime)) : '';
     frame.value = value;
     event.detail.parameters.frame = value;
   });
   document.body.addEventListener('review:posted', () => {
     body.value = '';
     timed.checked = !timed.disabled;
+    replyTo();
   });
   form.addEventListener('click', (event) => {
+    if (event.target.closest('[data-reply-cancel]')) {
+      replyTo();
+    }
     if (event.target.closest('[data-review-rename]')) {
       const field = form.querySelector('.review-name .field');
       field.hidden = false;

@@ -60,6 +60,7 @@ COLUMNS: tuple[Column, ...] = (
     Column("title", "Title", _C, Editor.TEXT),
     Column("version", "Cue Version", _V, Editor.NONE),
     Column("sub_status", "Sub Status", _V, Editor.SELECT),
+    Column("open_notes", "Open Notes", _X, Editor.NONE),
     Column("seq_start", "Seq. Start", _C, Editor.TIMECODE),
     Column("tc_in", "IN", _C, Editor.TIMECODE),
     Column("tc_out", "OUT", _C, Editor.TIMECODE),

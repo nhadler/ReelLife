@@ -1,65 +1,47 @@
-{# The cue page's Review section: the cue's review link and the chosen version's comments. Reloads itself after the link's settings change or a field saves. #}
+{# The cue page's Review section, under the version's File Link: whether that link plays, the cue's review link and its settings. The settings save as they change; only the status under them is redrawn, so a second change made straight after the first isn't lost. Comments are read on the review page. #}
 {% load text %}
-<section class="details-group cue-review" id="cue-review" aria-labelledby="group-review"
-         hx-get="{% url 'cues:cue_review' cue.pk %}{% if selected %}?version={{ selected.pk }}{% endif %}"
-         hx-trigger="review:changed from:body, cues:changed from:body" hx-swap="outerHTML">
-  <h2 class="details-group__title" id="group-review">Review{% if selected %} <span class="chip">{{ selected.label }}</span>{% endif %}</h2>
+<div class="cue-review__body" id="cue-review"
+     hx-get="{% url 'cues:cue_review' cue.pk %}{% if selected %}?version={{ selected.pk }}{% endif %}"
+     hx-trigger="review:changed from:body, cues:changed from:body" hx-swap="outerHTML">
+  {% if selected %}
+    <p class="cue-review__video">
+      {% if review_playable %}
+        <span class="cue-review__ok">Plays on the review page.</span>
+      {% elif file_link %}
+        <span class="cue-review__warn">Not a Dropbox link to a single file, so the review page can't play it.</span>
+      {% else %}
+        Paste a Dropbox link to {{ selected.label }}'s bounce in File Link to play it on the review page.
+      {% endif %}
+      {% if file_url %}<a href="{{ file_url }}" rel="noopener noreferrer" target="_blank">Open the Bounce</a>{% endif %}
+    </p>
+  {% endif %}
   {% if review_link %}
     <div class="cue-review__link">
       <label class="visually-hidden" for="review-link">Review link</label>
       <input id="review-link" type="text" readonly value="{{ review_url }}">
       <button class="button button--quiet" type="button" data-copy="#review-link">Copy Link</button>
-      <a class="button button--quiet" href="{{ review_url }}" rel="noopener" target="_blank">Open</a>
-      {% if can_edit %}
-        <button class="button button--quiet" type="button"
-                hx-get="{% url 'cues:review_link' cue.pk %}" hx-target="#app-dialog" hx-swap="innerHTML">Settings…</button>
-      {% endif %}
+      <a class="button" href="{{ review_url }}" rel="noopener" target="_blank">Open</a>
     </div>
-    <ul class="cue-review__facts">
-      {% if review_expired %}
-        <li class="cue-review__warn">Ended {{ review_link.expires_on|date:short_format }}</li>
-      {% elif review_link.expires_on %}
-        <li>Works through {{ review_link.expires_on|date:short_format }}</li>
-      {% endif %}
-      <li>{% if review_link.password %}Password set{% else %}No password{% endif %}</li>
-      {% if not review_link.comments_open %}<li>Comments closed</li>{% endif %}
-      <li>{% if review_link.last_opened_at %}Last opened {{ review_link.last_opened_at|stamp:short_format }}{% else %}Not opened yet{% endif %}</li>
-    </ul>
-    {% if selected and not review_playable %}
-      <p class="details-group__note">{{ selected.label }} has no video on its review page: its File Link isn't a Dropbox link to a file.</p>
+    {% if review_form %}
+      <form class="cue-review__settings" method="post" action="{% url 'cues:review_link' cue.pk %}" novalidate
+            hx-post="{% url 'cues:review_link' cue.pk %}" hx-trigger="change"
+            hx-target="#review-status" hx-swap="outerHTML" hx-sync="this:queue all">
+        {% csrf_token %}
+        {% if selected %}<input type="hidden" name="version" value="{{ selected.pk }}">{% endif %}
+        <div class="fields">
+          {% include "cues/details/review_password.html" %}
+          {% include "cues/includes/field.html" with field=review_form.expires_on %}
+          {% include "cues/includes/field.html" with field=review_form.preroll %}
+          {% include "cues/includes/field.html" with field=review_form.comments_open %}
+        </div>
+      </form>
     {% endif %}
+    {% include "cues/details/review_status.html" %}
   {% elif can_edit %}
-    <button class="button button--quiet" type="button"
+    <button class="button" type="button"
             hx-post="{% url 'cues:review_create' cue.pk %}"{% if selected %} hx-vals='{"version": "{{ selected.pk }}"}'{% endif %}
             hx-target="#cue-review" hx-swap="outerHTML">Make a Review Link</button>
   {% else %}
     <p class="muted">No review link.</p>
   {% endif %}
-  {% if review_comments %}
-    <ol class="review-list cue-review__comments">
-      {% for item in review_comments %}
-        <li class="review-comment">
-          <div class="review-comment__head">
-            {% if item.timecode %}
-              <span class="review-comment__at tc">{{ item.timecode }}</span>
-            {% else %}
-              <span class="review-comment__at review-comment__at--overall">Overall</span>
-            {% endif %}
-            <span class="review-comment__name">{{ item.comment.name }}</span>
-            <time class="review-comment__when" datetime="{{ item.comment.created_at.isoformat }}">{{ item.comment.created_at|stamp:short_format }}</time>
-            {% if can_edit %}
-              <button class="button button--quiet button--small review-comment__delete" type="button"
-                      aria-label="Delete the comment by {{ item.comment.name }}{% if item.timecode %} at {{ item.timecode }}{% endif %}"
-                      hx-post="{% url 'cues:review_comment_delete' item.comment.pk %}"
-                      hx-target="#cue-review" hx-swap="outerHTML"
-                      hx-confirm="Delete this comment by {{ item.comment.name }}? Activity can undo it.">Delete</button>
-            {% endif %}
-          </div>
-          <p class="review-comment__body">{{ item.comment.body|linebreaksbr }}</p>
-        </li>
-      {% endfor %}
-    </ol>
-  {% elif review_link and selected %}
-    <p class="muted">No comments on {{ selected.label }} yet.</p>
-  {% endif %}
-</section>
+</div>

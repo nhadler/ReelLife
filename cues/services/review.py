@@ -2,7 +2,8 @@
 
 A cue has at most one link. Its page plays each version whose File Link
 is a Dropbox link to a file, and takes comments on that version: on the
-whole of it, or at a frame of the video. A comment or its removal is one
+whole of it, or at a frame of the video. Notes take replies and can be
+resolved. A comment, a reply, resolving and removal are each one
 undoable change in the cue's project; making, changing and revoking the
 link aren't (see cues.review.ReviewLink).
 
@@ -16,6 +17,7 @@ import secrets
 import urllib.parse
 
 from django.contrib.auth import hashers
+from django.db.models import F
 from django.utils import crypto
 from django.utils import timezone
 
@@ -198,49 +200,71 @@ def first_frame(
 
 @dataclasses.dataclass(frozen=True)
 class Comment:
-    """A comment as a page lists it.
+    """A note and its replies, as a page lists them.
 
     Attributes:
-        comment: The comment.
+        comment: The note.
         timecode: Where in the picture it's about, or "" for the whole
             version.
+        replies: Its replies, oldest first.
     """
 
     comment: models.ReviewComment
     timecode: str
+    replies: list[models.ReviewComment]
+
+    @property
+    def resolved(self) -> bool:
+        """Whether the note has been dealt with."""
+        return self.comment.resolved_at is not None
 
 
 def comments(
     link: models.ReviewLink | None, version: models.CueVersion
 ) -> list[Comment]:
-    """A version's comments: on the whole of it first, then by frame."""
+    """A version's notes: on the whole of it first, then by frame."""
     rate = version.cue.project.rate
     base = first_frame(link, version)
     last = timecode.max_frames(rate)
-    listed = sorted(
-        version.review_comments.all(),
-        key=lambda c: (c.frame is not None, c.frame or 0, c.created_at, c.pk),
+    notes: list[models.ReviewComment] = []
+    replies: dict[int, list[models.ReviewComment]] = {}
+    for comment in version.review_comments.all():
+        if comment.parent_id is None:
+            notes.append(comment)
+        else:
+            replies.setdefault(comment.parent_id, []).append(comment)
+    notes.sort(
+        key=lambda c: (c.frame is not None, c.frame or 0, c.created_at, c.pk)
     )
     return [
         Comment(
-            comment,
+            note,
             ""
-            if comment.frame is None
-            else timecode.format_timecode(
-                min(base + comment.frame, last), rate
-            ),
+            if note.frame is None
+            else timecode.format_timecode(min(base + note.frame, last), rate),
+            replies.get(note.pk, []),
         )
-        for comment in listed
+        for note in notes
     ]
 
 
-def counts(versions: Iterable[models.CueVersion]) -> dict[int, int]:
-    """How many comments each version has."""
+def note_counts(version: models.CueVersion) -> tuple[int, int]:
+    """A version's notes: how many, and how many aren't resolved."""
+    notes = version.review_comments.filter(parent=None)
+    return notes.count(), notes.filter(resolved_at=None).count()
+
+
+def open_notes(cue_ids: Iterable[int]) -> dict[int, int]:
+    """How many unresolved notes each cue's current version has."""
     found: dict[int, int] = {}
-    for version_id in models.ReviewComment.objects.filter(
-        version__in=list(versions)
-    ).values_list("version_id", flat=True):
-        found[version_id] = found.get(version_id, 0) + 1
+    rows = models.ReviewComment.objects.filter(
+        parent=None,
+        resolved_at=None,
+        version__cue__in=list(cue_ids),
+        version=F("version__cue__current_version"),
+    ).values_list("version__cue_id", flat=True)
+    for cue_id in rows:
+        found[cue_id] = found.get(cue_id, 0) + 1
     return found
 
 
@@ -253,6 +277,13 @@ def _clean(text: str, limit: int, what: str) -> str:
     return text
 
 
+def _name(name: str, user: User | None) -> str:
+    """The name a comment shows: the user's own, else the guest's."""
+    if user is not None:
+        return activity.user_name(user)[:MAX_NAME]
+    return _clean(" ".join(name.split()), MAX_NAME, "your name")
+
+
 def add_comment(
     version: models.CueVersion,
     *,
@@ -260,8 +291,9 @@ def add_comment(
     body: str,
     frame: int | None,
     user: User | None,
+    parent: models.ReviewComment | None = None,
 ) -> models.ReviewComment:
-    """Adds a comment to a version, as one undoable change.
+    """Adds a note to a version, or a reply to one, as an undoable change.
 
     Args:
         version: The version it's about.
@@ -269,20 +301,22 @@ def add_comment(
             instead.
         body: The comment, as plain text.
         frame: Frames from the video's first frame, or None for the
-            whole version.
+            whole version. A reply has none.
         user: The signed-in user writing it, or None for a guest.
+        parent: The note this replies to, on the same version.
 
     Raises:
         ReviewError: A name or comment is missing or too long, the frame
-            is out of range, or the version has too many comments.
+            is out of range, the note replied to isn't one of this
+            version's, or the version has too many comments.
     """
     cue = version.cue
-    shown = (
-        activity.user_name(user)[:MAX_NAME]
-        if user
-        else _clean(" ".join(name.split()), MAX_NAME, "your name")
-    )
+    shown = _name(name, user)
     text = _clean(body, MAX_BODY, "a comment")
+    if parent is not None:
+        if parent.version_id != version.pk or parent.parent_id is not None:
+            raise ReviewError("That comment can't be replied to.")
+        frame = None
     if frame is not None and not 0 <= frame <= timecode.max_frames(
         cue.project.rate
     ):
@@ -292,7 +326,8 @@ def add_comment(
             f"{cue.number} {version.label} has {MAX_COMMENTS} comments, "
             "the most a version takes."
         )
-    label = f"Comment on {cue.number} {version.label} by {shown}"
+    what = f"Reply to {parent.name}" if parent else "Comment"
+    label = f"{what} on {cue.number} {version.label} by {shown}"
     with history.recording(cue.project, label, user):
         return models.ReviewComment.objects.create(
             version=version,
@@ -300,13 +335,44 @@ def add_comment(
             member=user is not None,
             name=shown,
             body=text,
+            parent=parent,
         )
 
 
-def delete_comment(comment: models.ReviewComment, user: User | None) -> None:
-    """Deletes a comment, as one undoable change."""
+def resolve(
+    comment: models.ReviewComment, user: User | None, *, resolved: bool = True
+) -> None:
+    """Marks a note dealt with, or open again, as one undoable change.
+
+    Raises:
+        ReviewError: It's a reply; only notes are resolved.
+    """
+    if comment.parent_id is not None:
+        raise ReviewError("Resolve the comment this replies to.")
+    if (comment.resolved_at is not None) == resolved:
+        return
     version = comment.version
     cue = version.cue
-    label = f"Delete comment on {cue.number} {version.label} by {comment.name}"
+    action = "Resolve" if resolved else "Reopen"
+    label = (
+        f"{action} comment on {cue.number} {version.label} by {comment.name}"
+    )
     with history.recording(cue.project, label, user):
+        comment.resolved_at = timezone.now() if resolved else None
+        comment.resolved_by = (
+            activity.user_name(user)[:MAX_NAME] if resolved else ""
+        )
+        comment.save()
+
+
+def delete_comment(comment: models.ReviewComment, user: User | None) -> None:
+    """Deletes a comment and any replies to it, as one undoable change."""
+    version = comment.version
+    cue = version.cue
+    what = "reply" if comment.parent_id else "comment"
+    label = f"Delete {what} on {cue.number} {version.label} by {comment.name}"
+    with history.recording(cue.project, label, user):
+        # Replies first, so undo puts the note back before them.
+        for reply in comment.replies.all():
+            reply.delete()
         comment.delete()

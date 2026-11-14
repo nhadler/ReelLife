@@ -7,14 +7,16 @@ for a password, which a browser gives once per session. Every one of
 these views is rate-limited per client address, password guesses also
 per link, and their responses are never cached or indexed.
 
-The rest is for signed-in users: the cue page's Review section, the
-link's settings dialog and deleting a comment.
+The rest is for signed-in users: the cue page's Review section with the
+link's settings, and resolving or deleting a comment (an editor does
+both on the review page).
 """
 
 from collections.abc import Callable
 import datetime
 import json
 from typing import Any, TypeVar, cast
+import urllib.parse
 
 from csp import constants as csp
 from csp.decorators import csp_update
@@ -139,6 +141,8 @@ def _context(
         "shown": shown,
         "comments": review.comments(link, shown.version),
         "member": member,
+        "can_resolve": member is not None
+        and roles.at_least(member.role, Role.EDITOR),
         "guest_name": request.session.get(NAME, ""),
         "can_comment": link.comments_open,
         "max_name": review.MAX_NAME,
@@ -221,6 +225,27 @@ def _frame(text: str) -> int | None:
     return int(text)
 
 
+def _parent(
+    version: models.CueVersion, text: str
+) -> models.ReviewComment | None:
+    """The note a posted comment replies to, if it names one.
+
+    Raises:
+        ReviewError: It isn't one of this version's notes.
+    """
+    text = text.strip()
+    if not text:
+        return None
+    found = (
+        version.review_comments.filter(pk=int(text), parent=None).first()
+        if text.isascii() and text.isdigit() and len(text) <= 18
+        else None
+    )
+    if found is None:
+        raise review.ReviewError("That comment isn't there any more.")
+    return found
+
+
 def _comments(
     request: HttpRequest,
     link: models.ReviewLink,
@@ -264,6 +289,7 @@ def comments(request: HttpRequest, token: str) -> HttpResponse:
             body=request.POST.get("body", ""),
             frame=_frame(request.POST.get("frame", "")),
             user=member,
+            parent=_parent(shown.version, request.POST.get("parent", "")),
         )
     except review.ReviewError as exc:
         return _comments(request, link, shown, posted=True, error=str(exc))
@@ -290,12 +316,26 @@ def _cue(cue_id: int) -> models.Cue:
     )
 
 
+def _web_link(text: str) -> str:
+    """The text if it's an http(s) URL (safe to link to), else ""."""
+    parts = urllib.parse.urlsplit(text.strip())
+    return (
+        text.strip()
+        if parts.scheme in ("http", "https") and parts.netloc
+        else ""
+    )
+
+
 def panel_context(
     request: HttpRequest,
     cue: models.Cue,
     version: models.CueVersion | None,
+    form: "LinkForm | None" = None,
 ) -> dict[str, Any]:
-    """The Review section's context, for the cue page and its refreshes."""
+    """The Review section's context, for the cue page and its refreshes.
+
+    `form` is the link's settings as just posted, to show their errors.
+    """
     link = models.ReviewLink.objects.filter(cue=cue).first()
     return {
         "cue": cue,
@@ -309,7 +349,11 @@ def panel_context(
         "review_playable": bool(
             version and review.video_url(version.file_link)
         ),
-        "review_comments": review.comments(link, version) if version else [],
+        "file_link": version.file_link.strip() if version else "",
+        "file_url": _web_link(version.file_link) if version else "",
+        "review_notes": review.note_counts(version) if version else (0, 0),
+        "review_form": form
+        or (LinkForm(link=link) if link and _can_edit(request) else None),
         "can_edit": _can_edit(request),
     }
 
@@ -355,11 +399,18 @@ class LinkForm(django_forms.Form):
     password = django_forms.CharField(
         required=False,
         max_length=100,
+        # A code to pass on, not the user's own password: shown as typed,
+        # and password managers are asked to leave it alone.
         widget=django_forms.TextInput(
-            attrs={"autocomplete": "off", "spellcheck": "false"}
+            attrs={
+                "autocomplete": "off",
+                "spellcheck": "false",
+                "data-bwignore": "true",
+                "data-1p-ignore": "true",
+                "data-lpignore": "true",
+            }
         ),
     )
-    remove_password = django_forms.BooleanField(required=False)
     expires_on = django_forms.DateField(
         label="Last Day",
         required=False,
@@ -372,7 +423,12 @@ class LinkForm(django_forms.Form):
         label="Pre-Roll",
         required=False,
         max_length=11,
-        help_text="Video before the cue's IN, as m:ss or a timecode.",
+        widget=django_forms.TextInput(
+            attrs={
+                "placeholder": "0:00",
+                "title": "Video before the cue's IN, as m:ss or a timecode",
+            }
+        ),
     )
 
     def __init__(
@@ -391,13 +447,9 @@ class LinkForm(django_forms.Form):
             else "",
         }
         super().__init__(*args, **kwargs)
-        self.fields["password"].help_text = (
-            "Set. Enter a new one to change it."
-            if link.password
-            else "Leave empty for a link anyone can open."
+        self.fields["password"].widget.attrs["placeholder"] = (
+            "Set. Type a new one to change it." if link.password else "None"
         )
-        if not link.password:
-            del self.fields["remove_password"]
 
     def clean_password(self) -> str:
         """Checks a new password's length."""
@@ -430,9 +482,7 @@ class LinkForm(django_forms.Form):
     def save(self) -> None:
         """Writes the settings to the link."""
         link, data = self.link, self.cleaned_data
-        if data.get("remove_password"):
-            review.set_password(link, "")
-        elif data["password"]:
+        if data["password"]:
             review.set_password(link, data["password"])
         link.expires_on = data["expires_on"]
         link.comments_open = data["comments_open"]
@@ -440,47 +490,69 @@ class LinkForm(django_forms.Form):
         link.save()
 
 
-def _changed() -> HttpResponse:
-    """Closes the dialog and tells the Review section to reload."""
+@role_required(Role.EDITOR)
+@require_POST
+def link_settings(request: HttpRequest, cue_id: int) -> HttpResponse:
+    """Saves the link's settings as they change, or revokes the link.
+
+    The Review section posts its settings whenever one changes and shows
+    what comes back under them: what the link is set to, and any errors.
+    """
+    cue = _cue(cue_id)
+    version = _version(cue, request.POST.get("version", ""))
+    link = get_object_or_404(models.ReviewLink, cue=cue)
+    if "revoke" in request.POST:
+        review.revoke(link)
+        return _panel(request, cue, version)
+    if "remove_password" in request.POST:
+        review.set_password(link, "")
+        link.save()
+        return _panel(request, cue, version)
+    form = LinkForm(request.POST, link=link)
+    saved = form.is_valid()
+    if saved:
+        form.save()
+    context = panel_context(request, cue, version, form)
+    # Only the status is redrawn: the fields stay as typed, so a change
+    # made while this one saves isn't overwritten. A saved password's
+    # field is emptied again.
+    if saved and form.cleaned_data["password"]:
+        context |= {"review_form": LinkForm(link=link), "empty_field": True}
+    return render(request, "cues/details/review_status.html", context)
+
+
+def _review_changed() -> HttpResponse:
+    """Tells the review page (and a cue page) to reload its comments."""
     response = HttpResponse(status=204)
-    response["HX-Trigger"] = json.dumps(
-        {"dialog:close": True, "review:changed": True}
-    )
+    response["HX-Trigger"] = json.dumps({"review:changed": True})
     return response
 
 
-@role_required(Role.EDITOR)
-@require_http_methods(["GET", "POST"])
-def link_settings(request: HttpRequest, cue_id: int) -> HttpResponse:
-    """The link's settings dialog: password, last day, comments; revoke."""
-    cue = _cue(cue_id)
-    if request.method == "GET" and request.headers.get("HX-Request") != "true":
-        return redirect("cues:cue", cue.pk)
-    link = get_object_or_404(models.ReviewLink, cue=cue)
-    if request.method == "POST" and "revoke" in request.POST:
-        review.revoke(link)
-        return _changed()
-    form = LinkForm(
-        request.POST if request.method == "POST" else None, link=link
-    )
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        return _changed()
-    return render(
-        request,
-        "cues/dialogs/review_link.html",
-        {"cue": cue, "link": link, "form": form},
+def _comment(comment_id: int) -> models.ReviewComment:
+    return get_object_or_404(
+        models.ReviewComment.objects.select_related("version__cue__project"),
+        pk=comment_id,
     )
 
 
 @role_required(Role.EDITOR)
 @require_POST
 def delete_comment(request: HttpRequest, comment_id: int) -> HttpResponse:
-    """Deletes a comment (undoable) and shows its version's again."""
-    comment = get_object_or_404(
-        models.ReviewComment.objects.select_related("version__cue__project"),
-        pk=comment_id,
-    )
-    version = comment.version
-    review.delete_comment(comment, _user(request))
-    return _panel(request, _cue(version.cue_id), version)
+    """Deletes a comment and any replies to it (undoable)."""
+    review.delete_comment(_comment(comment_id), _user(request))
+    return _review_changed()
+
+
+@role_required(Role.EDITOR)
+@require_POST
+def resolve(request: HttpRequest, comment_id: int) -> HttpResponse:
+    """Marks a note resolved, or open again with `resolved=0`."""
+    try:
+        review.resolve(
+            _comment(comment_id),
+            _user(request),
+            resolved=request.POST.get("resolved", "1") != "0",
+        )
+    except review.ReviewError:
+        return HttpResponse(status=400)
+    return _review_changed()

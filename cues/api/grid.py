@@ -20,6 +20,7 @@ from cues import defaults
 from cues import models
 from cues import timecode
 from cues.services import progress
+from cues.services import review
 from cues.services import summaries
 from cues.services import view_presets
 from cues.services import writing
@@ -70,6 +71,7 @@ class Context:
     sequence: dict[int, int]
     users: dict[int | None, str]  # user id -> display name
     logged: dict[tuple[int, bool], int]  # (cue, revising) -> seconds
+    open_notes: dict[int, int]  # cue -> unresolved review comments
 
     @classmethod
     def build(cls, project: models.Project) -> "Context":
@@ -96,6 +98,9 @@ class Context:
             users={u.pk: str(u) for u in User.objects.all()},
             logged=writing.logged(
                 project.cues.values_list("pk", flat=True), project.rate
+            ),
+            open_notes=review.open_notes(
+                project.cues.values_list("pk", flat=True)
             ),
         )
 
@@ -227,6 +232,8 @@ def row(cue: models.Cue, ctx: Context) -> Json:
         "title": cue.title,
         "version": version.label if version else "",
         "sub_status": version.sub_status_id if version else None,
+        # Blank rather than 0, so the cues with notes stand out.
+        "open_notes": ctx.open_notes.get(cue.pk),
         "seq_start": ctx.tc(cue.seq_start),
         "tc_in": ctx.tc(cue.tc_in),
         "tc_out": ctx.tc(cue.tc_out),

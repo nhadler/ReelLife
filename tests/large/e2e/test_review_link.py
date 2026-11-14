@@ -131,7 +131,66 @@ def test_a_guest_watches_and_comments(
     axe("review page with comments")
 
 
-def test_the_composer_makes_a_link_and_reads_comments(
+def test_the_composer_sets_up_a_link_on_the_cue_page(
+    page: Any,
+    app: str,
+    sign_in_as: SignInAs,
+    axe: Check,
+    csp_violations: list[str],
+) -> None:
+    del csp_violations
+    cue = demo.build_demo().project.cues.get(number="1m01")
+    sign_in_as("Casey Composer")
+    page.goto(f"{app}/cues/{cue.pk}/")
+    section = page.locator("#cue-review")
+    # File Link is in Review; the section says whether it plays.
+    expect(section).to_contain_text("Paste a Dropbox link")
+    file_link = page.get_by_label("File Link")
+    file_link.fill(FILE_LINK)
+    file_link.press("Tab")
+    expect(section).to_contain_text("Plays on the review page.")
+    section.get_by_role("button", name="Make a Review Link").click()
+    field = section.get_by_label("Review link")
+    expect(field).to_be_visible()
+    link = models.ReviewLink.objects.get(cue=cue)
+    expect(field).to_have_value(f"{app}/review/{link.token}/")
+    expect(section).to_contain_text("No password")
+    axe("review section", within="#group-review")
+
+    # The settings are fields here, saved as they change.
+    section.get_by_label("Password").fill("strings42")
+    section.get_by_label("Pre-Roll").click()
+    expect(section).to_contain_text("Password set")
+    section.get_by_label("Pre-Roll").fill("0:02")
+    section.get_by_label("Allow Comments").uncheck()
+    expect(section).to_contain_text("Comments closed")
+    link.refresh_from_db()
+    assert link.preroll == 2 * cue.project.rate.nominal
+    assert review.check_password(link, "strings42")
+    assert not link.comments_open
+    section.get_by_role("button", name="Remove Password").click()
+    expect(section).to_contain_text("No password")
+
+    # Comments are counted here and read on the review page.
+    version = cue.versions.get()
+    review.add_comment(
+        version, name="Dana", body="Too busy", frame=None, user=None
+    )
+    page.reload()
+    expect(section).to_contain_text("1 comment on v1, 1 open")
+    expect(section).not_to_contain_text("Too busy")
+
+    section.get_by_role("button", name="Revoke Link").click()
+    confirm = page.locator(".confirm-dialog")
+    expect(confirm).to_contain_text("Revoke this link?")
+    confirm.get_by_role("button", name="Revoke Link").click()
+    expect(
+        section.get_by_role("button", name="Make a Review Link")
+    ).to_be_visible()
+    assert not models.ReviewLink.objects.exists()
+
+
+def test_replies_and_an_editor_resolving_on_the_review_page(
     page: Any,
     app: str,
     sign_in_as: SignInAs,
@@ -140,43 +199,46 @@ def test_the_composer_makes_a_link_and_reads_comments(
 ) -> None:
     del csp_violations
     cue = _cue_with_video()
-    sign_in_as("Casey Composer")
-    page.goto(f"{app}/cues/{cue.pk}/")
-    section = page.locator("#cue-review")
-    section.get_by_role("button", name="Make a Review Link").click()
-    field = section.get_by_label("Review link")
-    expect(field).to_be_visible()
-    link = models.ReviewLink.objects.get(cue=cue)
-    expect(field).to_have_value(f"{app}/review/{link.token}/")
-    expect(section).to_contain_text("No password")
-    axe("review section", within="#cue-review")
-
-    # Settings: a password and a pre-roll.
-    section.get_by_role("button", name="Settings").click()
-    dialog = page.locator("#app-dialog")
-    dialog.get_by_label("Password").fill("strings42")
-    dialog.get_by_label("Pre-Roll").fill("0:02")
-    axe("review link settings", within="#app-dialog")
-    dialog.get_by_role("button", name="Save").click()
-    expect(dialog).to_be_hidden()
-    expect(section).to_contain_text("Password set")
-    link.refresh_from_db()
-    assert link.preroll == 2 * cue.project.rate.nominal
-    assert review.check_password(link, "strings42")
-
-    # A guest's comment shows here; deleting it asks first.
-    version = cue.current_version
-    assert version is not None
-    review.add_comment(
-        version, name="Dana", body="Too busy", frame=None, user=None
+    link = review.create(cue, None)
+    version = cue.versions.get()
+    note = review.add_comment(
+        version, name="Dana", body="Too busy", frame=24, user=None
     )
-    page.reload()
-    expect(section.locator(".review-comment")).to_contain_text("Too busy")
-    section.get_by_role("button", name="Delete the comment by Dana").click()
+    _dropbox(page)
+    sign_in_as("Casey Composer")
+    page.goto(f"{app}/review/{link.token}/")
+    listed = page.locator(".review-comment")
+    expect(listed).to_contain_text("Too busy")
+    # Reply turns the comment box into a reply, under the user's own name.
+    listed.get_by_role("button", name="Reply to Dana").click()
+    expect(page.locator("#review-replying")).to_contain_text("Replying to Dana")
+    expect(page.locator("#review-timed")).to_be_hidden()
+    box = page.get_by_label("Comment", exact=True)
+    expect(box).to_be_focused()
+    box.fill("Thinned out in v2")
+    box.press("Enter")
+    expect(listed.locator(".review-reply")).to_contain_text("Thinned out in v2")
+    expect(page.locator("#review-replying")).to_be_hidden()
+    expect(page.locator("#review-timed")).to_be_visible()
+    reply = models.ReviewComment.objects.get(parent=note)
+    assert reply.member and reply.frame is None
+    axe("review page with a reply")
+
+    # Resolving marks it here and on the scrubber; Reopen undoes it.
+    listed.get_by_role("button", name="Resolve the comment by Dana").click()
+    expect(listed).to_contain_text("Resolved")
+    expect(page.locator(".review-scrub__mark.is-resolved")).to_have_count(1)
+    note.refresh_from_db()
+    assert note.resolved_at is not None
+    listed.get_by_role("button", name="Reopen the comment by Dana").click()
+    expect(listed).not_to_contain_text("Resolved")
+
+    # Deleting the note takes its reply; it asks first.
+    listed.get_by_role("button", name="Delete the comment by Dana").click()
     confirm = page.locator(".confirm-dialog")
-    expect(confirm).to_contain_text("Delete this comment by Dana?")
+    expect(confirm).to_contain_text("and its 1 reply")
     confirm.get_by_role("button", name="Delete").click()
-    expect(section.locator(".review-comment")).to_have_count(0)
+    expect(listed).to_have_count(0)
     assert not models.ReviewComment.objects.exists()
 
 
@@ -203,7 +265,7 @@ def test_a_password_then_a_video_that_cannot_play(
     expect(page.get_by_role("heading", name="1m01")).to_be_visible()
     # The page says the video can't play, and comments still work.
     expect(page.get_by_role("alert")).to_contain_text(
-        "This video can't be played here."
+        "This video can't be played in this browser."
     )
     expect(page.get_by_role("link", name="Open the File")).to_be_visible()
     page.get_by_label("Your Name").fill("Dana")
@@ -211,6 +273,6 @@ def test_a_password_then_a_video_that_cannot_play(
     page.get_by_role("button", name="Send").click()
     expect(page.locator(".review-comment")).to_contain_text("Can't see it")
     # With nothing on screen, the comment is on the whole cue.
-    expect(page.locator("#review-timed")).to_be_disabled()
+    expect(page.locator("#review-timed")).to_be_hidden()
     assert models.ReviewComment.objects.get().frame is None
     axe("review page without video")
