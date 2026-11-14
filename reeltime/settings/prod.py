@@ -4,6 +4,7 @@ deploy/README.md lists the variables. `manage.py check --deploy` must pass
 with no warnings against this module.
 """
 
+import ipaddress
 import pathlib
 import urllib.parse
 
@@ -52,6 +53,22 @@ TRUST_PROXY = env.get_bool("REELTIME_TRUST_PROXY", default=False)
 if TRUST_PROXY:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     USE_X_FORWARDED_HOST = False
+# Which peers are the proxy: only their X-Forwarded-* headers count
+# (reeltime.net.trusts). Unset, any peer's do.
+TRUSTED_PROXIES = tuple(env.get_list("REELTIME_TRUSTED_PROXIES", ""))
+for _entry in TRUSTED_PROXIES:
+    try:
+        ipaddress.ip_network(_entry, strict=False)
+    except ValueError:
+        raise ImproperlyConfigured(
+            f"REELTIME_TRUSTED_PROXIES: {_entry!r} isn't an address or a "
+            "network like 192.168.1.35 or 172.18.0.0/16"
+        ) from None
+if TRUSTED_PROXIES and not TRUST_PROXY:
+    raise ImproperlyConfigured(
+        "REELTIME_TRUSTED_PROXIES is set but REELTIME_TRUST_PROXY isn't "
+        "true, so no proxy would be trusted"
+    )
 
 SECURE_SSL_REDIRECT = True
 # Health probes come from Docker and systemd over plain HTTP on loopback.

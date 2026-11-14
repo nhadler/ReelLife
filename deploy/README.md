@@ -40,6 +40,7 @@ all with comments. Any variable can instead be read from a file by setting
 | `REELTIME_ALLOWED_HOSTS` | The host name(s) people use, comma-separated. |
 | `REELTIME_BASE_URL` | `https://...`; used for CSRF and the OIDC redirect. |
 | `REELTIME_TRUST_PROXY` | `true` when the proxy in front sets `X-Forwarded-Proto` and `X-Forwarded-For`. See "Proxies" below. |
+| `REELTIME_TRUSTED_PROXIES` | Optional. The proxies' addresses or networks, separated by commas; only they are believed. See "Proxies" below. |
 | `OIDC_ISSUER`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` | From PocketID; the issuer must be `https://`. |
 | `OIDC_GROUP_ADMIN`, `OIDC_GROUP_EDITOR`, `OIDC_GROUP_VIEWER` | Defaults `reeltime-admins`, `reeltime-editors`, `reeltime-viewers`. |
 | `OIDC_ACCOUNT_URL` | Optional: where the profile menu's Manage Account goes. Default: PocketID's account page, `OIDC_ISSUER` + `/settings/account`. |
@@ -165,6 +166,14 @@ and sets HSTS, so it must sit behind TLS.
 - Only set `REELTIME_TRUST_PROXY=true` when a proxy really sits in front:
   otherwise clients could claim to be on HTTPS or forge their IP in the
   audit log and rate limits.
+- **`REELTIME_TRUSTED_PROXIES`** names the proxy, for when something else
+  can also reach ReelTime's port (another machine on the network, say).
+  List each proxy's address as ReelTime sees it connect, or a network:
+  `192.168.1.35, 172.18.0.0/16`. Requests from anywhere else then have
+  their `X-Forwarded-*` headers ignored: they count as their own
+  address, and as plain HTTP, so they're redirected to HTTPS. Under
+  Docker the address is often the proxy's on the shared Docker network,
+  or the Docker gateway; ReelTime's access log shows it.
 
 ## Backups
 

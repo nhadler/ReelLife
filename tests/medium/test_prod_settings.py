@@ -93,3 +93,25 @@ def test_oidc_issuer_must_be_https(tmp_path: pathlib.Path) -> None:
     result = _manage(env, "check")
     assert result.returncode != 0
     assert "OIDC_ISSUER must be an https:// URL" in result.stderr
+
+
+def test_trusted_proxies_are_checked_at_start(tmp_path: pathlib.Path) -> None:
+    good = _prod_env(
+        tmp_path,
+        REELTIME_TRUST_PROXY="true",
+        REELTIME_TRUSTED_PROXIES="192.168.1.35, 172.18.0.0/16, ::1",
+    )
+    assert _manage(good, "check").returncode == 0
+    bad = _prod_env(
+        tmp_path,
+        REELTIME_TRUST_PROXY="true",
+        REELTIME_TRUSTED_PROXIES="caddy",
+    )
+    result = _manage(bad, "check")
+    assert result.returncode != 0
+    assert "REELTIME_TRUSTED_PROXIES: 'caddy' isn't an address" in result.stderr
+    # A list with trust off would trust no proxy at all: say so.
+    off = _prod_env(tmp_path, REELTIME_TRUSTED_PROXIES="192.168.1.35")
+    result = _manage(off, "check")
+    assert result.returncode != 0
+    assert "REELTIME_TRUST_PROXY isn't true" in result.stderr

@@ -31,6 +31,9 @@ this project follows [Semantic Versioning](https://semver.org/).
     current version not yet resolved.
   - Every comment, reply, resolve and deletion is in Activity, where it
     undoes. See Help, Review Links.
+- `REELTIME_TRUSTED_PROXIES` (optional) lists the proxies' addresses.
+  Only they are then believed about a visitor's address and HTTPS, so
+  something else that can reach ReelTime's port can't forge either.
 - AI assistants (MCP): `review_comments` reads a cue's review comments,
   `reply_to_comment` answers one and `resolve_comment` marks it dealt
   with.

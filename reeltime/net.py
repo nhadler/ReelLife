@@ -1,7 +1,40 @@
 """Client address handling that respects REELTIME_TRUST_PROXY."""
 
+import functools
+import ipaddress
+
 from django.conf import settings
 from django.http import HttpRequest
+
+Network = ipaddress.IPv4Network | ipaddress.IPv6Network
+
+
+@functools.lru_cache(maxsize=8)
+def _networks(entries: tuple[str, ...]) -> tuple[Network, ...]:
+    return tuple(ipaddress.ip_network(entry, strict=False) for entry in entries)
+
+
+def trusts(remote: str) -> bool:
+    """Whether what a connection's peer says about the client is believed.
+
+    With REELTIME_TRUST_PROXY on, every peer is, unless
+    REELTIME_TRUSTED_PROXIES lists the proxies: then only they are, and a
+    client that reaches ReelTime some other way can't pass itself off as
+    someone else or as arriving over HTTPS.
+
+    Args:
+        remote: The connection's peer address.
+    """
+    if not settings.TRUST_PROXY:
+        return False
+    listed = _networks(tuple(settings.TRUSTED_PROXIES))
+    if not listed:
+        return True
+    try:
+        peer = ipaddress.ip_address(remote)
+    except ValueError:
+        return False
+    return any(peer in network for network in listed)
 
 
 def client_ip(request: HttpRequest) -> str:
@@ -34,9 +67,10 @@ def address(remote: str, forwarded: str) -> str:
         forwarded: The X-Forwarded-For header, or an empty string.
 
     Returns:
-        The last forwarded entry behind a trusted proxy, else `remote`.
+        The last forwarded entry when the peer is a trusted proxy, else
+        `remote`.
     """
-    if settings.TRUST_PROXY:
+    if trusts(remote):
         last = forwarded.rsplit(",", 1)[-1].strip()
         if last:
             return last

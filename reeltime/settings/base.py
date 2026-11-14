@@ -36,6 +36,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # First: drops X-Forwarded-* from peers that aren't trusted proxies,
+    # before anything reads them.
+    "reeltime.middleware.ForwardedHeadersMiddleware",
     "django.middleware.security.SecurityMiddleware",
     # Serves collected static files with far-future caching.
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -127,6 +130,10 @@ def sqlite_database(path: pathlib.Path | str) -> dict[str, object]:
 # Whether a reverse proxy in front sets X-Forwarded-For/-Proto. Production
 # reads REELTIME_TRUST_PROXY; everywhere else nothing sits in front.
 TRUST_PROXY = False
+# The proxies' addresses or networks, as ReelTime sees them connect
+# (REELTIME_TRUSTED_PROXIES). Empty trusts whatever connects, which is
+# right when nothing but the proxy can reach ReelTime's port.
+TRUSTED_PROXIES: tuple[str, ...] = ()
 
 AUTH_USER_MODEL = "accounts.User"
 AUTHENTICATION_BACKENDS = [
