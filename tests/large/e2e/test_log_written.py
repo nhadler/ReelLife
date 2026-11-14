@@ -80,6 +80,8 @@ def test_log_written_waits_for_one_cue(
     dialog.get_by_role("button", name="Remove").click()
     expect(dialog.locator(".log-written__list")).to_have_count(0)
     assert not models.WritingLog.objects.filter(cue=cue).exists()
+    # Focus lands on Day once htmx has wired up the new form.
+    expect(dialog.get_by_label("Day")).to_be_focused()
     dialog.get_by_label("To").press("Enter")
     expect(dialog).to_be_hidden()
     assert models.WritingLog.objects.filter(cue=cue).count() == 1

@@ -160,6 +160,8 @@ export function enhance(root) {
       continue;
     }
     input.classList.add(ENHANCED);
+    // Moving the field drops its focus (a dialog may have just focused it).
+    const focused = input === document.activeElement;
     const wrap = document.createElement('span');
     wrap.className = 'date-field';
     input.replaceWith(wrap);
@@ -178,6 +180,9 @@ export function enhance(root) {
       }
     });
     wrap.append(input, button);
+    if (focused) {
+      input.focus();
+    }
   }
 }
 
