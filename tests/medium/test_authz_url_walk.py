@@ -36,6 +36,8 @@ PUBLIC = {
     # bounces and comment on them (cues.services.review).
     "cues:review",
     "cues:review_unlock",
+    "cues:review_who",
+    "cues:review_watching",
     "cues:review_comments",
 }
 # Pages a viewer may POST to: their own calendar link.

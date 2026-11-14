@@ -17,6 +17,7 @@ from cues.services import trash
 from tests import factories
 from tests.medium.review.setup import HX
 from tests.medium.review.setup import comments_url
+from tests.medium.review.setup import guest
 from tests.medium.review.setup import page_url
 from tests.medium.review.setup import panel_url
 from tests.medium.review.setup import post
@@ -48,7 +49,7 @@ def test_a_comment_undoes_and_comes_back_with_its_cue(
     token = link.token
     authoring.delete_cue(cue)
     assert not models.ReviewComment.objects.exists()
-    assert Client().get(f"/review/{token}/").status_code == 404
+    assert guest().get(f"/review/{token}/").status_code == 404
     gone = models.ChangeSet.objects.first()
     assert gone is not None
     history.undo(gone)
@@ -81,7 +82,7 @@ def test_a_guest_replies_to_a_note(
     note = review.add_comment(
         version, name="Dana", body="Too busy", frame=24, user=None
     )
-    client = Client()
+    client = guest()
     status, page = post(
         client, link, name="Pat", body="Agreed", parent=str(note.pk), frame="99"
     )
@@ -128,7 +129,7 @@ def test_an_editor_resolves_and_reopens_on_the_review_page(
     )
     # Guests and viewers see no Resolve or Delete.
     viewer = role_client(Role.VIEWER)
-    for client in (Client(), viewer):
+    for client in (guest(), viewer):
         page = client.get(page_url(link)).content.decode()
         assert "Reply" in page
         assert "Resolve" not in page and "Delete" not in page
@@ -147,7 +148,7 @@ def test_an_editor_resolves_and_reopens_on_the_review_page(
     assert models.ChangeSet.objects.latest("pk").label == (
         "Resolve comment on 1m01 v1 by Dana"
     )
-    page = Client().get(page_url(link)).content.decode()
+    page = guest().get(page_url(link)).content.decode()
     assert "is-resolved" in page and "Resolved" in page
     assert review.note_counts(version) == (1, 0)
     # Again changes nothing; resolved=0 reopens; undo resolves again.
@@ -310,7 +311,7 @@ def test_activity_copes_with_a_version_that_has_no_history(
     ["\u200b\u200b", "\u2060", "\ufeff\u00ad", "\u202e\u202c", "\x07\x1b"],
 )
 def test_a_name_must_show(link: models.ReviewLink, name: str) -> None:
-    _, page = post(Client(), link, name=name)
+    _, page = post(guest(), link, name=name)
     assert "Enter your name." in page
     assert not models.ReviewComment.objects.exists()
 
@@ -319,7 +320,7 @@ def test_hidden_characters_are_left_out_of_names(
     link: models.ReviewLink,
 ) -> None:
     # A right-to-left override would show the name backwards.
-    post(Client(), link, name="\u202eanaD\u200b  Director")
+    post(guest(), link, name="\u202eanaD\u200b  Director")
     assert models.ReviewComment.objects.get().name == "anaD Director"
 
 
@@ -329,11 +330,11 @@ def test_team_comments_are_marked(
     # A guest can type anyone's name; only signed-in users get the mark.
     viewer = role_client(Role.VIEWER)
     name = activity.user_name(User.objects.get(role=Role.VIEWER))
-    post(Client(), link, name=name, body="Approved, print it")
-    page = Client().get(page_url(link)).content.decode()
+    post(guest(), link, name=name, body="Approved, print it")
+    page = guest().get(page_url(link)).content.decode()
     assert "Approved, print it" in page and "review-comment__team" not in page
     post(viewer, link, body="Not yet")
-    page = Client().get(page_url(link)).content.decode()
+    page = guest().get(page_url(link)).content.decode()
     assert page.count("review-comment__team") == 1
     labels = list(models.ChangeSet.objects.values_list("label", flat=True)[:2])
     assert labels == [
@@ -345,7 +346,7 @@ def test_team_comments_are_marked(
 def test_a_refresh_gets_nothing_while_nothing_changed(
     cue: models.Cue, link: models.ReviewLink
 ) -> None:
-    client = Client()
+    client = guest()
     page = client.get(comments_url(link), {"v": "v1"}).content.decode()
     stamp = page.split('data-stamp="')[1].split('"')[0]
     same = client.get(comments_url(link), {"v": "v1", "stamp": stamp})
@@ -381,14 +382,14 @@ def test_a_reply_to_a_note_just_deleted_is_refused_cleanly(
         )
     assert not models.ReviewComment.objects.exists()
     # The page is told to drop the reply; a new guest's name is kept.
-    response = Client().post(
+    response = guest().post(
         comments_url(link),
         {"v": "v1", "name": "Pat", "body": "Hm", "parent": str(note.pk)},
         headers=HX,
     )
     assert "review:reply-gone" in response["HX-Trigger"]
     assert 'id="review-name"' not in response.content.decode()
-    ok = Client().post(
+    ok = guest().post(
         comments_url(link), {"v": "v1", "name": "Pat", "body": "Hm"}, headers=HX
     )
     assert "review:posted" in ok["HX-Trigger"]

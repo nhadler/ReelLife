@@ -43,7 +43,9 @@ from accounts.models import Role
 from accounts.models import User
 from cues import models
 from cues import timecode
+from cues.services import activity
 from cues.services import review
+from cues.services import review_views
 from reeltime import net
 
 ViewT = TypeVar("ViewT", bound=Callable[..., Any])
@@ -52,6 +54,7 @@ ViewT = TypeVar("ViewT", bound=Callable[..., Any])
 # the name it comments under.
 UNLOCKED = "review_unlocked"
 NAME = "review_name"
+BROWSER = "review_browser"
 
 WRONG_PASSWORD = "That isn't the password for this link."  # noqa: S105  # nosec B105
 CLOSED = "Comments are closed on this link."
@@ -123,6 +126,34 @@ def _locked(request: HttpRequest, link: models.ReviewLink) -> bool:
     return not review.unlocked(link, kept.get(str(link.pk)))
 
 
+def _unnamed(request: HttpRequest) -> bool:
+    """Whether this guest has yet to say who is watching."""
+    return _member(request) is None and not request.session.get(NAME)
+
+
+def _visit(
+    request: HttpRequest, version: models.CueVersion
+) -> models.ReviewView | None:
+    """Starts (or carries on) this browser's visit to a version.
+
+    Editors and admins aren't recorded: they're the ones who sent the
+    link, checking how it looks.
+    """
+    member = _member(request)
+    if member is not None and roles.at_least(member.role, Role.EDITOR):
+        return None
+    if BROWSER not in request.session:
+        request.session[BROWSER] = review_views.new_browser()
+    return review_views.start(
+        version,
+        name=activity.user_name(member)[: review.MAX_NAME]
+        if member
+        else str(request.session[NAME]),
+        member=member is not None,
+        browser=str(request.session[BROWSER]),
+    )
+
+
 def _rate_config(rate: timecode.Rate, first: int) -> dict[str, Any]:
     """What the player needs to turn its position into a timecode."""
     return {
@@ -168,6 +199,8 @@ def page(request: HttpRequest, token: str) -> HttpResponse:
         return _private(
             render(request, "cues/review/locked.html", {"link": link})
         )
+    if _unnamed(request):
+        return _private(render(request, "cues/review/who.html", {"link": link}))
     found = review.playable(cue)
     shown = review.choose(found, request.GET.get("v", ""))
     if shown is None and "v" in request.GET:
@@ -186,6 +219,14 @@ def page(request: HttpRequest, token: str) -> HttpResponse:
         context["player"] = _rate_config(
             cue.project.rate, review.first_frame(link, shown.version)
         )
+        visit = _visit(request, shown.version)
+        if visit is not None:
+            context["player"] |= {
+                "visit": visit.key,
+                "watchingUrl": reverse(
+                    "cues:review_watching", args=[link.token]
+                ),
+            }
     return _private(render(request, "cues/review/page.html", context))
 
 
@@ -238,6 +279,52 @@ def unlock(request: HttpRequest, token: str) -> HttpResponse:
     kept[str(link.pk)] = review.unlock_key(link)
     request.session[UNLOCKED] = kept
     return _private(redirect("cues:review", link.token))
+
+
+@login_not_required
+@require_POST
+@_limit("review-name", "RATELIMIT_REVIEW", method="POST")
+def who(request: HttpRequest, token: str) -> HttpResponse:
+    """Takes a guest's name: asked once, before the video shows."""
+    link = review.find(token)
+    if link is None or _locked(request, link):
+        return _gone(request)
+    try:
+        request.session[NAME] = review.guest_name(request.POST.get("name", ""))
+    except review.ReviewError as exc:
+        return _private(
+            render(
+                request,
+                "cues/review/who.html",
+                {"link": link, "error": str(exc)},
+            )
+        )
+    return _private(redirect("cues:review", link.token))
+
+
+def _count(text: str) -> int | None:
+    """Posted digits as a number, or None for anything else."""
+    text = text.strip()
+    if text.isascii() and text.isdigit() and len(text) <= 9:
+        return int(text)
+    return None
+
+
+@login_not_required
+@require_POST
+@_limit("review-watching", "RATELIMIT_REVIEW_WATCHING", method="POST")
+def watching(request: HttpRequest, token: str) -> HttpResponse:
+    """The page's report on its visit: seconds played, furthest frame."""
+    link = review.find(token)
+    if link is None or _locked(request, link):
+        return _gone(request)
+    known = review_views.report(
+        link.cue,
+        request.POST.get("visit", ""),
+        played=_count(request.POST.get("played", "")) or 0,
+        furthest=_count(request.POST.get("furthest", "")),
+    )
+    return _private(HttpResponse(status=204 if known else 404))
 
 
 def _frame(text: str) -> int | None:
@@ -316,7 +403,7 @@ def comments(request: HttpRequest, token: str) -> HttpResponse:
     so the page isn't redrawn under someone reading or about to click.
     """
     link = review.find(token)
-    if link is None or _locked(request, link):
+    if link is None or _locked(request, link) or _unnamed(request):
         return _gone(request)
     values = request.POST if request.method == "POST" else request.GET
     shown = review.choose(review.playable(link.cue), values.get("v", "") or "-")
@@ -332,7 +419,7 @@ def comments(request: HttpRequest, token: str) -> HttpResponse:
     try:
         comment = review.add_comment(
             shown.version,
-            name=request.POST.get("name", ""),
+            name=request.POST.get("name", "") or request.session.get(NAME, ""),
             body=request.POST.get("body", ""),
             frame=_frame(request.POST.get("frame", "")),
             user=member,
@@ -398,6 +485,7 @@ def panel_context(
         "audio_playable": bool(version and review.play_url(version.audio_link)),
         "file_url": _web_link(version.file_link) if version else "",
         "review_notes": review.note_counts(version) if version else (0, 0),
+        "review_visits": review_views.visits(link, version) if version else [],
         "review_form": LinkForm(link=link, version=version)
         if link and _can_edit(request)
         else None,

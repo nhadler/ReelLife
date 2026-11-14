@@ -347,6 +347,19 @@ class ReviewCommentAdmin(SimpleHistoryAdmin):  # type: ignore[misc]
     list_display = ("version", "name", "member", "frame", "created_at")
 
 
+@admin.register(models.ReviewView)
+class ReviewViewAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
+    """Visits to review pages: a log, read only."""
+
+    list_display = ("version", "name", "member", "started_at", "played")
+    exclude = ("key", "browser")
+
+    def has_add_permission(self, request: HttpRequest) -> bool:
+        """Visits are recorded by the review page."""
+        del request
+        return False
+
+
 @admin.register(models.ScheduleEntry)
 class ScheduleEntryAdmin(admin.ModelAdmin):  # type: ignore[type-arg]
     """Saved daily plans: a log, read only."""

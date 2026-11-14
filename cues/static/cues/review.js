@@ -533,6 +533,66 @@ if (audio) {
   }
 }
 
+// The visit: tell the server now and then how long has played and how
+// far the video got, so whoever sent the link can see it was watched.
+if (config.visit) {
+  const REPORT_MS = 15000;
+  const token = JSON.parse(document.body.getAttribute('hx-headers') || '{}')[
+    'X-CSRFToken'
+  ];
+  let played = 0;
+  let furthest = null;
+  let last = performance.now();
+  /** Adds the time since the last look, if anything was playing. */
+  const count = () => {
+    const now = performance.now();
+    const sound = document.getElementById('review-audio-source');
+    if (!video.paused || (sound && !sound.paused)) {
+      played += (now - last) / 1000;
+    }
+    last = now;
+  };
+  const report = () => {
+    count();
+    const sent = new URLSearchParams({
+      visit: config.visit,
+      played: String(Math.round(played)),
+    });
+    if (furthest !== null) {
+      sent.set('furthest', String(furthest));
+    }
+    // keepalive: it still goes when the page is being closed.
+    fetch(config.watchingUrl, {
+      method: 'POST',
+      headers: {'X-CSRFToken': token},
+      body: sent,
+      keepalive: true,
+    }).catch(() => {});
+  };
+  for (const name of ['play', 'pause', 'ended']) {
+    video.addEventListener(name, count);
+    document
+      .getElementById('review-audio-source')
+      ?.addEventListener(name, count);
+  }
+  video.addEventListener('timeupdate', () => {
+    if (video.currentTime > 0) {
+      furthest = Math.max(furthest ?? 0, position());
+    }
+  });
+  setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      report();
+    }
+  }, REPORT_MS);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      report();
+    }
+  });
+  window.addEventListener('pagehide', report);
+}
+
 // What may have happened before this script ran.
 if (video.error) {
   broken();

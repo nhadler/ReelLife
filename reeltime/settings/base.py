@@ -325,6 +325,9 @@ RATELIMIT_CALENDAR = "60/m"
 # page and its comment refreshes, comments posted, and password tries.
 RATELIMIT_REVIEW = "120/m"
 RATELIMIT_REVIEW_COMMENTS = "20/m"
+# The page's reports on how much has been watched: about four a minute
+# from each open page.
+RATELIMIT_REVIEW_WATCHING = "60/m"
 RATELIMIT_REVIEW_UNLOCK = "10/m"
 # Wrong passwords for one link, whoever tries them.
 RATELIMIT_REVIEW_UNLOCK_LINK = "100/h"

@@ -9,6 +9,15 @@ FILE_LINK = "https://www.dropbox.com/scl/fi/abc/1m01_v1.mp4?rlkey=k&dl=0"
 HX = {"HX-Request": "true"}
 
 
+def guest(name: str = "Dana") -> Client:
+    """A browser that has said who is watching."""
+    client = Client()
+    session = client.session
+    session["review_name"] = name
+    session.save()
+    return client
+
+
 def page_url(link: models.ReviewLink) -> str:
     return reverse("cues:review", args=[link.token])
 

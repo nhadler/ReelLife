@@ -95,3 +95,40 @@ class ReviewComment(Timestamped):
     def __str__(self) -> str:
         """Returns who commented on what."""
         return f"{self.name} on {self.version}"
+
+
+class ReviewView(models.Model):
+    """One visit to a version's review page: who watched, and how much.
+
+    Made when the page opens, then kept up to date by the page while it
+    stays open. A record, not tracked by history; it goes with its
+    version.
+    """
+
+    version = models.ForeignKey(
+        "cues.CueVersion",
+        on_delete=models.CASCADE,
+        related_name="review_views",
+    )
+    # What the page sends back to say which visit it is.
+    key = models.CharField(max_length=32, unique=True)
+    # The same for every visit from one browser, so a reload within the
+    # half hour carries on its visit rather than starting another.
+    browser = models.CharField(max_length=32)
+    name = models.CharField(max_length=60)
+    # Whether a signed-in ReelTime user watched, rather than a guest.
+    member = models.BooleanField(default=False)
+    started_at = models.DateTimeField()
+    last_seen_at = models.DateTimeField()
+    # Seconds the video or the audio actually played.
+    played = models.PositiveIntegerField(default=0)
+    # The furthest frame of the video reached, if any was.
+    furthest = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "review view"
+        ordering = ["-started_at", "-id"]
+
+    def __str__(self) -> str:
+        """Returns who watched what."""
+        return f"{self.name} watched {self.version}"

@@ -811,7 +811,6 @@ class CueVersion(Timestamped):
     file_link = models.CharField(
         max_length=500, blank=True, help_text="URL or path to the bounce."
     )
-    # The cue's audio on its own, for the review page.
     audio_link = models.CharField(max_length=500, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     # Notes that describe this delivery. A new version
@@ -988,6 +987,7 @@ from cues.notes import NoteKind as NoteKind  # noqa: E402
 from cues.notes import ProjectNote as ProjectNote  # noqa: E402
 from cues.review import ReviewComment as ReviewComment  # noqa: E402
 from cues.review import ReviewLink as ReviewLink  # noqa: E402
+from cues.review import ReviewView as ReviewView  # noqa: E402
 from cues.schedule import CalendarFeed as CalendarFeed  # noqa: E402
 from cues.schedule import DayOff as DayOff  # noqa: E402
 from cues.schedule import Deadline as Deadline  # noqa: E402

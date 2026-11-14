@@ -68,6 +68,7 @@ def test_every_cues_model_is_registered() -> None:
         "SchedulePin",
         "ReviewComment",
         "ReviewLink",
+        "ReviewView",
         "WritingLog",
         "Series",
         "SeriesShare",

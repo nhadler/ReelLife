@@ -49,4 +49,26 @@
   {% else %}
     <p class="muted">No review link.</p>
   {% endif %}
+  {% if review_visits %}
+    {# Who opened the review page for this version, newest first. #}
+    <details class="cue-review__views">
+      <summary>Views <span class="chip">{{ review_visits|length }}</span></summary>
+      <table class="cue-review__visits">
+        <thead>
+          <tr><th scope="col">Who</th><th scope="col">When</th><th scope="col">Watched</th><th scope="col">Reached</th><th scope="col">Page Open</th></tr>
+        </thead>
+        <tbody>
+          {% for visit in review_visits %}
+            <tr>
+              <td>{{ visit.view.name }}{% if visit.view.member %} <span class="chip review-comment__team">Team</span>{% endif %}</td>
+              <td>{{ visit.view.started_at|stamp:short_format }}</td>
+              <td class="tc">{{ visit.played }}</td>
+              <td class="tc">{{ visit.reached|default:"–" }}</td>
+              <td class="tc">{{ visit.open_for }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </details>
+  {% endif %}
 </div>

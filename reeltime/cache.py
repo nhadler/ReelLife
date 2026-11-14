@@ -38,11 +38,10 @@ class Cache(DatabaseCache):
             value = self.get(key, self._missing_key, version=version)
             if value is self._missing_key:
                 raise ValueError(f"Key '{key}' not found")
+            # The table's name is Django's own, quoted; the key is bound.
+            query = f"SELECT expires FROM {table} WHERE cache_key = %s"  # noqa: S608  # nosec B608
             with connection.cursor() as cursor:
-                cursor.execute(
-                    f"SELECT expires FROM {table} WHERE cache_key = %s",  # noqa: S608
-                    [stored],
-                )
+                cursor.execute(query, [stored])
                 (expires,) = cursor.fetchone()
             when = models.Expression(output_field=models.DateTimeField())
             for convert in connection.ops.get_db_converters(

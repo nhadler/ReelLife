@@ -338,6 +338,15 @@ def _name(name: str, user: User | None) -> str:
     return _clean(" ".join(_visible(name).split()), MAX_NAME, "your name")
 
 
+def guest_name(name: str) -> str:
+    """A guest's name as it's kept: trimmed, and with something to show.
+
+    Raises:
+        ReviewError: It's empty or too long.
+    """
+    return _name(name, None)
+
+
 def add_comment(
     version: models.CueVersion,
     *,

@@ -15,6 +15,7 @@ from cues.services import review
 from cues.views import review as review_views
 from tests import factories
 from tests.medium.review.setup import HX
+from tests.medium.review.setup import guest
 from tests.medium.review.setup import page_url
 from tests.medium.review.setup import panel_url
 
@@ -70,7 +71,7 @@ def test_the_panel_says_what_the_link_is_set_to(
     link: models.ReviewLink,
 ) -> None:
     editor = role_client(Role.EDITOR)
-    Client().get(page_url(link))
+    guest().get(page_url(link))
     link.refresh_from_db()
     review.set_password(link, "strings42")
     link.expires_on = datetime.date(2026, 11, 30)
@@ -272,7 +273,7 @@ def test_a_versions_audio_plays_under_its_video(
     cue: models.Cue,
     link: models.ReviewLink,
 ) -> None:
-    page = Client().get(page_url(link)).content.decode()
+    page = guest().get(page_url(link)).content.decode()
     assert "review-audio" not in page
     version = cue.versions.get()
     editor = role_client(Role.EDITOR)
@@ -287,7 +288,7 @@ def test_a_versions_audio_plays_under_its_video(
     assert saved.status_code == 200
     version.refresh_from_db()
     assert version.audio_link == AUDIO_LINK
-    page = Client().get(page_url(link)).content.decode()
+    page = guest().get(page_url(link)).content.decode()
     assert (
         '<audio id="review-audio-source" src="https://www.dropbox.com/scl/fi/'
         'def/1m01_v1_2mx.wav?rlkey=j&amp;raw=1"'
@@ -300,7 +301,7 @@ def test_a_versions_audio_plays_under_its_video(
     # Not a Dropbox file: no player, and the cue page says so.
     version.audio_link = "/Volumes/Bounces/1m01_2mx.wav"
     version.save()
-    assert "review-audio" not in Client().get(page_url(link)).content.decode()
+    assert "review-audio" not in guest().get(page_url(link)).content.decode()
     assert "Audio Link isn" in editor.get(panel_url(cue)).content.decode()
     # Audio without video isn't a review page of its own.
     version.audio_link = AUDIO_LINK
@@ -309,4 +310,4 @@ def test_a_versions_audio_plays_under_its_video(
     assert "The audio plays once File Link has a video." in (
         editor.get(panel_url(cue)).content.decode()
     )
-    assert b"Nothing to Watch Yet" in Client().get(page_url(link)).content
+    assert b"Nothing to Watch Yet" in guest().get(page_url(link)).content

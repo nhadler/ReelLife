@@ -335,6 +335,12 @@ urlpatterns = [
     ),
     path("review/<str:token>/", review.page, name="review"),
     path("review/<str:token>/unlock/", review.unlock, name="review_unlock"),
+    path("review/<str:token>/who/", review.who, name="review_who"),
+    path(
+        "review/<str:token>/watching/",
+        review.watching,
+        name="review_watching",
+    ),
     path(
         "review/<str:token>/comments/",
         review.comments,

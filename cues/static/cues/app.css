@@ -7934,3 +7934,33 @@ button.review-comment__at:hover {
 .review-comment__team {
   font-size: var(--step--1);
 }
+
+/* Who watched: a small table that opens under the link. */
+.cue-review__views {
+  margin-top: calc(var(--space) * 2);
+}
+
+.cue-review__views summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cue-review__visits {
+  width: 100%;
+  margin-top: var(--space);
+  border-collapse: collapse;
+  font-size: var(--step--1);
+}
+
+.cue-review__visits th {
+  color: var(--slate);
+  font-weight: 400;
+  text-align: left;
+}
+
+.cue-review__visits th,
+.cue-review__visits td {
+  padding: 0.25rem var(--space) 0.25rem 0;
+  border-top: 1px solid var(--rule);
+  overflow-wrap: anywhere;
+}

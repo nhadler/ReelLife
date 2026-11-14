@@ -60,6 +60,13 @@ def _dropbox(page: Any) -> list[str]:
     return asked
 
 
+def _watch(page: Any, url: str, name: str = "Dana Director") -> None:
+    """Opens a review link as a guest: says who's watching, then watches."""
+    page.goto(url)
+    page.get_by_label("Your Name").fill(name)
+    page.get_by_role("button", name="Watch").click()
+
+
 def _cue_with_video() -> models.Cue:
     cue = demo.build_demo().project.cues.get(number="1m01")
     version = cue.current_version
@@ -83,7 +90,7 @@ def test_a_guest_watches_and_comments(
     def tc(frames: int) -> str:
         return timecode.format_timecode(start + frames, rate)
 
-    page.goto(f"{app}/review/{link.token}/")
+    _watch(page, f"{app}/review/{link.token}/")
     expect(page.get_by_role("heading", name="1m01")).to_be_visible()
     # No way into the app from here.
     expect(page.locator(".topbar")).to_have_count(0)
@@ -101,8 +108,8 @@ def test_a_guest_watches_and_comments(
     page.get_by_role("button", name="Back one frame").click()
     expect(readout).to_have_text(tc(11))
 
-    # A comment at the frame on screen; Enter sends it.
-    page.get_by_label("Your Name").fill("Dana Director")
+    # A comment at the frame on screen, under the name given; Enter sends.
+    expect(page.get_by_text("Commenting as Dana Director")).to_be_visible()
     box = page.get_by_label("Comment", exact=True)
     box.fill("Hold the strings back here")
     expect(page.locator("#review-at")).to_have_text(tc(11))
@@ -116,8 +123,6 @@ def test_a_guest_watches_and_comments(
     assert (comment.frame, comment.name) == (11, "Dana Director")
     assert not comment.member
     expect(page.locator(".review-scrub__mark")).to_have_count(1)
-    # The name is asked once.
-    expect(page.get_by_text("Commenting as Dana Director")).to_be_visible()
 
     # Unticked, a comment is about the whole cue.
     page.locator("#review-timed").uncheck()
@@ -272,13 +277,14 @@ def test_a_password_then_a_video_that_cannot_play(
     expect(page.get_by_text("That isn't the password")).to_be_visible()
     page.get_by_label("Password").fill("strings42")
     page.get_by_role("button", name="Open").click()
+    page.get_by_label("Your Name").fill("Dana")
+    page.get_by_role("button", name="Watch").click()
     expect(page.get_by_role("heading", name="1m01")).to_be_visible()
     # The page says the video can't play, and comments still work.
     expect(page.get_by_role("alert")).to_contain_text(
         "This video can't be played in this browser."
     )
     expect(page.get_by_role("link", name="Open the File")).to_be_visible()
-    page.get_by_label("Your Name").fill("Dana")
     page.get_by_label("Comment", exact=True).fill("Can't see it")
     page.get_by_role("button", name="Send").click()
     expect(page.locator(".review-comment")).to_contain_text("Can't see it")
@@ -296,7 +302,7 @@ def test_the_audio_alone_plays_under_the_video(
     cue.versions.update(audio_link=AUDIO_LINK)
     link = review.create(cue, None)
     asked = _dropbox(page)
-    page.goto(f"{app}/review/{link.token}/")
+    _watch(page, f"{app}/review/{link.token}/")
     player = page.locator("#review-audio")
     expect(player).to_contain_text("Audio Only")
     expect(player.locator("#review-audio-time")).to_have_text("0:00 / 0:03")
@@ -332,7 +338,7 @@ def test_keys_work_after_clicking_the_controls(
     def tc(frames: int) -> str:
         return timecode.format_timecode(start + frames, cue.project.rate)
 
-    page.goto(f"{app}/review/{link.token}/")
+    _watch(page, f"{app}/review/{link.token}/")
     readout = page.locator("#review-time")
     expect(page.locator("#review-seek")).not_to_have_attribute("max", "0")
     # A click leaves the keyboard with the page, not the button.
@@ -379,7 +385,7 @@ def test_the_page_fits_a_phone(
     )
     _dropbox(page)
     page.set_viewport_size({"width": 375, "height": 700})
-    page.goto(f"{app}/review/{link.token}/")
+    _watch(page, f"{app}/review/{link.token}/")
     expect(page.locator("#review-seek")).not_to_have_attribute("max", "0")
     # Nothing is wider than the screen, and every control is on it.
     assert page.evaluate("document.documentElement.scrollWidth") <= 375
@@ -396,8 +402,7 @@ def test_a_comment_that_cannot_be_sent_says_so(
     cue = _cue_with_video()
     link = review.create(cue, None)
     _dropbox(page)
-    page.goto(f"{app}/review/{link.token}/")
-    page.get_by_label("Your Name").fill("Dana")
+    _watch(page, f"{app}/review/{link.token}/", "Dana")
     box = page.get_by_label("Comment", exact=True)
     box.fill("Too busy")
     review.revoke(link)  # while the page is open
@@ -407,4 +412,49 @@ def test_a_comment_that_cannot_be_sent_says_so(
     )
     # What was typed is still there.
     expect(box).to_have_value("Too busy")
-    expect(page.get_by_label("Your Name")).to_have_value("Dana")
+
+
+def test_a_guest_says_who_is_watching_first(
+    page: Any, app: str, axe: Check, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    link = review.create(_cue_with_video(), None)
+    _dropbox(page)
+    page.goto(f"{app}/review/{link.token}/")
+    # Nothing of the cue shows until the guest gives a name.
+    expect(page.get_by_role("heading", name="Who's Watching?")).to_be_visible()
+    expect(page.locator("video")).to_have_count(0)
+    expect(page.get_by_label("Your Name")).to_be_focused()
+    axe("review name")
+    page.get_by_label("Your Name").fill("Dana Director")
+    page.get_by_role("button", name="Watch").click()
+    expect(page.get_by_role("heading", name="1m01")).to_be_visible()
+    expect(page.get_by_text("Commenting as Dana Director")).to_be_visible()
+
+
+def test_watching_is_recorded(
+    page: Any, app: str, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    cue = _cue_with_video()
+    link = review.create(cue, None)
+    _dropbox(page)
+    _watch(page, f"{app}/review/{link.token}/", "Dana Director")
+    expect(page.locator("#review-seek")).not_to_have_attribute("max", "0")
+    visit = models.ReviewView.objects.get()
+    assert (visit.name, visit.played, visit.furthest) == (
+        "Dana Director",
+        0,
+        None,
+    )
+    # Play a little, then leave: the page reports on its way out.
+    page.get_by_role("button", name="Play", exact=True).click()
+    page.wait_for_timeout(1500)
+    page.goto(f"{app}/auth/login/")
+    for _ in range(50):
+        visit.refresh_from_db()
+        if visit.played:
+            break
+        page.wait_for_timeout(100)
+    assert visit.played >= 1
+    assert visit.furthest is not None and visit.furthest >= 12

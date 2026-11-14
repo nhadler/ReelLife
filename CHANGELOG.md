@@ -23,6 +23,10 @@ this project follows [Semantic Versioning](https://semver.org/).
     save as they change.
   - Reviewers reply to each other's comments. Signed in, an editor also
     resolves and deletes comments on the review page.
+  - A guest gives their name before the video shows, and the cue's
+    page lists who watched each version: when, how long the video or
+    audio played, how far they got and how long the page was open. Only
+    the name is kept about a guest.
   - The grid has an **Open Notes** column: the comments on each cue's
     current version not yet resolved.
   - Every comment, reply, resolve and deletion is in Activity, where it

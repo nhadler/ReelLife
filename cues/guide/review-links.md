@@ -59,14 +59,17 @@ restoring the cue doesn't bring the link back.
 
 ## What a Reviewer Sees
 
-The video with its timecode, and the comments beside it. Space plays
+First the password, if the link has one, then **Who's Watching?**: a
+guest gives their name once, before anything of the cue shows. The name
+goes with their comments and with when they watched.
+
+Then the video with its timecode, and the comments beside it. Space plays
 and pauses, the arrow keys step one frame, J and L jump five seconds, F
 is full screen and M mutes.
 
 Typing a comment pauses the video. The comment is about the frame on
 screen, shown as **At** with its timecode; untick **At** for a comment
-on the whole cue. Enter sends it. A reviewer gives their name with
-their first comment. Reviewers see each other's comments, and **Reply**
+on the whole cue. Enter sends it. Reviewers see each other's comments, and **Reply**
 on a comment answers it. A guest can type any name; comments from
 someone signed in to ReelTime are marked **Team**, and only those are
 sure to be from who they say.
@@ -92,3 +95,15 @@ a new version starts with none.
 
 Every comment, reply, resolve and deletion is in the project's
 **Activity**, where **Undo** reverses it.
+
+## Who Watched
+
+Under the link, **Views** lists each visit to the chosen version's
+review page, newest first: who, when, how long the video or audio
+actually played (**Watched**), the furthest timecode they got to
+(**Reached**) and how long the page was open. A reload within half an
+hour counts as the same visit. A version keeps its newest 200 visits.
+
+Guests are known only by the name they gave; no address or other detail
+about them is kept. Editors and admins opening the link aren't counted;
+a viewer is, marked **Team**.

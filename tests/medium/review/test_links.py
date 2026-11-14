@@ -18,6 +18,7 @@ from cues.views import review as review_views
 from tests import factories
 from tests.medium.review.setup import FILE_LINK
 from tests.medium.review.setup import comments_url
+from tests.medium.review.setup import guest
 from tests.medium.review.setup import page_url
 from tests.medium.review.setup import post
 
@@ -37,7 +38,7 @@ def test_a_cue_has_one_link_with_a_long_token(cue: models.Cue) -> None:
 
 
 def test_a_guest_opens_the_page(link: models.ReviewLink) -> None:
-    response = Client().get(page_url(link))
+    response = guest().get(page_url(link))
     assert response.status_code == 200
     page = response.content.decode()
     assert "Main Title" in page and "Night Ferry" in page
@@ -55,7 +56,7 @@ def test_a_guest_opens_the_page(link: models.ReviewLink) -> None:
 def test_the_page_is_private_and_may_play_dropbox_video(
     link: models.ReviewLink,
 ) -> None:
-    response = Client().get(page_url(link))
+    response = guest().get(page_url(link))
     assert response["Cache-Control"] == "no-store"
     assert response["X-Robots-Tag"] == "noindex, nofollow"
     policy = dict(
@@ -67,14 +68,14 @@ def test_the_page_is_private_and_may_play_dropbox_video(
     )
     assert policy["script-src"] == "'self'"
     # Only the review page: no other page may load media from elsewhere.
-    other = Client().get("/auth/login/")["Content-Security-Policy"]
+    other = guest().get("/auth/login/")["Content-Security-Policy"]
     assert "media-src" not in other and "dropbox" not in other
 
 
 def test_unknown_revoked_and_expired_links_are_gone(
     link: models.ReviewLink,
 ) -> None:
-    client = Client()
+    client = guest()
     response = client.get("/review/nonsense/")
     assert response.status_code == 404
     assert b"This Link Doesn" in response.content
@@ -107,7 +108,7 @@ def test_versions_without_video_are_left_out(
     )
     cue.current_version = v2
     cue.save()
-    client = Client()
+    client = guest()
     page = client.get(page_url(link)).content.decode()
     assert "1m01_v1.mp4" in page and "review-versions" not in page
     assert client.get(page_url(link), {"v": "v2"}).status_code == 404
@@ -127,11 +128,11 @@ def test_a_cue_with_no_video_says_so(
     cue: models.Cue, link: models.ReviewLink
 ) -> None:
     cue.versions.update(file_link="")
-    response = Client().get(page_url(link))
+    response = guest().get(page_url(link))
     assert response.status_code == 200
     assert b"Nothing to Watch Yet" in response.content
     assert b"review.js" not in response.content
-    assert Client().get(comments_url(link), {"v": "v1"}).status_code == 404
+    assert guest().get(comments_url(link), {"v": "v1"}).status_code == 404
 
 
 # Passwords.
@@ -143,7 +144,7 @@ def test_a_password_is_asked_once_per_session(
     review.set_password(link, "strings42")
     link.save()
     assert "strings42" not in link.password
-    client = Client()
+    client = guest()
     locked = client.get(page_url(link))
     assert locked.status_code == 200
     assert b"Enter the Password" in locked.content
@@ -164,7 +165,7 @@ def test_a_password_is_asked_once_per_session(
     assert b"Main Title" in client.get(page_url(link)).content
     assert post(client, link)[0] == 200
     # Another browser still has to give it.
-    assert b"Enter the Password" in Client().get(page_url(link)).content
+    assert b"Enter the Password" in guest().get(page_url(link)).content
 
 
 def test_changing_the_password_locks_the_link_again(
@@ -172,7 +173,7 @@ def test_changing_the_password_locks_the_link_again(
 ) -> None:
     review.set_password(link, "strings42")
     link.save()
-    client = Client()
+    client = guest()
     unlock = reverse("cues:review_unlock", args=[link.token])
     client.post(unlock, {"password": "strings42"})
     assert b"Main Title" in client.get(page_url(link)).content
@@ -182,7 +183,7 @@ def test_changing_the_password_locks_the_link_again(
     # Removed, the link is open; unlocking it needs nothing.
     review.set_password(link, "")
     link.save()
-    assert b"Main Title" in Client().get(page_url(link)).content
+    assert b"Main Title" in guest().get(page_url(link)).content
     assert client.post(unlock, {}).status_code == 302
     assert not review.check_password(link, "")
     assert not review.unlocked(link, None)
@@ -210,7 +211,7 @@ def test_a_signed_in_member_skips_the_password(
 def test_a_guest_comments_at_a_frame_and_overall(
     cue: models.Cue, link: models.ReviewLink
 ) -> None:
-    client = Client()
+    client = guest()
     status, page = post(client, link, frame="36", name="  Dana   Director ")
     assert status == 200
     comment = models.ReviewComment.objects.get()
@@ -273,7 +274,6 @@ def test_the_pre_roll_moves_the_timecodes(
     [
         ({"body": "  "}, "Enter a comment."),
         ({"body": "x" * 2001}, "Keep a comment to 2,000 characters."),
-        ({"name": ""}, "Enter your name."),
         ({"name": "n" * 61}, "Keep your name to 60 characters."),
         ({"frame": "-1"}, "That time isn"),
         ({"frame": "1.5"}, "That time isn"),
@@ -285,7 +285,7 @@ def test_the_pre_roll_moves_the_timecodes(
 def test_bad_comments_are_refused(
     link: models.ReviewLink, data: dict[str, str], error: str
 ) -> None:
-    status, page = post(Client(), link, **data)
+    status, page = post(guest(), link, **data)
     assert status == 200
     assert error in page and 'id="review-form-error"' in page
     assert not models.ReviewComment.objects.exists()
@@ -293,7 +293,7 @@ def test_bad_comments_are_refused(
 
 def test_comments_are_escaped(link: models.ReviewLink) -> None:
     _, page = post(
-        Client(),
+        guest(),
         link,
         name="<b>Dana</b>",
         body="<script>alert(1)</script>\x00",
@@ -307,7 +307,7 @@ def test_comments_are_escaped(link: models.ReviewLink) -> None:
 def test_comments_can_be_closed(link: models.ReviewLink) -> None:
     link.comments_open = False
     link.save()
-    client = Client()
+    client = guest()
     page = client.get(page_url(link)).content.decode()
     assert "Comments are closed." in page and "review-form" not in page
     status, answer = post(client, link)
@@ -322,9 +322,9 @@ def test_a_version_takes_only_so_many_comments(
     with override_settings():
         review.MAX_COMMENTS, kept = 2, review.MAX_COMMENTS
         try:
-            assert post(Client(), link)[0] == 200
-            assert post(Client(), link)[0] == 200
-            _, page = post(Client(), link)
+            assert post(guest(), link)[0] == 200
+            assert post(guest(), link)[0] == 200
+            _, page = post(guest(), link)
         finally:
             review.MAX_COMMENTS = kept
     assert "1m01 v1 has 2 comments" in page
@@ -336,8 +336,8 @@ def test_a_comment_names_a_version_of_this_cue(
 ) -> None:
     other = factories.CueVersionFactory.create(label="v9", file_link=FILE_LINK)
     assert other.cue != link.cue
-    assert post(Client(), link, v="v9")[0] == 404
-    assert post(Client(), link, v="")[0] == 404
+    assert post(guest(), link, v="v9")[0] == 404
+    assert post(guest(), link, v="")[0] == 404
     assert not models.ReviewComment.objects.exists()
 
 
@@ -369,19 +369,19 @@ def test_guest_writes_need_the_csrf_token(link: models.ReviewLink) -> None:
 
 @override_settings(RATELIMIT_REVIEW="3/m")
 def test_the_page_is_limited_per_address(link: models.ReviewLink) -> None:
-    client = Client()
+    client = guest()
     for _ in range(3):
         assert client.get(page_url(link)).status_code == 200
     assert client.get(page_url(link)).status_code == 429
     assert client.get(comments_url(link), {"v": "v1"}).status_code == 429
     assert (
-        Client().get(page_url(link), REMOTE_ADDR="10.0.0.2").status_code == 200
+        guest().get(page_url(link), REMOTE_ADDR="10.0.0.2").status_code == 200
     )
 
 
 @override_settings(RATELIMIT_REVIEW_COMMENTS="2/m")
 def test_comments_are_limited_per_address(link: models.ReviewLink) -> None:
-    client = Client()
+    client = guest()
     assert post(client, link)[0] == 200
     assert post(client, link)[0] == 200
     assert post(client, link)[0] == 429
@@ -397,7 +397,7 @@ def test_password_tries_are_limited_per_address(
     review.set_password(link, "strings42")
     link.save()
     unlock = reverse("cues:review_unlock", args=[link.token])
-    client = Client()
+    client = guest()
     for _ in range(2):
         assert client.post(unlock, {"password": "nope"}).status_code == 200
     assert client.post(unlock, {"password": "strings42"}).status_code == 429
@@ -413,23 +413,23 @@ def test_wrong_passwords_are_limited_per_link(
     with freezegun.freeze_time("2026-11-13 18:00:30") as clock:
         # Opening it with the right password doesn't count.
         for n in range(3):
-            opened = Client().post(
+            opened = guest().post(
                 unlock, {"password": "strings42"}, REMOTE_ADDR=f"10.0.1.{n}"
             )
             assert opened.status_code == 302
         # Two wrong tries from different addresses use the link's hour up.
         for n in range(2):
-            tried = Client().post(
+            tried = guest().post(
                 unlock, {"password": "nope"}, REMOTE_ADDR=f"10.0.0.{n}"
             )
             assert tried.status_code == 200
-        blocked = Client().post(
+        blocked = guest().post(
             unlock, {"password": "strings42"}, REMOTE_ADDR="10.0.0.9"
         )
         assert blocked.status_code == 429
         # Still blocked after ten idle minutes: the count lasts the hour.
         clock.tick(datetime.timedelta(minutes=10))
-        again = Client().post(
+        again = guest().post(
             unlock, {"password": "strings42"}, REMOTE_ADDR="10.0.0.9"
         )
         assert again.status_code == 429
@@ -440,7 +440,7 @@ def test_wrong_passwords_are_limited_per_link(
         )
         review.set_password(other, "woodwinds7")
         other.save()
-        elsewhere = Client().post(
+        elsewhere = guest().post(
             reverse("cues:review_unlock", args=[other.token]),
             {"password": "woodwinds7"},
             REMOTE_ADDR="10.0.0.9",
@@ -451,13 +451,13 @@ def test_wrong_passwords_are_limited_per_link(
 @override_settings(RATELIMIT_REVIEW_COMMENTS_LINK="2/h")
 def test_comments_are_limited_per_link(link: models.ReviewLink) -> None:
     for n in range(2):
-        posted = Client().post(
+        posted = guest().post(
             comments_url(link),
             {"v": "v1", "name": "Dana", "body": "Too busy"},
             REMOTE_ADDR=f"10.0.0.{n}",
         )
         assert posted.status_code == 200
-    flood = Client().post(
+    flood = guest().post(
         comments_url(link),
         {"v": "v1", "name": "Dana", "body": "Too busy"},
         REMOTE_ADDR="10.0.0.9",
@@ -471,7 +471,7 @@ def test_unlocking_gives_the_browser_a_new_session(
 ) -> None:
     review.set_password(link, "strings42")
     link.save()
-    client = Client()
+    client = guest()
     # A guest who commented elsewhere already has a session.
     session = client.session
     session["review_name"] = "Dana"
