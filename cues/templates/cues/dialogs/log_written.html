@@ -17,11 +17,7 @@
   {% else %}
     <p class="muted">Give {{ cue.number }} an IN and OUT to log what's written.</p>
   {% endif %}
-  <footer class="form-actions">
-    {% if form %}<button class="button" type="submit">Log</button>{% endif %}
-    <button class="button button--quiet" type="button" data-dialog-close>{% if form %}Cancel{% else %}Close{% endif %}</button>
-  </footer>
-  {# After the buttons: Enter in a field submits the first one, Log. #}
+  {# Remove posts through htmx rather than submitting, so Enter in a field still means Log. #}
   {% if logged %}
     <h3 class="log-written__heading">Logged</h3>
     <ul class="log-written__list">
@@ -29,10 +25,14 @@
         <li>
           <span class="log-written__date">{{ entry.date|date:short_format }}</span>
           <span class="log-written__stretch">{% if entry.stretch %}{{ entry.stretch }}{% else %}{{ entry.amount }} written{% endif %}</span>
-          <button class="button button--quiet button--small" type="submit" name="remove" value="{{ entry.id }}"
-                  formnovalidate>Remove<span class="visually-hidden"> the log on {{ entry.date|date:short_format }}</span></button>
+          <button class="button button--quiet button--small" type="button"
+                  hx-post="{% url 'cues:log_written' cue.pk %}" hx-vals='{"remove": "{{ entry.id }}"}'>Remove<span class="visually-hidden"> the log on {{ entry.date|date:short_format }}</span></button>
         </li>
       {% endfor %}
     </ul>
   {% endif %}
+  <footer class="form-actions">
+    {% if form %}<button class="button" type="submit">Log</button>{% endif %}
+    <button class="button button--quiet" type="button" data-dialog-close>{% if form %}Cancel{% else %}Close{% endif %}</button>
+  </footer>
 </form>

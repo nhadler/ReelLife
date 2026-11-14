@@ -6,6 +6,11 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Log Written: the list of logs no longer slides under the Log and
+  Cancel buttons; it sits above them.
+
 ## [2.0.0] - 2026-11-12
 
 ### Changed

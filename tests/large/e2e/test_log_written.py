@@ -71,3 +71,15 @@ def test_log_written_waits_for_one_cue(
         f"{tc(cue.tc_in)} to {stop}"
     )
     axe("log written with a log", within="#app-dialog")
+    # The list sits above the buttons, clear of them.
+    listed = dialog.locator(".log-written__list").bounding_box()
+    footer = dialog.locator(".form-actions").bounding_box()
+    assert listed is not None and footer is not None
+    assert listed["y"] + listed["height"] <= footer["y"]
+    # Remove keeps the dialog open; Enter in a field still logs.
+    dialog.get_by_role("button", name="Remove").click()
+    expect(dialog.locator(".log-written__list")).to_have_count(0)
+    assert not models.WritingLog.objects.filter(cue=cue).exists()
+    dialog.get_by_label("To").press("Enter")
+    expect(dialog).to_be_hidden()
+    assert models.WritingLog.objects.filter(cue=cue).count() == 1
