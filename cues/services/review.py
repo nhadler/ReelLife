@@ -1,7 +1,8 @@
 """Review links: a cue's bounces and comments for someone without an account.
 
 A cue has at most one link. Its page plays each version whose File Link
-is a Dropbox link to a file, and takes comments on that version: on the
+is a Dropbox link to a file (and under it the version's Audio Link, the
+music alone, when it has one), and takes comments on that version: on the
 whole of it, or at a frame of the video. Notes take replies and can be
 resolved. A comment, a reply, resolving and removal are each one
 undoable change in the cue's project; making, changing and revoking the
@@ -46,8 +47,8 @@ class ReviewError(ValueError):
     """The comment or setting can't be saved; the message says why."""
 
 
-def video_url(file_link: str) -> str:
-    """The address a browser plays a version's File Link from, or "".
+def play_url(file_link: str) -> str:
+    """The address a browser plays a File Link or Audio Link from, or "".
 
     Only Dropbox links to a single file can be played: the link is
     rewritten to ask for the file itself (`raw=1`) rather than Dropbox's
@@ -164,19 +165,26 @@ class Playable:
         version: The version.
         url: Where the browser loads its video from.
         current: Whether it's the cue's current version.
+        audio: Where its audio alone loads from, or "" for none.
     """
 
     version: models.CueVersion
     url: str
     current: bool
+    audio: str = ""
 
 
 def playable(cue: models.Cue) -> list[Playable]:
     """The cue's versions with a playable File Link, newest first."""
     return [
-        Playable(version, url, version.pk == cue.current_version_id)
+        Playable(
+            version,
+            url,
+            version.pk == cue.current_version_id,
+            play_url(version.audio_link),
+        )
         for version in cue.versions.order_by("-created_at", "-id")
-        if (url := video_url(version.file_link))
+        if (url := play_url(version.file_link))
     ]
 
 

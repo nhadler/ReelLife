@@ -811,6 +811,8 @@ class CueVersion(Timestamped):
     file_link = models.CharField(
         max_length=500, blank=True, help_text="URL or path to the bounce."
     )
+    # The cue's audio on its own, for the review page.
+    audio_link = models.CharField(max_length=500, blank=True)
     delivered_at = models.DateTimeField(null=True, blank=True)
     # Notes that describe this delivery. A new version
     # starts as a copy of the previous one's.

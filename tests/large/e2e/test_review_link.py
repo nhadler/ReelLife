@@ -17,17 +17,22 @@ from tests.large.e2e.conftest import SignInAs
 pytestmark = pytest.mark.django_db(transaction=True, serialized_rollback=True)
 
 BOUNCE = pathlib.Path(__file__).parent / "data" / "bounce.webm"
+AUDIO = pathlib.Path(__file__).parent / "data" / "cue.wav"
+AUDIO_LINK = (
+    "https://www.dropbox.com/scl/fi/def456/1m01_v1_2mx.wav?rlkey=j&dl=0"
+)
 FILE_LINK = "https://www.dropbox.com/scl/fi/abc123/1m01_v1.mp4?rlkey=k&dl=0"
 
 
 def _dropbox(page: Any) -> list[str]:
-    """Answers Dropbox's address with a three-second test video."""
+    """Answers Dropbox's address: a three-second test video, or audio."""
     asked: list[str] = []
-
-    data = BOUNCE.read_bytes()
 
     def answer(route: Any) -> None:
         asked.append(route.request.url)
+        audio = ".wav" in route.request.url
+        data = (AUDIO if audio else BOUNCE).read_bytes()
+        kind = "audio/wav" if audio else "video/webm"
         # Seeking asks for byte ranges, as Dropbox's file servers allow.
         wanted = re.fullmatch(
             r"bytes=(\d+)-(\d*)", route.request.headers.get("range", "")
@@ -35,7 +40,7 @@ def _dropbox(page: Any) -> list[str]:
         if wanted is None:
             route.fulfill(
                 body=data,
-                content_type="video/webm",
+                content_type=kind,
                 headers={"Accept-Ranges": "bytes"},
             )
             return
@@ -44,7 +49,7 @@ def _dropbox(page: Any) -> list[str]:
         route.fulfill(
             status=206,
             body=data[first : last + 1],
-            content_type="video/webm",
+            content_type=kind,
             headers={
                 "Accept-Ranges": "bytes",
                 "Content-Range": f"bytes {first}-{last}/{len(data)}",
@@ -276,3 +281,31 @@ def test_a_password_then_a_video_that_cannot_play(
     expect(page.locator("#review-timed")).to_be_hidden()
     assert models.ReviewComment.objects.get().frame is None
     axe("review page without video")
+
+
+def test_the_audio_alone_plays_under_the_video(
+    page: Any, app: str, axe: Check, csp_violations: list[str]
+) -> None:
+    del csp_violations
+    cue = _cue_with_video()
+    cue.versions.update(audio_link=AUDIO_LINK)
+    link = review.create(cue, None)
+    asked = _dropbox(page)
+    page.goto(f"{app}/review/{link.token}/")
+    player = page.locator("#review-audio")
+    expect(player).to_contain_text("Audio Only")
+    expect(player.locator("#review-audio-time")).to_have_text("0:00 / 0:03")
+    assert any("1m01_v1_2mx.wav" in url and "raw=1" in url for url in asked)
+    axe("review page with audio")
+    # One at a time: starting the audio pauses the video, and back.
+    page.get_by_role("button", name="Play", exact=True).click()
+    expect(page.locator("#review-player.is-playing")).to_have_count(1)
+    player.get_by_role("button", name="Play the audio").click()
+    expect(player.get_by_role("button", name="Pause the audio")).to_be_visible()
+    expect(page.locator("#review-player.is-playing")).to_have_count(0)
+    page.get_by_role("button", name="Play", exact=True).click()
+    expect(player.get_by_role("button", name="Play the audio")).to_be_visible()
+    # A version without an Audio Link has no audio player.
+    cue.versions.update(audio_link="")
+    page.reload()
+    expect(page.locator("#review-audio")).to_have_count(0)

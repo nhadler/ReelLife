@@ -318,4 +318,60 @@ if (form) {
   });
 }
 
+// The music alone, in its own player under the video.
+const audio = document.getElementById('review-audio-source');
+if (audio) {
+  const box = document.getElementById('review-audio');
+  const audioSeek = document.getElementById('review-audio-seek');
+  const audioTime = document.getElementById('review-audio-time');
+  /**
+   * Seconds as m:ss.
+   * @param {number} seconds
+   * @return {string}
+   */
+  const clock = (seconds) => {
+    const whole = Number.isFinite(seconds) ? Math.floor(seconds) : 0;
+    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
+  };
+  const showAudio = () => {
+    audioSeek.value = String(audio.currentTime);
+    const text = `${clock(audio.currentTime)} / ${clock(audio.duration)}`;
+    audioTime.value = text;
+    audioSeek.setAttribute('aria-valuetext', text);
+  };
+  audio.addEventListener('loadedmetadata', () => {
+    audioSeek.max = String(audio.duration);
+    showAudio();
+  });
+  audio.addEventListener('timeupdate', showAudio);
+  audio.addEventListener('error', () => {
+    document.getElementById('review-audio-error').hidden = false;
+    box.classList.add('is-broken');
+  });
+  for (const name of ['play', 'pause', 'ended']) {
+    audio.addEventListener(name, () => {
+      box.classList.toggle('is-playing', !audio.paused);
+      document
+        .getElementById('review-audio-play')
+        .setAttribute(
+          'aria-label',
+          audio.paused ? 'Play the audio' : 'Pause the audio',
+        );
+    });
+  }
+  // One at a time: the video and the audio are the same music.
+  audio.addEventListener('play', () => video.pause());
+  video.addEventListener('play', () => audio.pause());
+  audioSeek.addEventListener('input', () => {
+    audio.currentTime = Number(audioSeek.value);
+  });
+  document.getElementById('review-audio-play').addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+    }
+  });
+}
+
 update();

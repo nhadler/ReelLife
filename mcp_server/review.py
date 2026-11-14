@@ -63,7 +63,8 @@ def review_comments(cue_id: int, version: str = "") -> dict[str, Any]:
             {
                 "version": each.label,
                 "current": current,
-                "plays": bool(review.video_url(each.file_link)),
+                "plays": bool(review.play_url(each.file_link)),
+                "audio": bool(review.play_url(each.audio_link)),
                 "notes": [
                     {
                         **_comment(note.comment),

@@ -169,9 +169,10 @@
       <section class="details-group cue-review" aria-labelledby="group-review">
         <h2 class="details-group__title" id="group-review">Review{% if selected %} <span class="chip">{{ selected.label }}</span>{% endif %}</h2>
         {% if version_form %}
-          {# The bounce's link sits with what plays it. It stays outside the part below, which reloads after every save. #}
+          {# The bounce's links sit with what plays them. It stays outside the part below, which reloads after every save. #}
           <div class="fields cue-review__file">
             {% include "cues/details/field.html" with field=version_form.file_link %}
+            {% include "cues/details/field.html" with field=version_form.audio_link %}
           </div>
         {% endif %}
         {% include "cues/details/review.html" %}

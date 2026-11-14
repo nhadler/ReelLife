@@ -16,6 +16,8 @@ this project follows [Semantic Versioning](https://semver.org/).
     Review, when that is a Dropbox link to a single file; ReelTime
     doesn't hold video. The same link follows new versions, and comments
     stay with the version they were made on.
+  - A version can also have an **Audio Link**, the music alone, which
+    plays in its own small player under the video.
   - A link can have a password and a last day, can be closed to
     comments and can be revoked. Its settings are in the section and
     save as they change.

@@ -21,7 +21,11 @@ own site streams, so keep bounces small: 1080p at about 10 Mbit/s
 plays smoothly, a 4K master doesn't.
 
 Links to a Dropbox folder, and links to anywhere else, aren't played.
-An audio file's link plays too, without picture.
+
+**Audio Link**, under File Link, is optional: a Dropbox link to the
+cue's music alone, such as a WAV of the mix. It gets a small player of
+its own under the video, for listening without picture. Playing one
+pauses the other. Comments are about the video.
 
 ## Making a Link
 

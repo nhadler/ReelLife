@@ -346,10 +346,10 @@ def panel_context(
         if link
         else "",
         "selected": version,
-        "review_playable": bool(
-            version and review.video_url(version.file_link)
-        ),
+        "review_playable": bool(version and review.play_url(version.file_link)),
         "file_link": version.file_link.strip() if version else "",
+        "audio_link": version.audio_link.strip() if version else "",
+        "audio_playable": bool(version and review.play_url(version.audio_link)),
         "file_url": _web_link(version.file_link) if version else "",
         "review_notes": review.note_counts(version) if version else (0, 0),
         "review_form": form

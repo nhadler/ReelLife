@@ -52,6 +52,7 @@ _VERSION_TEXT = {
     "revision_notes",
     "change_notes",
     "file_link",
+    "audio_link",
 }
 _CUE_TIMECODES = {"tc_in", "tc_out", "seq_start"}
 _VERSION_TIMECODES = {
@@ -79,6 +80,7 @@ VERSION_FIELDS = {
     "review_status": "Review Status",
     "sub_status": "Sub Status",
     "file_link": "File Link",
+    "audio_link": "Audio Link",
     "delivered_at": "Delivered",
     "in_note": "IN Note",
     "out_note": "OUT Note",

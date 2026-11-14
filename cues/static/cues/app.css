@@ -7531,7 +7531,7 @@ button.review-comment__at:hover {
   display: block;
   width: 100%;
   /* Room for the header and the controls, so the page needn't scroll. */
-  height: calc(100dvh - 9.5rem);
+  height: calc(100dvh - 9.5rem - var(--below, 0rem));
   min-height: 12rem;
   background: #000;
   cursor: pointer;
@@ -7850,4 +7850,56 @@ button.review-comment__at:hover {
 /* The bounce's link is as wide as the review link under it. */
 .cue-review__file .field {
   grid-column: 1 / -1;
+}
+
+/* The video with, under it, the audio alone. */
+.review-main {
+  display: grid;
+  gap: var(--space);
+  min-width: 0;
+}
+
+.review-audio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space);
+  align-items: center;
+  padding: calc(var(--space) * 0.75) var(--space);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--panel);
+}
+
+.review-audio__label {
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.review-audio__time {
+  min-width: 6rem;
+  text-align: right;
+}
+
+.review-audio.is-playing .review-controls__play {
+  display: none;
+}
+
+.review-audio.is-playing .review-controls__pause {
+  display: inline;
+}
+
+.review-audio__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.review-audio.is-broken > :not(.review-audio__error) {
+  display: none;
+}
+
+/* With the audio player under it, the video gives up that much height. */
+.review-main:has(.review-audio) .review-player__video {
+  --below: 4rem;
 }

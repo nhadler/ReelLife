@@ -13,6 +13,15 @@
         Paste a Dropbox link to {{ selected.label }}'s bounce in File Link to play it on the review page.
       {% endif %}
       {% if file_url %}<a href="{{ file_url }}" rel="noopener noreferrer" target="_blank">Open the Bounce</a>{% endif %}
+      {% if audio_link %}
+        {% if not audio_playable %}
+          <span class="cue-review__warn">Audio Link isn't a Dropbox link to a single file, so it can't be played.</span>
+        {% elif review_playable %}
+          <span class="cue-review__ok">The audio plays under the video.</span>
+        {% else %}
+          The audio plays once File Link has a video.
+        {% endif %}
+      {% endif %}
     </p>
   {% endif %}
   {% if review_link %}

@@ -835,6 +835,7 @@ class NewVersionForm(TimecodeModelForm):
             "sub_status",
             "revision_notes",
             "file_link",
+            "audio_link",
             "delivered_at",
             *models.VERSION_NOTE_FIELDS,
         ]

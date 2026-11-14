@@ -891,3 +891,53 @@ def test_open_notes_count_the_current_versions_unresolved_notes(
     assert not review.open_notes([cue.pk])
     grid = editor.get(reverse("cues:api_grid", args=[cue.project.pk])).json()
     assert grid["rows"][0]["open_notes"] is None
+
+
+# The audio alone.
+
+AUDIO_LINK = "https://www.dropbox.com/scl/fi/def/1m01_v1_2mx.wav?rlkey=j&dl=0"
+
+
+def test_a_versions_audio_plays_under_its_video(
+    role_client: Callable[[Role], Client],
+    cue: models.Cue,
+    link: models.ReviewLink,
+) -> None:
+    page = Client().get(_page(link)).content.decode()
+    assert "review-audio" not in page
+    version = cue.versions.get()
+    editor = role_client(Role.EDITOR)
+    saved = editor.post(
+        reverse("cues:version_field", args=[version.pk, "audio_link"]),
+        {
+            "version-audio_link": f" {AUDIO_LINK} ",
+            "updated_at": cue.updated_at.isoformat(),
+        },
+        headers=HX,
+    )
+    assert saved.status_code == 200
+    version.refresh_from_db()
+    assert version.audio_link == AUDIO_LINK
+    page = Client().get(_page(link)).content.decode()
+    assert (
+        '<audio id="review-audio-source" src="https://www.dropbox.com/scl/fi/'
+        'def/1m01_v1_2mx.wav?rlkey=j&amp;raw=1"'
+    ) in page
+    (shown,) = review.playable(cue)
+    assert shown.audio.endswith("raw=1")
+    assert "The audio plays under the video." in (
+        editor.get(_panel(cue)).content.decode()
+    )
+    # Not a Dropbox file: no player, and the cue page says so.
+    version.audio_link = "/Volumes/Bounces/1m01_2mx.wav"
+    version.save()
+    assert "review-audio" not in Client().get(_page(link)).content.decode()
+    assert "Audio Link isn" in editor.get(_panel(cue)).content.decode()
+    # Audio without video isn't a review page of its own.
+    version.audio_link = AUDIO_LINK
+    version.file_link = ""
+    version.save()
+    assert "The audio plays once File Link has a video." in (
+        editor.get(_panel(cue)).content.decode()
+    )
+    assert b"Nothing to Watch Yet" in Client().get(_page(link)).content

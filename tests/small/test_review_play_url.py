@@ -27,7 +27,7 @@ RAW = "https://www.dropbox.com/scl/fi/abc/1m01.mp4?rlkey=k&raw=1"
     ],
 )
 def test_dropbox_file_links_play(link: str, url: str) -> None:
-    assert review.video_url(link) == url
+    assert review.play_url(link) == url
 
 
 @pytest.mark.parametrize(
@@ -50,7 +50,7 @@ def test_dropbox_file_links_play(link: str, url: str) -> None:
     ],
 )
 def test_other_links_do_not(link: str) -> None:
-    assert review.video_url(link) == ""
+    assert review.play_url(link) == ""
 
 
 def test_the_media_sources_cover_the_urls() -> None:

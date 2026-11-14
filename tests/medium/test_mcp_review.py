@@ -61,7 +61,13 @@ def test_reading_replying_and_resolving(editor: User, cue: models.Cue) -> None:
         "cue": "1m01",
         "link": None,
         "versions": [
-            {"version": "v1", "current": True, "plays": True, "notes": []}
+            {
+                "version": "v1",
+                "current": True,
+                "plays": True,
+                "audio": False,
+                "notes": [],
+            }
         ],
     }
     link = review.create(cue, None)
@@ -103,7 +109,13 @@ def test_reading_replying_and_resolving(editor: User, cue: models.Cue) -> None:
     assert tools.resolve_comment(note.pk, resolved=False)["resolved"] is False
     # A version asked for by name is listed even when empty.
     assert tools.review_comments(cue.pk, " v0 ")["versions"] == [
-        {"version": "v0", "current": False, "plays": False, "notes": []}
+        {
+            "version": "v0",
+            "current": False,
+            "plays": False,
+            "audio": False,
+            "notes": [],
+        }
     ]
     link.expires_on = v1.created_at.date()
     link.save()
